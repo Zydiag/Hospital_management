@@ -21,6 +21,7 @@ model User {
   email            String?   @unique
   mobileNo         String?   @unique
   dob              DateTime?
+  refreshToken     String
 
   role    Role     @default(PATIENT)
   Patient Patient?
@@ -28,9 +29,10 @@ model User {
 }
 
 model Admin {
-  id       String @id @default(uuid())
-  adminId  String
-  password String
+  id           String  @id @default(uuid())
+  adminId      String
+  password     String
+  refreshToken String?
 }
 
 // Role model for user access control

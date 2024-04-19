@@ -10,24 +10,27 @@ generator client {
 
 // User model with enhanced data types and relationships
 model User {
-  id               UUID    @id @default(uuid())
+  id               String    @id @default(uuid())
   armyNo           String
   unit             String?
   rank             String?
-  dateOfCommission Date?
+  dateOfCommission DateTime?
   firstName        String
   middleName       String?
   lastName         String
-  email            Email?  @unique
-  mobileNo         String? @unique
-  dob              Date?
+  email            String?   @unique
+  mobileNo         String?   @unique
+  dob              DateTime?
 
-  // Role as a separate model for better organization
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId Int  @unique
+  role    Role     @default(PATIENT)
+  Patient Patient?
+  Doctor  Doctor?
+}
 
-  // One-to-one relationship with Patient (optional)
-  patient Patient? @relation(fields: [id], references: [userId])
+model Admin {
+  id       String @id @default(uuid())
+  adminId  String
+  password String
 }
 
 // Role model for user access control
@@ -40,27 +43,41 @@ enum Role {
 
 // Patient model with improved relationships and data types
 model Patient {
-  id     UUID  @id @default(uuid())
-  userId UUID? @unique
-  user   User? @relation(fields: [userId], references: [id])
+  id         String      @id @default(uuid())
+  userId     String?     @unique
+  user       User?       @relation(fields: [userId], references: [id])
+  medical    Medical[]
+  test       Test[]
+  treatments Treatment[]
+}
 
-  // Many-to-many relationship with Medical records
-  medical   Medical[] @relation(fields: [patientId], references: [id])
-  patientId Int[]
+// Medical record model with relationships and enhanced data types
+model Medical {
+  id            String    @id @default(uuid())
+  heightCm      Int?
+  weightKg      Float?
+  BMI           Float?
+  chest         Int?
+  waist         Int?
+  bloodPressure String?
+  disabilities  String?
+  bloodGroup    String?
+  onDrug        Boolean
+  date          DateTime?
 
-  // Many-to-many relationship with Tests
-  test      Test[] @relation(fields: [patientId], references: [id])
-  patientId Int[]
+  patient   Patient @relation(fields: [patientId], references: [id])
+  patientId String  @unique
 }
 
 // Doctor model with relationships
 model Doctor {
   id     String @id @default(uuid())
-  userId UUID   @unique
+  userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
   specialization String
-  department     Department? @relation(fields: [departmentId], references: [id])
+  Treatment      Treatment[]
+  Department     Department? @relation(fields: [departmentId], references: [id])
   departmentId   String?
 }
 
@@ -71,34 +88,8 @@ model Department {
   location String?
 
   // One-to-many relationship with Doctors
-  doctors Doctor[] @relation(fields: [id], references: [departmentId])
-}
-
-// Medical record model with relationships and enhanced data types
-model Medical {
-  id            String  @id @default(uuid())
-  heightCm      Int?
-  weightKg      Float?
-  BMI           Float?
-  chest         Int?
-  waist         Int?
-  bloodPressure String?
-  disabilities  String?
-  bloodGroup    String?
-  onDrug        Boolean
-  date          Date?
-
-  // One-to-many relationship with Treatments
-  treatments Treatment[] @relation(fields: [medicalId], references: [id])
-  medicalId  Int[]
-
-  // Many-to-many relationship with Tests
-  test      Test[] @relation(fields: [medicalId], references: [id])
-  medicalId Int[]
-
-  // One-to-many relationship with Patient
-  patient   Patient @relation(fields: [patientId], references: [id])
-  patientId UUID    @unique
+  doctors  Doctor[]
+  doctorId String
 }
 
 // Treatment model with relationships
@@ -108,22 +99,31 @@ model Treatment {
   doctor      Doctor @relation(fields: [doctorId], references: [id])
   doctorId    String
 
-  // Many-to-many relationship with Medications
-  medications Medication[] @relation(fields: [treatmentId], references: [id])
-  treatmentId Int[]
+  medications Medication[]
+  test        Test[]
+  Patient     Patient?     @relation(fields: [patientId], references: [id])
+  patientId   String?
+}
 
-  // Many-to-many relationship with Tests
-  test        Test[] @relation(fields: [treatmentId], references: [id])
-  treatmentId Int[]
+model Medication {
+  id          String     @id @default(uuid())
+  name        String
+  description String
+  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatmentId String?
 }
 
 // Test model with relationships
 model Test {
-  id       String @id @default(uuid())
-  date     Date
+  id       String   @id @default(uuid())
+  date     DateTime
   testFor  String
-  imageUrl String @db(name: "imageUrl") // Explicit column naming for clarity
+  imageUrl String
   result   String
 
   // Many-to-many relationships with Medical records and Treatments (through ame & pme models)
+  Patient     Patient?   @relation(fields: [patientId], references: [id])
+  patientId   String?
+  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatmentId String?
 }

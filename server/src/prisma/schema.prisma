@@ -11,14 +11,14 @@ generator client {
 // User model with enhanced data types and relationships
 model User {
   id               UUID    @id @default(uuid())
-  armyNo           String?
+  armyNo           String
   unit             String?
   rank             String?
   dateOfCommission Date?
   firstName        String
   middleName       String?
   lastName         String
-  email            Email   @unique
+  email            Email?  @unique
   mobileNo         String? @unique
   dob              Date?
 

@@ -255,44 +255,82 @@ export const updatePersonalMedicalHistory = async (req, res, next) => {
 // Read Family History
 export const getFamilyHistory = async (req, res, next) => {
   try {
+    // Ensure the ID is provided
+    const userId = req.body.id;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID must be provided." });
+    }
+
     const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
+      where: { id: userId },
       include: { patient: true },
     });
 
+    // Check if patient information exists
+    if (!patient || !patient.patient) {
+      return res.status(404).json({ error: "Patient not found." });
+    }
+
     const patientId = patient.patient.id;
-    const medicalRecord = await prisma.medicalRecord.findUnique({
+    const medicalRecords = await prisma.medicalRecord.findMany({
       where: {
         patientId,
       },
+      include: {
+        familyhistories: true
+      },
     });
-    res.render('familyHistoryForm', { medicalRecord });
+
+    // Flatten family histories from medical records
+    const familyhistories = medicalRecords.flatMap(record => record.familyhistories);
+
+    // Check if family histories are found
+    if (familyhistories.length === 0) {
+      return res.status(404).json({ message: "No family history records found." });
+    }
+
+    res.json({ familyhistories });
   } catch (error) {
+    console.error("Failed to retrieve family history:", error);
+    res.status(500).json({ error: "Internal server error." });
     next(error);
   }
 };
 
+
 // Update Family History
 export const updateFamilyHistory = async (req, res, next) => {
   try {
-    const { hypertension, diabetes, unnaturalDeath, otherHistory } = req.body;
+    console.log("updatefamilyhistoryroute");
+    const { hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
     const patient = await prisma.user.findUnique({
       where: { id: req.body.id },
       include: { patient: true },
     });
 
+    if (!patient || !patient.patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
     const patientId = patient.patient.id;
 
     const newMedicalRecord = await prisma.medicalRecord.create({
       data: {
-        hypertension,
-        diabetes,
-        unnaturalDeath,
-        otherHistory,
-        patientId,
+        patientId: patientId,
+        familyhistories: {
+          create: {
+            hypertension,
+            diabetesMellitus,
+            anyUnnaturalDeath,
+            otherSignificantHistory
+          }
+        },
       },
+      include: {
+        familyhistories: true
+      }
     });
-    res.redirect('/family-history');
+    
+    res.status(200).json({ message: "Family history updated", data: newMedicalRecord });
   } catch (error) {
     next(error);
   }
@@ -300,49 +338,113 @@ export const updateFamilyHistory = async (req, res, next) => {
 
 // Read Present Referral Details
 export const getPresentReferralDetails = async (req, res, next) => {
-    try {
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
+  try {
+      // Extract the patient ID from request body
+      const { id: userId } = req.body;
+      if (!userId) {
+          return res.status(400).json({ error: "User ID must be provided." });
+      }
+
+      // Find the patient from the user table
+      const userWithPatient = await prisma.user.findUnique({
+          where: { id: userId },
+          include: { patient: true },
       });
-  
-      const patientId = patient.patient.id;
-      const tests = await prisma.test.findMany({
-        where: {
-          patientId,
-        },
+
+      // Check if patient data is available
+      if (!userWithPatient || !userWithPatient.patient) {
+          return res.status(404).json({ error: "Patient not found." });
+      }
+
+      const patientId = userWithPatient.patient.id;
+
+      // Retrieve referral details related to the patient
+      const referralDetails = await prisma.referraldetails.findMany({
+          where: {
+              patientId,
+          },
+          include: {
+              treatments: true
+          }
       });
-      res.render('presentReferralDetailsForm', { tests });
-    } catch (error) {
+
+      // Flatten and extract treatments if any referral details were found
+      const treatments = referralDetails.flatMap(detail => detail.treatments || []);
+
+      // Construct a response object
+      res.json({
+          referralDetails,
+          treatments
+      });
+  } catch (error) {
+      console.error("Failed to retrieve referral details:", error);
+      res.status(500).json({ error: "Internal server error" });
       next(error);
-    }
-  };
+  }
+};
+
   
   // Update Present Referral Details
   export const updatePresentReferralDetails = async (req, res, next) => {
     try {
-      const { testFor, imageUrl, result } = req.body;
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
-      });
-  
-      const patientId = patient.patient.id;
-  
-      const newTest = await prisma.test.create({
-        data: {
-          date: new Date(),
-          testFor,
-          imageUrl,
-          result,
-          patientId,
-        },
-      });
-      res.redirect('/present-referral-details');
+        const {
+            Examinations,
+            Diagnosiss,
+            Evacuationdetailss,
+            presentmedicationDes,
+            pastmedicationDes,
+            pasthospitalisationDes,
+            significantpasthistoryDes,
+            knownallergiesDes,
+            miscellaneousDes
+        } = req.body;
+
+        // Fetch the patient
+        const patient = await prisma.user.findUnique({
+            where: { id: req.body.id },
+            include: { patient: true },
+        });
+
+        // Check if patient and patient details are present
+        if (!patient || !patient.patient) {
+            return res.status(404).json({ message: "Patient not found." });
+        }
+
+        // Create referral details and associated treatments
+        const referraldetailss = await prisma.referraldetails.create({
+            data: {
+                patientId: patient.patient.id, // Ensure patientId is correctly assigned
+                Examination: Examinations,
+                Diagnosis: Diagnosiss,
+                Evacuationdetails: Evacuationdetailss,
+                treatments: {
+                    create: {
+                        presentmedication: presentmedicationDes,
+                        pastmedication: pastmedicationDes,
+                        pasthospitalisation: pasthospitalisationDes,
+                        significantpasthistory: significantpasthistoryDes,
+                        knownallergies: knownallergiesDes,
+                        miscellaneous: miscellaneousDes,
+                    }
+                }
+            },
+            include: {
+                treatments: true
+            }
+        });
+
+        // Instead of redirecting, return the created referral details
+        res.json({
+            message: "Referral details updated successfully",
+            data: referraldetailss
+        });
     } catch (error) {
-      next(error);
+        console.error("Error updating referral details:", error);
+        res.status(500).json({ error: "Internal server error" });
+        next(error);
     }
-  };
+};
+
   
   // Delete Present Referral Details
   // export const deletePresentReferralDetails = async (req, res, next) => {
@@ -369,7 +471,6 @@ export const getPresentReferralDetails = async (req, res, next) => {
       message: err.message || 'Internal Server Error',
     });
   };
-
   
   
   

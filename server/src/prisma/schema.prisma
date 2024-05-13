@@ -1,6 +1,7 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -10,24 +11,31 @@ generator client {
 // User model with enhanced data types and relationships
 model User {
   id               String    @id @default(uuid())
-  armyNo           String?
+  armyNo           String
   unit             String?
   rank             String?
   dateOfCommission DateTime?
   firstName        String
   middleName       String?
   lastName         String
-  email            String    @unique
+  email            String?   @unique
   mobileNo         String?   @unique
   dob              DateTime?
+  refreshToken     String
 
-  // Direct use of enum for role without relation
-  role   Role    
-  patient Patient?
-  //deoctors Doctor[]
+  role    Role     @default(PATIENT)
+  Patient Patient?
+  Doctor  Doctor?
 }
 
-// Enum for user roles, not used for relations
+model Admin {
+  id           String  @id @default(uuid())
+  adminId      String
+  password     String
+  refreshToken String?
+}
+
+// Role model for user access control
 enum Role {
   ADMIN
   DOCTOR
@@ -35,19 +43,18 @@ enum Role {
   PATIENT
 }
 
+// Patient model with improved relationships and data types
 model Patient {
-  id     String  @id @default(uuid())
-  userId String? @unique
-  user   User?   @relation(fields: [userId], references: [id])
-
-  medicalRecords MedicalRecord[]
-  ames ame[]
-  pmes pme[]
+  id         String      @id @default(uuid())
+  userId     String?     @unique
+  user       User?       @relation(fields: [userId], references: [id])
+  medical    Medical[]
+  test       Test[]
   treatments Treatment[]
-  tests          Test[]
 }
 
-model MedicalRecord {
+// Medical record model with relationships and enhanced data types
+model Medical {
   id            String    @id @default(uuid())
   heightCm      Int?
   weightKg      Float?
@@ -60,86 +67,74 @@ model MedicalRecord {
   onDrug        Boolean
   date          DateTime?
 
-  patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
   patient   Patient @relation(fields: [patientId], references: [id])
-  ames ame[]
-  pmes pme[]
-  treatments Treatment[]
-  tests Test[]
+  patientId String  @unique
+  familyhistories familyhistory[]
 }
 
-model Treatment {
-  id          String    @id @default(uuid())
-  presentmedication String
-  pastmedication String
-  pasthospitalisation String
-  significantpasthistory String
-  knownallergies String
-  miscellaneous String
-  //doctorId    String
-  //doctor      Doctor    @relation(fields: [doctorId], references: [id])
+// Doctor model with relationships
+model Doctor {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
-  patient   Patient @relation(fields: [patientId], references: [id])
-
-  medicalRecords MedicalRecord[]
-  tests          Test[]
+  specialization String
+  Treatment      Treatment[]
+  Department     Department? @relation(fields: [departmentId], references: [id])
+  departmentId   String?
 }
 
-// model Doctor {
-//   id             String    @id @default(uuid())
-//   userId         String    @unique
-//   user           User      @relation(fields: [userId], references: [id])
-//   specialization String
-//   departmentId   String?
-//   department     Department? @relation(fields: [departmentId], references: [id])
-//   treatments Treatment[]
-// }
-
+// Department model
 model Department {
-  id       String    @id @default(uuid())
+  id       String  @id @default(uuid())
   name     String
   location String?
 
-  //doctors Doctor[]
+  // One-to-many relationship with Doctors
+  doctors  Doctor[]
+  doctorId String
 }
+
+// Treatment model with relationships
+model Treatment {
+  id          String @id @default(uuid())
+  description String
+  doctor      Doctor @relation(fields: [doctorId], references: [id])
+  doctorId    String
+
+  medications Medication[]
+  test        Test[]
+  Patient     Patient?     @relation(fields: [patientId], references: [id])
+  patientId   String?
+}
+
+model Medication {
+  id          String     @id @default(uuid())
+  name        String
+  description String
+  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatmentId String?
+}
+
+// Test model with relationships
 model Test {
   id       String   @id @default(uuid())
   date     DateTime
   testFor  String
-  imageUrl String   @map("image_url")  // Correct attribute for mapping database column names
+  imageUrl String
   result   String
 
-  medicalRecords MedicalRecord[]
-  treatments     Treatment[]
-  patients Patient[]
-  ameid String
-  ame ame @relation(fields: [ameid], references:[ameid])
-  pmeid String
-  pme pme @relation(fields: [pmeid], references:[pmeid])
-
+  // Many-to-many relationships with Medical records and Treatments (through ame & pme models)
+  Patient     Patient?   @relation(fields: [patientId], references: [id])
+  patientId   String?
+  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatmentId String?
 }
-
-
-model ame {
-   ameid    String  @id @default(uuid())
-MedicalRecord   MedicalRecord  @relation(fields: [ameid], references: [id])
-
-patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
-  patient   Patient @relation(fields: [patientId], references: [id])
-
-description  String
-tests Test[]
-}
-
-model pme {
-  pmeid     String  @id @default(uuid())
-
- MedicalRecord   MedicalRecord   @relation(fields: [pmeid], references: [id])
-
- patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
-  patient   Patient @relation(fields: [patientId], references: [id])
-
- description  String
- tests Test[]
+model familyhistory{
+  id       String   @id @default(uuid())
+  Hypertension String
+  Diabetes_Mellitus String
+  Any_Unnatural_Death String
+  Any_other_significant_history String
+   Medical   Medical   @relation(fields: [id], references: [id])
 }

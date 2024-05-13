@@ -255,110 +255,87 @@ export const updatePersonalMedicalHistory = async (req, res, next) => {
 // Read Family History
 export const getFamilyHistory = async (req, res, next) => {
   try {
+    // Ensure the ID is provided
+    const userId = req.body.id;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID must be provided." });
+    }
+
     const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
+      where: { id: userId },
       include: { patient: true },
     });
 
+    // Check if patient information exists
+    if (!patient || !patient.patient) {
+      return res.status(404).json({ error: "Patient not found." });
+    }
+
     const patientId = patient.patient.id;
-    const medicalRecord = await prisma.medicalRecord.findUnique({
+    const medical = await prisma.Medical.findMany({
       where: {
         patientId,
       },
+      include: {
+        familyhistories: true
+      },
     });
-    res.render('familyHistoryForm', { medicalRecord });
+
+    // Flatten family histories from medical records
+    const familyhistories = Medical.flatMap(record => record.familyhistories);
+
+    // Check if family histories are found
+    if (familyhistories.length === 0) {
+      return res.status(404).json({ message: "No family history records found." });
+    }
+
+    res.json({ familyhistories });
   } catch (error) {
+    console.error("Failed to retrieve family history:", error);
+    res.status(500).json({ error: "Internal server error." });
     next(error);
   }
 };
+
 
 // Update Family History
 export const updateFamilyHistory = async (req, res, next) => {
   try {
-    const { hypertension, diabetes, unnaturalDeath, otherHistory } = req.body;
+    console.log("updatefamilyhistoryroute");
+    const { hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
     const patient = await prisma.user.findUnique({
       where: { id: req.body.id },
       include: { patient: true },
     });
 
+    if (!patient || !patient.patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
     const patientId = patient.patient.id;
 
-    const newMedicalRecord = await prisma.medicalRecord.create({
+    const newMedicalRecord = await prisma.Medical.create({
       data: {
-        hypertension,
-        diabetes,
-        unnaturalDeath,
-        otherHistory,
-        patientId,
+        patientId: patientId,
+        familyhistories: {
+          create: {
+            hypertension,
+            diabetesMellitus,
+            anyUnnaturalDeath,
+            otherSignificantHistory
+          }
+        },
       },
+      include: {
+        familyhistories: true
+      }
     });
-    res.redirect('/family-history');
+    
+    res.status(200).json({ message: "Family history updated", data: newMedicalRecord });
   } catch (error) {
     next(error);
   }
 };
 
-// Read Present Referral Details
-export const getPresentReferralDetails = async (req, res, next) => {
-    try {
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
-      });
-  
-      const patientId = patient.patient.id;
-      const tests = await prisma.test.findMany({
-        where: {
-          patientId,
-        },
-      });
-      res.render('presentReferralDetailsForm', { tests });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  // Update Present Referral Details
-  export const updatePresentReferralDetails = async (req, res, next) => {
-    try {
-      const { testFor, imageUrl, result } = req.body;
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
-      });
-  
-      const patientId = patient.patient.id;
-  
-      const newTest = await prisma.test.create({
-        data: {
-          date: new Date(),
-          testFor,
-          imageUrl,
-          result,
-          patientId,
-        },
-      });
-      res.redirect('/present-referral-details');
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  // Delete Present Referral Details
-  // export const deletePresentReferralDetails = async (req, res, next) => {
-  //   try {
-  //     const { testId } = req.body;
-  
-  //     await prisma.test.delete({
-  //       where: {
-  //         id: testId,
-  //       },
-  //     });
-  //     res.redirect('/present-referral-details');
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
   
   // Other necessary functions can be added similarly
   
@@ -369,7 +346,6 @@ export const getPresentReferralDetails = async (req, res, next) => {
       message: err.message || 'Internal Server Error',
     });
   };
-
   
   
   

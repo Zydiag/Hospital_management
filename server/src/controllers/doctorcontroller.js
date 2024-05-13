@@ -7,6 +7,7 @@ import pkg from 'pg';
 // Now you can use Client as before
 
 import { PrismaClient } from '@prisma/client';
+import { create } from 'domain';
 const { Client } = pkg;
 
 const prisma = new PrismaClient();
@@ -61,7 +62,7 @@ export const getPersonalInfo = async (req, res) => {
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {
   try {
-    const { armyNo, unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
+    const { armyNo, unit, rank,dateOfCommission, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
     console.log(req.body.armyNo);
     const userId = req.body.id;
     
@@ -73,6 +74,7 @@ export const updatePersonalInfo = async (req, res, next) => {
         armyNo,
         unit,
         rank,
+        dateOfCommission,
         firstName,
         middleName,
         lastName,
@@ -104,13 +106,13 @@ export const getHealthRecord = async (req, res, next) => {
     });
 
     const patientId = patient.patient.id;
-    const medicalRecord = await prisma.medicalRecord.findMany({
+    const medicalRecord = await prisma.Medical.findMany({
       where: {
         patientId,
       },
     });
 
-    res.json({ medicalRecord }); // Changed to medicalRecord
+    res.json({ Medical }); // Changed to medicalRecord
   } catch (error) {
     next(error);
   }
@@ -120,7 +122,7 @@ export const getHealthRecord = async (req, res, next) => {
 // Update Health Record
 export const updateHealthRecord = async (req, res, next) => {
   try {
-    const { heightCm, weightKg, chest, waist, bloodPressure, disabilities, bloodGroup, onDrug } = req.body;
+    const { heightCm, weightKg, chest,BMI, waist, bloodPressure, disabilities, bloodGroup, onDrug,date } = req.body;
 
     const patient = await prisma.user.findUnique({
       where: { id: req.body.id },
@@ -129,16 +131,18 @@ export const updateHealthRecord = async (req, res, next) => {
 
     const patientId = patient.patient.id;
 
-    const newMedicalRecord = await prisma.medicalRecord.create({
+    const newMedicalRecord = await prisma.Medical.create({
       data: {
         heightCm,
         weightKg,
         chest,
+        BMI,
         waist,
         bloodPressure,
         disabilities,
         bloodGroup,
         onDrug,
+        date,
         patientId,
       },
     });
@@ -149,7 +153,7 @@ export const updateHealthRecord = async (req, res, next) => {
 };
 
 // Read Personal Medical History
-export const getPersonalMedicalHistory = async (req, res, next) => {
+export const getTreatmentRecord = async (req, res, next) => {
   try {
     const patient = await prisma.user.findUnique({
       where: { id: req.body.id },
@@ -162,33 +166,22 @@ export const getPersonalMedicalHistory = async (req, res, next) => {
 
     const patientId = patient.patient.id;
 
-    // Fetch medical records associated with the patient
-    const medicalRecords = await prisma.medicalRecord.findMany({
+    // Fetch treatment records associated with the patient
+    const treatmentRecords = await prisma.treatment.findMany({
       where: {
         patientId,
       },
       include: {
-        ames: true, // Include related ame records
-        pmes: true, // Include related pme records
+        Medication: true
       },
     });
 
-    // Extract ame and pme records from medical records
-    const ames = medicalRecords.flatMap(record => record.ames);
-    const pmes = medicalRecords.flatMap(record => record.pmes);
-
-    // Fetch treatment records associated with the patient
-    const treatments = await prisma.treatment.findMany({
-      where: {
-        patientId,
-      }
-    });
+    // Extract medication records from treatment records
+    const medicationRecords = treatmentRecords.flatMap(record => record.Medication);
 
     res.json({
-      treatments,
-      ames,
-      pmes,
-      //medicalRecords, // Optionally include medical records if needed
+      treatmentRecords,
+      medicationRecords
     });
   } catch (error) {
     next(error);
@@ -196,11 +189,10 @@ export const getPersonalMedicalHistory = async (req, res, next) => {
 };
 
 
-
-// Update Personal Medical History
-export const updatePersonalMedicalHistory = async (req, res, next) => {
+// Update Treatment Records
+export const updateTreatmentRecord = async (req, res, next) => {
   try {
-    const { presentmedicationDes, pastmedicationDes, pasthospitalisationDes, significantpasthistoryDes, knownallergiesDes, miscellaneousDes,  ameDescription, pmeDescription, onDrug } = req.body;
+    const { problemDes, medication, medicationDes, } = req.body;
     const patient = await prisma.user.findUnique({
       where: { id: req.body.id },
       include: { patient: true },
@@ -208,43 +200,29 @@ export const updatePersonalMedicalHistory = async (req, res, next) => {
 
     const patientId = patient.patient.id;
 
-    const newMedicalRecord = await prisma.medicalRecord.create({
+    const newTreatment = await prisma.Treatment.create({
       data: {
-        treatments: {
-          create:{
-            presentmedication: presentmedicationDes,
-            pastmedication: pastmedicationDes,
-            pasthospitalisation: pasthospitalisationDes,
-            significantpasthistory: significantpasthistoryDes ,
-            knownallergies: knownallergiesDes ,
-            miscellaneous: miscellaneousDes ,
-            //doctorId: doctorId,
-          }
-        },
-        ames: {
-          create: {
-            description: ameDescription,
-          },
-        },
-        pmes: {
-          create: {
-            description: pmeDescription,
-          },
-        },
-        onDrug: onDrug, // Include the onDrug field
-        patientId,
+            description:problemDes,
+            doctorId: doctorId,
+            patientId,
+
       },
-      include: {
-        ames: true,
-        pmes: true,
-        treatments: true
+     
+    });
+
+    const newMedication = await prisma.Medication.create({
+      data: {
+        name: medication,
+        description: medicationDes,
+        Treatment: {
+          connect: { id: treatmentId }, // Connect the medication to the specified treatment
+        },
       },
     });
     // Accessing related data directly from newMedicalRecord
     res.json({
-      ames: newMedicalRecord.ames,
-      pmes: newMedicalRecord.pmes,
-      treatments: newMedicalRecord.treatments
+      newTreatment,
+      newMedication
     });
   } catch (error) {
     next(error);
@@ -298,51 +276,6 @@ export const updateFamilyHistory = async (req, res, next) => {
   }
 };
 
-// Read Present Referral Details
-export const getPresentReferralDetails = async (req, res, next) => {
-    try {
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
-      });
-  
-      const patientId = patient.patient.id;
-      const tests = await prisma.test.findMany({
-        where: {
-          patientId,
-        },
-      });
-      res.render('presentReferralDetailsForm', { tests });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  // Update Present Referral Details
-  export const updatePresentReferralDetails = async (req, res, next) => {
-    try {
-      const { testFor, imageUrl, result } = req.body;
-      const patient = await prisma.user.findUnique({
-        where: { id: req.body.id },
-        include: { patient: true },
-      });
-  
-      const patientId = patient.patient.id;
-  
-      const newTest = await prisma.test.create({
-        data: {
-          date: new Date(),
-          testFor,
-          imageUrl,
-          result,
-          patientId,
-        },
-      });
-      res.redirect('/present-referral-details');
-    } catch (error) {
-      next(error);
-    }
-  };
   
   // Delete Present Referral Details
   // export const deletePresentReferralDetails = async (req, res, next) => {

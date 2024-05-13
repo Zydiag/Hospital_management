@@ -4,12 +4,10 @@ import {
   updatePersonalInfo,
   getHealthRecord,
   updateHealthRecord,
-  getPersonalMedicalHistory,
-  updatePersonalMedicalHistory,
+  getTreatmentRecord,
+  updateTreatmentRecord,
   getFamilyHistory,
   updateFamilyHistory,
-  getPresentReferralDetails,
-  updatePresentReferralDetails,
   //deletePresentReferralDetails,
 } from '../controllers/doctorcontroller.js'; // Updated import path
 
@@ -28,12 +26,10 @@ router.post('/personal-info', (req, res, next) => {
 router.put('/personal-info', updatePersonalInfo);//checked
 router.get('/health-record', getHealthRecord);//checked
 router.post('/health-record', updateHealthRecord);//checked
-router.get('/personal-medical-history', getPersonalMedicalHistory);//checked
-router.post('/personal-medical-history', updatePersonalMedicalHistory);//checked
+router.get('/treatment-record', getTreatmentRecord);//checked
+router.post('/treatment-record', updateTreatmentRecord);//checked
 router.get('/family-history', getFamilyHistory);
 router.post('/family-history', updateFamilyHistory);
-router.get('/present-referral-details', getPresentReferralDetails);
-router.post('/present-referral-details', updatePresentReferralDetails);
 //router.delete('/present-referral-details', deletePresentReferralDetails);
 
 export default router;

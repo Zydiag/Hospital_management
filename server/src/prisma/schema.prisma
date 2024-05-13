@@ -66,6 +66,7 @@ model MedicalRecord {
   pmes pme[]
   treatments Treatment[]
   tests Test[]
+  familyhistories familyhistory[]
 }
 
 model Treatment {
@@ -81,6 +82,7 @@ model Treatment {
 
   patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
   patient   Patient @relation(fields: [patientId], references: [id])
+   referraldetailsed referraldetails[]
 
   medicalRecords MedicalRecord[]
   tests          Test[]
@@ -143,3 +145,23 @@ model pme {
  description  String
  tests Test[]
 }
+
+model familyhistory{
+  id       String   @id @default(uuid())
+  Hypertension String
+  Diabetes_Mellitus String
+  Any_Unnatural_Death String
+  Any_other_significant_history String
+   MedicalRecord   MedicalRecord   @relation(fields: [id], references: [id])
+
+}
+
+model referraldetails{
+  patientId String @default("27c57ab0-8e7c-4368-b22d-c2db71b316f9")
+    id   String  @id @default(uuid())
+    Examination String
+    Diagnosis String 
+    Evacuationdetails String
+     treatments Treatment[]
+}
+

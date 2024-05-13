@@ -1,15 +1,22 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import doctorRoutes from './routes/doctorroute.js';
 
 export const app = express();
 
-// using this to allow access to our backend from specific URLs
+app.use(express.json({ type: 'application/json' }));
+
+app.use('/api/doctor', doctorRoutes);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGINS,
+    origin: process.env.CORS_ORIGINS || 'http://localhost:3000',
     credentials: true,
   })
 );
 
-app.use(express.json({ limit: '16kb' }));
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});

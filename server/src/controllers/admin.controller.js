@@ -1,6 +1,7 @@
 import { apiError } from "../utils/apiError";
 import { apiResponse } from "../utils/apiResponse";
 import { asynchandler } from "../utils/asyncHandler";
+import { db } from "../lib/db";
 import jwt from "jsonwebtoken";
 
 // 
@@ -37,13 +38,13 @@ const loginAdmin = asynchandler(async (req, res) => {
       throw new apiError(400, "password  required");
     }
     // check if user exists
-    const Admin = await prisma.Admin.findUnique({
+    const Admin = await db.Admin.findUnique({
         where: {
         id: id,
         },
       })
     if (!Admin) {
-      throw new apiError(404, "User not found");
+      throw new apiError(404, "Admin not found");
     }
     // check if password is correct
     if(Admin.password !== password) {
@@ -55,7 +56,7 @@ const loginAdmin = asynchandler(async (req, res) => {
     await db.Admin.update({
         where: { 
             id,
-            }, 
+            },  
             data: { refreshToken } 
         });
     //cookies ke liya hai , options for which cookie to be sent
@@ -74,7 +75,7 @@ const loginAdmin = asynchandler(async (req, res) => {
             accessToken,
             refreshToken,
           },
-          "User logged in successfully"
+          "Admin logged in successfully"
         )
       );
   });

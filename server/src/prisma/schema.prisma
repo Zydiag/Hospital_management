@@ -69,6 +69,7 @@ model Medical {
 
   patient   Patient @relation(fields: [patientId], references: [id])
   patientId String  @unique
+ familyhistories familyhistory
 }
 
 // Doctor model with relationships
@@ -128,4 +129,12 @@ model Test {
   patientId   String?
   Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
   treatmentId String?
+}
+model familyhistory{
+  id       String   @id @default(uuid())
+  Hypertension String
+  Diabetes_Mellitus String
+  Any_Unnatural_Death String
+  Any_other_significant_history String
+   Medical   Medical  @relation(fields: [id], references: [id])
 }

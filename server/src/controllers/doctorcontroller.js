@@ -21,6 +21,64 @@ const generateRefreshToken = (user) => {
 };
 
 export const getPersonalInfo = async (req, res) => {
+
+//create Doctor profile
+const CreateDoctorProfile = asynchandler(async (req, res) => {
+  const { armyNo, unit, rank, firstName, middleName, lastName, email, mobileNo, dob,password} = req.body;
+  // check if all fields are filled
+  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password) throw new apiError(400, 'All fields are required to create a new user');
+  // check if user already exists
+  let existedDoctor = await prisma.user.findFirst({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+  if (existedDoctor) {
+    throw new apiError(400, 'Doctor already exists');
+  }
+  // hash password
+  const hashedPassword = await hashPassword(password);
+  // create user and store in database
+  user = await prisma.user.create({
+    data: {
+      armyNo,
+      unit,
+      rank,
+      firstName,
+      middleName,
+      lastName,
+      email,
+      password: hashedPassword,
+      mobileNo,
+      dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
+      role: 'DOCTOR', // Default role for this example
+    },
+  });
+
+
+  const createdDoctor = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+    }
+  })
+ if (!user) {
+    throw new apiError(505, 'Something went wrong while registering user');
+  }
+  const newDoctorRequest = await prisma.Request.create({
+    data: {
+      armyNo,
+      firstName,
+      lastName,
+      unit,
+      rank
+    },
+  });
+  // return response
+  return res.status(200).json(new apiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet'));
+});
+
+// Get Personal Info of patient by Army Number
+export const getPersonalInfo = async (req, res) => {
   console.log('Inside getPersonalInfo function');
   const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
   const armyNo = req.body.armyNo;
@@ -92,7 +150,6 @@ export const getPersonalInfo = async (req, res) => {
 
   res.json(user);
 };
-
 
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {

@@ -3,75 +3,120 @@
 // import { asynchandler } from "../utils/asyncHandler.js";
 // import jwt from "jsonwebtoken";
 import pkg from 'pg';
-
-// Now you can use Client as before
-
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { create } from 'domain';
+import jwt from 'jsonwebtoken';
+import { Router } from 'express';
+
 const { Client } = pkg;
-
 const prisma = new PrismaClient();
+const router = Router();
 
-// Create or Get Personal Info by Army Number
+// Function to generate a refresh token
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    { userId: user.id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '7d' } // Refresh token valid for 7 days
+  );
+};
+
 export const getPersonalInfo = async (req, res) => {
   console.log('Inside getPersonalInfo function');
   const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
   const armyNo = req.body.armyNo;
   console.log(armyNo);
+
   if (!armyNo) {
     console.log(req.body);
-      return res.status(400).json({
-          "error": "Army number is required"
-      });
+    return res.status(400).json({
+      error: 'Army number is required'
+    });
   }
-  
-    let user = await prisma.user.findFirst({
-      where: {
-        armyNo: armyNo,
+
+  let user = await prisma.user.findFirst({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+
+  if (!user) {
+    // Validation for all required fields
+    if (!unit || !rank || !firstName || !lastName || !dob) {
+      console.log("abs");
+      return res.status(400).json({ error: 'All fields are required to create a new user' });
+    }
+
+    // Generate a refresh token for the new user
+    const refreshToken = generateRefreshToken({ id: armyNo });
+
+    user = await prisma.user.create({
+      data: {
+        armyNo,
+        unit,
+        rank,
+        firstName,
+        middleName,
+        lastName,
+        email,
+        mobileNo,
+        dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
+        role: 'PATIENT', // Default role for this example
+        refreshToken
       },
     });
-  
-    if (!user) {
-      // Validation for all required fields
-      if (!unit || !rank || !firstName || !lastName || !dob) {
-        console.log("abs");
-        return res.status(400).json({ error: 'All fields are required to create a new user' });
-      }
-  
-      user = await prisma.user.create({
-        data: {
-          armyNo,
-          unit,
-          rank,
-          firstName,
-          middleName,
-          lastName,
-          email,
-          mobileNo,
-          dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
-          role: 'PATIENT', // Default role for this example
-        },
-      });
-    }
-  
-    res.json(user);
-  };
-  
-  
+    
+    const userId = user.id; // Assuming you need the user ID for creating a patient entry
+    // Create a patient entry for the user
+    patient = await prisma.patient.create({
+      data: {
+        userId: userId,
+      },
+    });
+
+  } else if (!user.refreshToken) {
+    // If user exists but does not have a refresh token, generate a new refresh token and update the user
+    const refreshToken = generateRefreshToken(user);
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
+  }
+
+  // Set the refresh token as an HTTP-only cookie
+  res.cookie('refreshToken', user.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Ensure the cookie is only sent over HTTPS in production
+    sameSite: 'Strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  res.json(user);
+};
+
 
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {
   try {
-    const { armyNo, unit, rank,dateOfCommission, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
-    console.log(req.body.armyNo);
-    const userId = req.body.id;
-    
+    const { armyNo, unit, rank, dateOfCommission, firstName, middleName, lastName, email, mobileNo, dob, refreshToken } = req.body;
+
+    // Find the user by army number
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        armyNo: armyNo,
+      },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User not found with the provided army number' });
+    }
+
+    // Update the user data
     const updatedUser = await prisma.user.update({
       where: {
-        id: userId,
+        id: existingUser.id, // Use id as the unique identifier
       },
       data: {
-        armyNo,
         unit,
         rank,
         dateOfCommission,
@@ -81,56 +126,83 @@ export const updatePersonalInfo = async (req, res, next) => {
         email,
         mobileNo,
         dob,
-      },
-    });
-
-    await prisma.patient.create({
-      data: {
-        userId: user.id,
+        refreshToken // Assuming refreshToken is part of the User model
       },
     });
 
     res.redirect('/personal-info');
-    
   } catch (error) {
     next(error);
   }
 };
+
 
 // Read Health Record
 export const getHealthRecord = async (req, res, next) => {
   try {
-    const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
-      include: { patient: true },
+    const { armyNo } = req.body;
+
+    // Find the user based on the army number
+    const user = await prisma.User.findFirst({
+      where: { armyNo: armyNo },
     });
 
-    const patientId = patient.patient.id;
-    const medicalRecord = await prisma.Medical.findMany({
-      where: {
-        patientId,
-      },
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find the patient based on the userId
+    const patient = await prisma.patient.findFirst({
+      where: { userId: user.id },
+      
     });
 
-    res.json({ Medical }); // Changed to medicalRecord
+
+    const medicalRecord = await prisma.medical.findMany({
+      where: { patientId: patient.id},
+    })
+
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    // Extract medical records from the patient
+    //const medicalRecords = patient.Medical;
+
+    res.json({ medicalRecord });
   } catch (error) {
     next(error);
   }
 };
+
 
 
 // Update Health Record
 export const updateHealthRecord = async (req, res, next) => {
   try {
-    const { heightCm, weightKg, chest,BMI, waist, bloodPressure, disabilities, bloodGroup, onDrug,date } = req.body;
+    const { heightCm, weightKg, chest, BMI, waist, bloodPressure, disabilities, bloodGroup, onDrug, date } = req.body;
+    const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
 
-    const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
-      include: { patient: true },
+    // Find the patient by army number
+    const patient = await prisma.patient.findFirst({
+      where: {
+        user: {
+          armyNo: armyNo,
+        },
+      },
+      select: {
+        id: true, // Select only the id field
+      },
     });
 
-    const patientId = patient.patient.id;
+    // If patient is not found, handle the error
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found with the provided army number' });
+    }
 
+    const patientId = patient.id;
+
+    // Create a new medical record
     const newMedicalRecord = await prisma.Medical.create({
       data: {
         heightCm,
@@ -146,28 +218,36 @@ export const updateHealthRecord = async (req, res, next) => {
         patientId,
       },
     });
-    res.redirect('/health-record');
+
+    // Send a JSON response in Postman
+    res.json({ message: 'Medical record created successfully', medicalRecord: newMedicalRecord });
   } catch (error) {
     next(error);
   }
 };
 
+
 // Read Personal Medical History
 export const getTreatmentRecord = async (req, res, next) => {
   try {
-    const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
-      include: { patient: true },
+    const patient = await prisma.patient.findFirst({
+      where: {
+        userId: userId,
+      },
+      select: {
+        id: true, // Select only the id field
+      },
     });
 
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
     }
 
-    const patientId = patient.patient.id;
+    const patientId = patient.id;
 
     // Fetch treatment records associated with the patient
-    const treatmentRecords = await prisma.treatment.findMany({
+    
+    const treatmentRecords = await prisma.Treatment.findMany({
       where: {
         patientId,
       },
@@ -176,11 +256,20 @@ export const getTreatmentRecord = async (req, res, next) => {
       },
     });
 
+    if(treatmentRecords){
+      const description = JSON.parse(treatmentRecords.description);
+
+    }
+    
+
     // Extract medication records from treatment records
     const medicationRecords = treatmentRecords.flatMap(record => record.Medication);
 
     res.json({
-      treatmentRecords,
+      presentingComplaints: description.presentingComplaints,
+      diagnosis: description.diagnosis,
+      treatmentGiven: description.treatmentGiven,
+      miscellaneous: description.miscellaneous,
       medicationRecords
     });
   } catch (error) {
@@ -192,18 +281,33 @@ export const getTreatmentRecord = async (req, res, next) => {
 // Update Treatment Records
 export const updateTreatmentRecord = async (req, res, next) => {
   try {
-    const { problemDes, medication, medicationDes, } = req.body;
-    const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
-      include: { patient: true },
+    const { armyNo, presentingComplaints, diagnosis, treatmentGiven, miscellaneous, medication, medicationDes, } = req.body;
+    
+    // Find the patient by army number
+    const patient = await prisma.patient.findFirst({
+      where: {
+        user: {
+          armyNo: armyNo,
+        },
+      },
+      select: {
+        id: true, // Select only the id field
+      },
     });
 
-    const patientId = patient.patient.id;
+    const patientId = patient.id;
+
+    const description = JSON.stringify({
+      presentingComplaints: presentingComplaints,
+      diagnosis: diagnosis,
+      treatmentGiven: treatmentGiven,
+      miscellaneous: miscellaneous
+    });
 
     const newTreatment = await prisma.Treatment.create({
       data: {
-            description:problemDes,
-            doctorId: doctorId,
+            description:description,
+            //doctorId: doctorId,
             patientId,
 
       },
@@ -239,17 +343,21 @@ export const getFamilyHistory = async (req, res, next) => {
       return res.status(400).json({ error: "User ID must be provided." });
     }
 
-    const patient = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { patient: true },
+    const patient = await prisma.patient.findFirst({
+      where: {
+        userId: userId,
+      },
+      select: {
+        id: true, // Select only the id field
+      },
     });
 
     // Check if patient information exists
-    if (!patient || !patient.patient) {
+    if (!patient) {
       return res.status(404).json({ error: "Patient not found." });
     }
 
-    const patientId = patient.patient.id;
+    const patientId = patient.id;
     const medical = await prisma.Medical.findMany({
       where: {
         patientId,
@@ -281,15 +389,19 @@ export const updateFamilyHistory = async (req, res, next) => {
   try {
     console.log("updatefamilyhistoryroute");
     const { hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
-    const patient = await prisma.user.findUnique({
-      where: { id: req.body.id },
-      include: { patient: true },
+    const patient = await prisma.patient.findFirst({
+      where: {
+        userId: userId,
+      },
+      select: {
+        id: true, // Select only the id field
+      },
     });
 
-    if (!patient || !patient.patient) {
+    if (!patient) {
       return res.status(404).json({ error: "Patient not found" });
     }
-    const patientId = patient.patient.id;
+    const patientId = patient.id;
 
     const newMedicalRecord = await prisma.Medical.create({
       data: {

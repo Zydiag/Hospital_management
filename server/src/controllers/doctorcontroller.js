@@ -68,39 +68,17 @@ const CreateDoctorProfile = asynchandler(async (req, res) => {
 });
 
 // Get Personal Info of patient by Army Number
-export const getPersonalInfo = asynchandler(async (req, res) => {
-  const { armyNo } = req.body;
-  if (!armyNo) {
-    throw new apiError(400, 'army number  required');
-  }
-  let user = await prisma.user.findFirst({
-    where: {
-      armyNo: armyNo,
-    },
-  });
-  if (!user) {
-    throw new apiError(404, 'User not found');
-  }
-  return res.status(200).json(
-    new apiResponse(
-      200,
-      {
-        // user info (past history or something else)
-      },
-      'user fetched successfully'
-    )
-  );
-});
-
-// Create patient profile
-export const createPatientProfile = asynchandler(async (req, res) => {
+export const getPersonalInfo = async (req, res) => {
   console.log('Inside getPersonalInfo function');
   const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
   const armyNo = req.body.armyNo;
   console.log(armyNo);
+
   if (!armyNo) {
-    // console.log(req.body);
-    throw new apiError(400, 'army number  required');
+    console.log(req.body);
+    return res.status(400).json({
+      error: 'Army number is required'
+    });
   }
 
   let user = await prisma.user.findFirst({
@@ -111,7 +89,13 @@ export const createPatientProfile = asynchandler(async (req, res) => {
 
   if (!user) {
     // Validation for all required fields
-    if (!unit || !rank || !firstName || !lastName || !dob) throw new apiError(400, 'All fields are required to create a new user');
+    if (!unit || !rank || !firstName || !lastName || !dob) {
+      console.log("abs");
+      return res.status(400).json({ error: 'All fields are required to create a new user' });
+    }
+
+    // Generate a refresh token for the new user
+    const refreshToken = generateRefreshToken({ id: armyNo });
 
     user = await prisma.user.create({
       data: {
@@ -125,14 +109,37 @@ export const createPatientProfile = asynchandler(async (req, res) => {
         mobileNo,
         dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
         role: 'PATIENT', // Default role for this example
+        refreshToken
       },
     });
-  } else {
-    throw new apiError(400, 'User already exists');
+    
+    const userId = user.id; // Assuming you need the user ID for creating a patient entry
+    // Create a patient entry for the user
+    patient = await prisma.patient.create({
+      data: {
+        userId: userId,
+      },
+    });
+
+  } else if (!user.refreshToken) {
+    // If user exists but does not have a refresh token, generate a new refresh token and update the user
+    const refreshToken = generateRefreshToken(user);
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
   }
 
+  // Set the refresh token as an HTTP-only cookie
+  res.cookie('refreshToken', user.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Ensure the cookie is only sent over HTTPS in production
+    sameSite: 'Strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
   res.json(user);
-});
+};
 
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {

@@ -1,6 +1,7 @@
-import { apiError } from '../utils/apiError.js';
-import { apiResponse } from '../utils/apiResponse.js';
-import { asynchandler } from '../utils/asyncHandler.js';
+//import { apiError } from '../utils/apiError.js';
+import { ApiResponse } from '../utils/apiResponse.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { hashPassword } from '../utils/hashPassword.js';
 import pkg from 'pg';
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
@@ -20,10 +21,9 @@ const generateRefreshToken = (user) => {
   );
 };
 
-export const getPersonalInfo = async (req, res) => {
 
 //create Doctor profile
-const CreateDoctorProfile = asynchandler(async (req, res) => {
+const CreateDoctorProfile = asyncHandler(async (req, res) => {
   const { armyNo, unit, rank, firstName, middleName, lastName, email, mobileNo, dob,password} = req.body;
   // check if all fields are filled
   if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password) throw new apiError(400, 'All fields are required to create a new user');
@@ -318,9 +318,6 @@ export const getTreatmentRecord = async (req, res, next) => {
     }
     
 
-    // Extract medication records from treatment records
-    const medicationRecords = treatmentRecords.flatMap(record => record.Medication);
-
     res.json({
       presentingComplaints: description.presentingComplaints,
       diagnosis: description.diagnosis,
@@ -370,19 +367,10 @@ export const updateTreatmentRecord = async (req, res, next) => {
      
     });
 
-    const newMedication = await prisma.Medication.create({
-      data: {
-        name: medication,
-        description: medicationDes,
-        Treatment: {
-          connect: { id: treatmentId }, // Connect the medication to the specified treatment
-        },
-      },
-    });
+    
     // Accessing related data directly from newMedicalRecord
     res.json({
-      newTreatment,
-      newMedication
+      newTreatment
     });
   } catch (error) {
     next(error);
@@ -483,8 +471,6 @@ export const updateFamilyHistory = async (req, res, next) => {
 };
 
 
-  
-  // Other necessary functions can be added similarly
   
   // Error handling middleware
   export const errorHandler = (err, req, res, next) => {

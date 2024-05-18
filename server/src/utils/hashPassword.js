@@ -1,9 +1,9 @@
 
 import bcrypt from "bcrypt";
-import { asynchandler } from '../utils/asyncHandler.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { APIError } from "./apiError.js";
 
-export const hashPassword =asynchandler(async (password) => {
+export const hashPassword =asyncHandler(async (password) => {
     try {
       // Generate a salt
       const salt = await bcrypt.genSalt(10);

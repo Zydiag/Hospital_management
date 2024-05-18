@@ -1,63 +1,138 @@
-// import { apiError } from "../utils/apiError.js";
-// import { apiResponse } from "../utils/apiResponse.js";
-// import { asynchandler } from "../utils/asyncHandler.js";
+import { apiError } from '../utils/apiError.js';
+import { apiResponse } from '../utils/apiResponse.js';
+import { asynchandler } from '../utils/asyncHandler.js';
+import { hashPassword } from '../utils/hashPassword.js';
 // import jwt from "jsonwebtoken";
 import pkg from 'pg';
 
 // Now you can use Client as before
 
 import { PrismaClient } from '@prisma/client';
-import { create } from 'domain';
 const { Client } = pkg;
 
 const prisma = new PrismaClient();
 
-// Create or Get Personal Info by Army Number
-export const getPersonalInfo = async (req, res) => {
+//create Doctor profile
+const CreateDoctorProfile = asynchandler(async (req, res) => {
+  const { armyNo, unit, rank, firstName, middleName, lastName, email, mobileNo, dob,password} = req.body;
+  // check if all fields are filled
+  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password) throw new apiError(400, 'All fields are required to create a new user');
+  // check if user already exists
+  let existedDoctor = await prisma.user.findFirst({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+  if (existedDoctor) {
+    throw new apiError(400, 'Doctor already exists');
+  }
+  // hash password
+  const hashedPassword = await hashPassword(password);
+  // create user and store in database
+  user = await prisma.user.create({
+    data: {
+      armyNo,
+      unit,
+      rank,
+      firstName,
+      middleName,
+      lastName,
+      email,
+      password: hashedPassword,
+      mobileNo,
+      dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
+      role: 'DOCTOR', // Default role for this example
+    },
+  });
+
+
+  const createdDoctor = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+    }
+  })
+ if (!user) {
+    throw new apiError(505, 'Something went wrong while registering user');
+  }
+  const newDoctorRequest = await prisma.Request.create({
+    data: {
+      armyNo,
+      firstName,
+      lastName,
+      unit,
+      rank
+    },
+  });
+  // return response
+  return res.status(200).json(new apiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet'));
+});
+
+// Get Personal Info of patient by Army Number
+export const getPersonalInfo = asynchandler(async (req, res) => {
+  const { armyNo } = req.body;
+  if (!armyNo) {
+    throw new apiError(400, 'army number  required');
+  }
+  let user = await prisma.user.findFirst({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+  if (!user) {
+    throw new apiError(404, 'User not found');
+  }
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      {
+        // user info (past history or something else)
+      },
+      'user fetched successfully'
+    )
+  );
+});
+
+// Create patient profile
+export const createPatientProfile = asynchandler(async (req, res) => {
   console.log('Inside getPersonalInfo function');
   const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
   const armyNo = req.body.armyNo;
   console.log(armyNo);
   if (!armyNo) {
-    console.log(req.body);
-      return res.status(400).json({
-          "error": "Army number is required"
-      });
+    // console.log(req.body);
+    throw new apiError(400, 'army number  required');
   }
-  
-    let user = await prisma.user.findFirst({
-      where: {
-        armyNo: armyNo,
+
+  let user = await prisma.user.findFirst({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+
+  if (!user) {
+    // Validation for all required fields
+    if (!unit || !rank || !firstName || !lastName || !dob) throw new apiError(400, 'All fields are required to create a new user');
+
+    user = await prisma.user.create({
+      data: {
+        armyNo,
+        unit,
+        rank,
+        firstName,
+        middleName,
+        lastName,
+        email,
+        mobileNo,
+        dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
+        role: 'PATIENT', // Default role for this example
       },
     });
-  
-    if (!user) {
-      // Validation for all required fields
-      if (!unit || !rank || !firstName || !lastName || !dob) {
-        console.log("abs");
-        return res.status(400).json({ error: 'All fields are required to create a new user' });
-      }
-  
-      user = await prisma.user.create({
-        data: {
-          armyNo,
-          unit,
-          rank,
-          firstName,
-          middleName,
-          lastName,
-          email,
-          mobileNo,
-          dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
-          role: 'PATIENT', // Default role for this example
-        },
-      });
-    }
-  
-    res.json(user);
-  };
-  
-  
+  } else {
+    throw new apiError(400, 'User already exists');
+  }
+
+  res.json(user);
+});
 
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {

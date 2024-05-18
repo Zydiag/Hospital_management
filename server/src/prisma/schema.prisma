@@ -82,8 +82,15 @@ model Doctor {
   Treatment      Treatment[]
   Department     Department? @relation(fields: [departmentId], references: [id])
   departmentId   String?
+  status         String      @default("PENDING")
+  requests       Request[]
 }
-
+//Doctor Request
+model Request {
+  id         String    @id @default(uuid())
+  doctorId String @unique
+  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+}
 // Department model
 model Department {
   id       String  @id @default(uuid())
@@ -136,5 +143,5 @@ model familyhistory{
   Diabetes_Mellitus String
   Any_Unnatural_Death String
   Any_other_significant_history String
-   Medical   Medical  @relation(fields: [id], references: [id])
+  Medical   Medical  @relation(fields: [id], references: [id])
 }

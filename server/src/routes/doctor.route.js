@@ -1,5 +1,10 @@
-import express from 'express';
+import { Router } from 'express';
+import { verifyjwt } from '../middlewares/authmiddlewares.js';
+import { authorizeAdmin } from '../middlewares/authmiddlewares.js';
+import { authorizeDoctor } from '../middlewares/authmiddlewares.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import {
+  createDoctorProfile,
   getPersonalInfo,
   updatePersonalInfo,
   getHealthRecord,
@@ -7,29 +12,26 @@ import {
   getTreatmentRecord,
   updateTreatmentRecord,
   getFamilyHistory,
-  updateFamilyHistory,
-  //deletePresentReferralDetails,
-} from '../controllers/doctorcontroller.js'; // Updated import path
+  updateFamilyHistory
+} from '../controllers/yourController.js';
+//import { errorHandler } from '../middlewares/errorHandler.js';
 
-const router = express.Router();
+const router = Router();
 
-// In doctorroute.js
-router.get('/test', (req, res) => {
-  res.send('Test endpoint working');
-});
+// Unprotected routes
+router.post('/get-personal-info', asyncHandler(getPersonalInfo));
+router.post('/get-health-record', asyncHandler(getHealthRecord));
+router.post('/get-treatment-record', asyncHandler(getTreatmentRecord));
+router.post('/get-family-history', asyncHandler(getFamilyHistory));
 
-router.post('/personal-info', (req, res, next) => {
-  console.log('Inside POST /personal-info route');
-  getPersonalInfo(req, res, next);
-}); //checked
+// Protected routes
+router.post('/create-doctor-profile', verifyjwt, authorizeAdmin, asyncHandler(createDoctorProfile));
+router.post('/update-personal-info', verifyjwt, authorizeDoctor, asyncHandler(updatePersonalInfo));
+router.post('/update-health-record', verifyjwt, authorizeDoctor, asyncHandler(updateHealthRecord));
+router.post('/update-treatment-record', verifyjwt, authorizeDoctor, asyncHandler(updateTreatmentRecord));
+router.post('/update-family-history', verifyjwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
 
-router.put('/personal-info', updatePersonalInfo); //checked
-router.get('/health-record', getHealthRecord); //checked
-router.post('/health-record', updateHealthRecord); //checked
-router.get('/treatment-record', getTreatmentRecord); //checked
-router.post('/treatment-record', updateTreatmentRecord); //checked
-router.get('/family-history', getFamilyHistory);
-router.post('/family-history', updateFamilyHistory);
-//router.delete('/present-referral-details', deletePresentReferralDetails);
+// Error handling middleware
+//router.use(errorHandler);
 
 export default router;

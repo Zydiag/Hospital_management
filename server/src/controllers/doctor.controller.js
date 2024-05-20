@@ -21,7 +21,7 @@ const generateRefreshToken = (user) => {
   );
 };
 
-//create Doctor profile
+// Create Doctor profile
 const createDoctorProfile = asyncHandler(async (req, res) => {
   const {
     armyNo,
@@ -36,21 +36,23 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
     password,
   } = req.body;
 
-  // check if all fields are filled
-  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password)
-    throw new apiError(400, 'All fields are required to create a new user');
-  // check if user already exists
+  // Check if all fields are filled
+  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password) {
+    throw new APIError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
+  }
+
+  // Check if user already exists
   let existedDoctor = await prisma.user.findFirst({
-    where: {
-      armyNo: armyNo,
-    },
+    where: { armyNo },
   });
   if (existedDoctor) {
-    throw new apiError(400, 'Doctor already exists');
+    throw new APIError(HttpStatusCode.BAD_REQUEST, 'Doctor already exists');
   }
-  // hash password
+
+  // Hash password
   const hashedPassword = await hashPassword(password);
-  // create user and store in database
+
+  // Create user and store in database
   const user = await prisma.user.create({
     data: {
       armyNo,
@@ -72,9 +74,11 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
       id: user.id,
     },
   });
+
   if (!user) {
-    throw new apiError(505, 'Something went wrong while registering user');
+    throw new APIError(HttpStatusCode.INTERNAL_SERVER_ERROR, 'Something went wrong while registering user');
   }
+
   const newDoctorRequest = await prisma.Request.create({
     data: {
       armyNo,
@@ -84,7 +88,8 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
       rank,
     },
   });
-  // return response
+
+  // Return response
   return res
     .status(200)
     .json(
@@ -93,30 +98,22 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
 });
 
 // Get Personal Info of patient by Army Number
-export const getPersonalInfo = async (req, res) => {
-  console.log('Inside getPersonalInfo function');
-  const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
-  const armyNo = req.body.armyNo;
-  console.log(armyNo);
+export const getPersonalInfo = asyncHandler(async (req, res) => {
+    const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob } = req.body;
+    const { armyNo } = req.body;
 
   if (!armyNo) {
-    console.log(req.body);
-    return res.status(400).json({
-      error: 'Army number is required',
-    });
+    throw new APIError(HttpStatusCode.BAD_REQUEST, 'Army number is required');
   }
 
   let user = await prisma.user.findFirst({
-    where: {
-      armyNo: armyNo,
-    },
+    where: { armyNo },
   });
 
   if (!user) {
     // Validation for all required fields
     if (!unit || !rank || !firstName || !lastName || !dob) {
-      console.log('abs');
-      return res.status(400).json({ error: 'All fields are required to create a new user' });
+      throw new APIError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
     }
 
     // Generate a refresh token for the new user
@@ -138,15 +135,10 @@ export const getPersonalInfo = async (req, res) => {
       },
     });
 
-    const userId = user.id; // Assuming you need the user ID for creating a patient entry
-    // Create a patient entry for the user
-    patient = await prisma.patient.create({
-      data: {
-        userId: userId,
-      },
+    await prisma.patient.create({
+      data: { userId: user.id },
     });
   } else if (!user.refreshToken) {
-    // If user exists but does not have a refresh token, generate a new refresh token and update the user
     const refreshToken = generateRefreshToken(user);
     user = await prisma.user.update({
       where: { id: user.id },
@@ -154,7 +146,6 @@ export const getPersonalInfo = async (req, res) => {
     });
   }
 
-  // Set the refresh token as an HTTP-only cookie
   res.cookie('refreshToken', user.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Ensure the cookie is only sent over HTTPS in production
@@ -162,90 +153,85 @@ export const getPersonalInfo = async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
-  res.json(user);
-};
+  res.json(new ApiResponse(HttpStatusCode.OK, user, 'User retrieved successfully'));
+});
 
 // Update Personal Info
-export const updatePersonalInfo = async (req, res, next) => {
-  try {
-    const { middleName, lastName, email, mobileNo } = req.body;
+export const updatePersonalInfo = asyncHandler(async (req, res) => {
+  const { armyNo, middleName, lastName, email, mobileNo } = req.body;
 
-    // Find the user by army number
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        armyNo: armyNo,
-      },
-    });
+  const existingUser = await prisma.user.findFirst({
+    where: { armyNo },
+  });
 
-    if (!existingUser) {
-      throw new APIError('Not Found', HttpStatusCode.NOT_FOUND, 'User Not Found');
-    }
-
-    // Update the user data
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: existingUser.id, // Use id as the unique identifier
-      },
-      data: {
-        unit,
-        rank,
-        dateOfCommission,
-        firstName,
-        middleName,
-        lastName,
-        email,
-        mobileNo,
-        dob,
-        refreshToken, // Assuming refreshToken is part of the User model
-      },
-    });
-
-    res.redirect('/personal-info');
-  } catch (error) {
-    next(error);
+  if (!existingUser) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'User Not Found');
   }
-};
+
+  const updatedUser = await prisma.user.update({
+    where: { id: existingUser.id },
+    data: { middleName, lastName, email, mobileNo },
+  });
+
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedUser, 'Personal info updated successfully'));
+});
 
 // Read Health Record
-export const getHealthRecord = async (req, res, next) => {
-  try {
-    const { armyNo } = req.body;
+export const getHealthRecord = asyncHandler(async (req, res) => {
+  const { armyNo } = req.body;
 
-    // Find the user based on the army number
-    const user = await prisma.User.findFirst({
-      where: { armyNo: armyNo },
-    });
+  const user = await prisma.user.findFirst({
+    where: { armyNo },
+  });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Find the patient based on the userId
-    const patient = await prisma.patient.findFirst({
-      where: { userId: user.id },
-    });
-
-    const medicalRecord = await prisma.medical.findMany({
-      where: { patientId: patient.id },
-    });
-
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
-    }
-
-    // Extract medical records from the patient
-    //const medicalRecords = patient.Medical;
-
-    res.json({ medicalRecord });
-  } catch (error) {
-    next(error);
+  if (!user) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'User not found');
   }
-};
+
+  const patient = await prisma.patient.findFirst({
+    where: { userId: user.id },
+  });
+
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
+
+  const medicalRecord = await prisma.medical.findMany({
+    where: { patientId: patient.id },
+  });
+
+  res.json(new ApiResponse(HttpStatusCode.OK, medicalRecord, 'Health records retrieved successfully'));
+});
 
 // Update Health Record
-export const updateHealthRecord = async (req, res, next) => {
-  try {
-    const {
+export const updateHealthRecord = asyncHandler(async (req, res) => {
+  const {
+    armyNo,
+    heightCm,
+    weightKg,
+    chest,
+    BMI,
+    waist,
+    bloodPressure,
+    disabilities,
+    bloodGroup,
+    onDrug,
+    date,
+  } = req.body;
+
+  const patient = await prisma.patient.findFirst({
+    where: {
+      user: { armyNo },
+    },
+    select: { id: true },
+  });
+
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found with the provided army number');
+  }
+
+  const newMedicalRecord = await prisma.medical.create({
+    data: {
       heightCm,
       weightKg,
       chest,
@@ -256,247 +242,142 @@ export const updateHealthRecord = async (req, res, next) => {
       bloodGroup,
       onDrug,
       date,
-    } = req.body;
-    const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
+      patientId: patient.id,
+    },
+  });
 
-    // Find the patient by army number
-    const patient = await prisma.patient.findFirst({
-      where: {
-        user: {
-          armyNo: armyNo,
-        },
-      },
-      select: {
-        id: true, // Select only the id field
-      },
-    });
-
-    // If patient is not found, handle the error
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found with the provided army number' });
-    }
-
-    const patientId = patient.id;
-
-    // Create a new medical record
-    const newMedicalRecord = await prisma.Medical.create({
-      data: {
-        heightCm,
-        weightKg,
-        chest,
-        BMI,
-        waist,
-        bloodPressure,
-        disabilities,
-        bloodGroup,
-        onDrug,
-        date,
-        patientId,
-      },
-    });
-
-    // Send a JSON response in Postman
-    res.json({ message: 'Medical record created successfully', medicalRecord: newMedicalRecord });
-  } catch (error) {
-    next(error);
-  }
-};
+  res.json(new ApiResponse(HttpStatusCode.OK, newMedicalRecord, 'Medical record created successfully'));
+});
 
 // Read Personal Medical History
-export const getTreatmentRecord = async (req, res, next) => {
-  try {
-    const patient = await prisma.patient.findFirst({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true, // Select only the id field
-      },
-    });
+export const getTreatmentRecord = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
 
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
-    }
+  const patient = await prisma.patient.findFirst({
+    where: { userId },
+    select: { id: true },
+  });
 
-    const patientId = patient.id;
-
-    // Fetch treatment records associated with the patient
-
-    const treatmentRecords = await prisma.Treatment.findMany({
-      where: {
-        patientId,
-      },
-      include: {
-        Medication: true,
-      },
-    });
-
-    if (treatmentRecords) {
-      const description = JSON.parse(treatmentRecords.description);
-    }
-
-    res.json({
-      presentingComplaints: description.presentingComplaints,
-      diagnosis: description.diagnosis,
-      treatmentGiven: description.treatmentGiven,
-      miscellaneous: description.miscellaneous,
-<<<<<<< HEAD:server/src/controllers/doctorcontroller.js
-      
-=======
-      medicationRecords,
->>>>>>> 025b4260b9800af320a948b1effc7573c096d015:server/src/controllers/doctor.controller.js
-    });
-  } catch (error) {
-    next(error);
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found');
   }
-};
+
+  const treatmentRecords = await prisma.treatment.findMany({
+    where: { patientId: patient.id },
+    include: { medication: true },
+  });
+
+  const descriptions = treatmentRecords.map(record => JSON.parse(record.description));
+
+  res.json(new ApiResponse(HttpStatusCode.OK, { treatmentRecords, descriptions }, 'Treatment records retrieved successfully'));
+});
 
 // Update Treatment Records
-export const updateTreatmentRecord = async (req, res, next) => {
-  try {
-    const {
-      armyNo,
-      presentingComplaints,
-      diagnosis,
-      treatmentGiven,
-      miscellaneous,
-      medication,
-      medicationDes,
-    } = req.body;
+export const updateTreatmentRecord = asyncHandler(async (req, res) => {
+  const {
+    armyNo,
+    presentingComplaints,
+    diagnosis,
+    treatmentGiven,
+    miscellaneous,
+  } = req.body;
 
-    // Find the patient by army number
-    const patient = await prisma.patient.findFirst({
-      where: {
-        user: {
-          armyNo: armyNo,
-        },
-      },
-      select: {
-        id: true, // Select only the id field
-      },
-    });
+  const patient = await prisma.patient.findFirst({
+    where: { user: { armyNo } },
+    select: { id: true },
+  });
 
-    const patientId = patient.id;
-
-    const description = JSON.stringify({
-      presentingComplaints: presentingComplaints,
-      diagnosis: diagnosis,
-      treatmentGiven: treatmentGiven,
-      miscellaneous: miscellaneous,
-    });
-
-    const newTreatment = await prisma.Treatment.create({
-      data: {
-        description: description,
-        //doctorId: doctorId,
-        patientId,
-      },
-    });
-
-    // Accessing related data directly from newMedicalRecord
-    res.json({
-      newTreatment,
-    });
-  } catch (error) {
-    next(error);
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found');
   }
-};
+
+  const description = JSON.stringify({
+    presentingComplaints,
+    diagnosis,
+    treatmentGiven,
+    miscellaneous,
+  });
+
+  const newTreatment = await prisma.treatment.create({
+    data: {
+      description,
+      patientId: patient.id,
+    },
+  });
+
+  res.json(new ApiResponse(HttpStatusCode.OK, newTreatment, 'Treatment record created successfully'));
+});
 
 // Read Family History
-export const getFamilyHistory = async (req, res, next) => {
-  try {
-    // Ensure the ID is provided
-    const userId = req.body.id;
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID must be provided.' });
-    }
+export const getFamilyHistory = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
 
-    const patient = await prisma.patient.findFirst({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true, // Select only the id field
-      },
-    });
-
-    // Check if patient information exists
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found.' });
-    }
-
-    const patientId = patient.id;
-    const medical = await prisma.Medical.findMany({
-      where: {
-        patientId,
-      },
-      include: {
-        familyhistories: true,
-      },
-    });
-
-    // Flatten family histories from medical records
-    const familyhistories = Medical.flatMap((record) => record.familyhistories);
-
-    // Check if family histories are found
-    if (familyhistories.length === 0) {
-      return res.status(404).json({ message: 'No family history records found.' });
-    }
-
-    res.json({ familyhistories });
-  } catch (error) {
-    console.error('Failed to retrieve family history:', error);
-    res.status(500).json({ error: 'Internal server error.' });
-    next(error);
+  if (!userId) {
+    throw new APIError(HttpStatusCode.BAD_REQUEST, 'User ID must be provided.');
   }
-};
+
+  const patient = await prisma.patient.findFirst({
+    where: { userId },
+    select: { id: true },
+  });
+
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found.');
+  }
+
+  const medicalRecords = await prisma.medical.findMany({
+    where: { patientId: patient.id },
+    include: { familyhistories: true },
+  });
+
+  const familyHistories = medicalRecords.flatMap(record => record.familyhistories);
+
+  if (familyHistories.length === 0) {
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No family history records found.'));
+  }
+
+  res.json(new ApiResponse(HttpStatusCode.OK, familyHistories, 'Family history records retrieved successfully'));
+});
 
 // Update Family History
-export const updateFamilyHistory = async (req, res, next) => {
-  try {
-    console.log('updatefamilyhistoryroute');
-    const { hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
-    const patient = await prisma.patient.findFirst({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true, // Select only the id field
-      },
-    });
+export const updateFamilyHistory = asyncHandler(async (req, res) => {
+  const { userId, hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
 
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
-    }
-    const patientId = patient.id;
+  if (!userId) {
+    throw new APIError(HttpStatusCode.BAD_REQUEST, 'User ID must be provided.');
+  }
 
-    const newMedicalRecord = await prisma.Medical.create({
-      data: {
-        patientId: patientId,
-        familyhistories: {
-          create: {
-            hypertension,
-            diabetesMellitus,
-            anyUnnaturalDeath,
-            otherSignificantHistory,
-          },
+  const patient = await prisma.patient.findFirst({
+    where: { userId },
+    select: { id: true },
+  });
+
+  if (!patient) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
+
+  const newFamilyHistory = await prisma.medical.create({
+    data: {
+      patientId: patient.id,
+      familyhistories: {
+        create: {
+          hypertension,
+          diabetesMellitus,
+          anyUnnaturalDeath,
+          otherSignificantHistory,
         },
       },
-      include: {
-        familyhistories: true,
-      },
-    });
+    },
+    include: { familyhistories: true },
+  });
 
-    res.status(200).json({ message: 'Family history updated', data: newMedicalRecord });
-  } catch (error) {
-    next(error);
-  }
-};
+  res.json(new ApiResponse(HttpStatusCode.OK, newFamilyHistory, 'Family history updated successfully'));
+});
 
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-  });
+  const status = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
+  const message = err.message || 'Internal Server Error';
+  res.status(status).json(new ApiResponse(status, null, message));
 };

@@ -147,7 +147,7 @@ model FamilyHistory {
   diabetesMellitus        String
   anyUnnaturalDeath       String
   otherSignificantHistory String
-  Medical                 Patient  @relation(fields: [patientId], references: [id])
+  medical                 Patient  @relation(fields: [patientId], references: [id])
   patientId               String   @unique
   createdAt               DateTime @default(now())
 }

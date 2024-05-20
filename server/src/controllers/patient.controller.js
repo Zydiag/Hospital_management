@@ -90,6 +90,71 @@ export const loginpatient = async (req, res) => {
     }
   });
 };
+//perosnal-info-section1-patient
+export const getpersonalinfo=async(req,res)=>{
+  console.log("we are inside getpersonalinfo route");
+  const {armyNo,date}=req.body;
+  if(!date){
+    res.send("date is missing");
+  }
+  
+  const user=await prisma.user.findFirst({
+    where:{
+      armyNo:armyNo,
+      date:date,
+    },
+    select:{
+      armyNo:true,
+      firstName:true,
+      lastName:true,
+      middleName:true,
+      unit:true
+    }
+  })
+  if(!user){
+    res.send("date is not present in record");
+  }
+
+  res.json(
+    user,
+  )
+
+};
+
+//read-health-record
+export const getHealthRecord=async(req,res)=>{
+  console.log("You are inside getHealthRecord Route");
+  const {armyNo, date}=req.body;
+  const user =await prisma.user.findUnique({
+    where:{
+      armyNo:armyNo,
+    }
+  })
+  const healthId=user.id;
+  const patient=await prisma.patient.findUnique({
+    where:{
+      userId:healthId
+    }
+  })
+  const health=await prisma.medical.findFirst({
+    where:{
+      patientId:patient.id,
+      date:date,
+    },
+    select:{
+     heightCm:true,
+     weightKg:true,
+     BMI:true,
+     chest:true,
+     waist:true,
+     bloodPressure:true
+    }
+  })
+  if(!health){
+    res.send("date does not exist in record");
+  }
+  res.json(health);
+}
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {
   console.error(err.stack);

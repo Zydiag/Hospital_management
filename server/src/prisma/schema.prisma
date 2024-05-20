@@ -21,8 +21,8 @@ model User {
   mobileNo         String?   @unique
   dob              DateTime
   role             Role      @default(PATIENT)
-  Patient          Patient?
-  Doctor           Doctor?
+  patient          Patient?
+  doctor           Doctor?
   refreshToken     String
   createdAt        DateTime
   updatedAt        DateTime  @updatedAt
@@ -95,7 +95,7 @@ model Doctor {
   status         Status      @default(PENDING)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
-  Treatment      Treatment[]
+  treatment      Treatment[]
   user           User        @relation(fields: [userId], references: [id])
   request        Request?
 }
@@ -126,7 +126,7 @@ model Treatment {
   updatedAt      DateTime @updatedAt
   doctor         Doctor   @relation(fields: [doctorId], references: [id])
   doctorId       String
-  Patient        Patient? @relation(fields: [patientId], references: [id])
+  patient        Patient? @relation(fields: [patientId], references: [id])
   patientId      String?
 }
 
@@ -137,7 +137,7 @@ model Test {
   testFor     String
   imageUrl    String
   result      String
-  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatment   Treatment? @relation(fields: [treatmentId], references: [id])
   treatmentId String?
 }
 

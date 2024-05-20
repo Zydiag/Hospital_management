@@ -1,12 +1,12 @@
-//import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
+import { PrismaClient } from '@prisma/client';
+import { Router } from 'express';
+import { APIError, HttpStatusCode } from '../utils/apiError.js';
+import jwt from 'jsonwebtoken';
 import pkg from 'pg';
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
-import { Router } from 'express';
 
 const { Client } = pkg;
 const prisma = new PrismaClient();
@@ -21,12 +21,24 @@ const generateRefreshToken = (user) => {
   );
 };
 
-
 //create Doctor profile
-const CreateDoctorProfile = asyncHandler(async (req, res) => {
-  const { armyNo, unit, rank, firstName, middleName, lastName, email, mobileNo, dob,password} = req.body;
+const createDoctorProfile = asyncHandler(async (req, res) => {
+  const {
+    armyNo,
+    unit,
+    rank,
+    firstName,
+    middleName = '',
+    lastName = '',
+    email,
+    mobileNo,
+    dob,
+    password,
+  } = req.body;
+
   // check if all fields are filled
-  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password) throw new apiError(400, 'All fields are required to create a new user');
+  if (!armyNo || !unit || !rank || !firstName || !lastName || !dob || !password)
+    throw new apiError(400, 'All fields are required to create a new user');
   // check if user already exists
   let existedDoctor = await prisma.user.findFirst({
     where: {
@@ -39,7 +51,7 @@ const CreateDoctorProfile = asyncHandler(async (req, res) => {
   // hash password
   const hashedPassword = await hashPassword(password);
   // create user and store in database
-  user = await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       armyNo,
       unit,
@@ -55,13 +67,12 @@ const CreateDoctorProfile = asyncHandler(async (req, res) => {
     },
   });
 
-
   const createdDoctor = await prisma.user.findUnique({
     where: {
       id: user.id,
-    }
-  })
- if (!user) {
+    },
+  });
+  if (!user) {
     throw new apiError(505, 'Something went wrong while registering user');
   }
   const newDoctorRequest = await prisma.Request.create({
@@ -70,11 +81,15 @@ const CreateDoctorProfile = asyncHandler(async (req, res) => {
       firstName,
       lastName,
       unit,
-      rank
+      rank,
     },
   });
   // return response
-  return res.status(200).json(new apiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet'));
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet')
+    );
 });
 
 // Get Personal Info of patient by Army Number
@@ -87,7 +102,7 @@ export const getPersonalInfo = async (req, res) => {
   if (!armyNo) {
     console.log(req.body);
     return res.status(400).json({
-      error: 'Army number is required'
+      error: 'Army number is required',
     });
   }
 
@@ -100,7 +115,7 @@ export const getPersonalInfo = async (req, res) => {
   if (!user) {
     // Validation for all required fields
     if (!unit || !rank || !firstName || !lastName || !dob) {
-      console.log("abs");
+      console.log('abs');
       return res.status(400).json({ error: 'All fields are required to create a new user' });
     }
 
@@ -119,10 +134,10 @@ export const getPersonalInfo = async (req, res) => {
         mobileNo,
         dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
         role: 'PATIENT', // Default role for this example
-        refreshToken
+        refreshToken,
       },
     });
-    
+
     const userId = user.id; // Assuming you need the user ID for creating a patient entry
     // Create a patient entry for the user
     patient = await prisma.patient.create({
@@ -130,7 +145,6 @@ export const getPersonalInfo = async (req, res) => {
         userId: userId,
       },
     });
-
   } else if (!user.refreshToken) {
     // If user exists but does not have a refresh token, generate a new refresh token and update the user
     const refreshToken = generateRefreshToken(user);
@@ -154,7 +168,7 @@ export const getPersonalInfo = async (req, res) => {
 // Update Personal Info
 export const updatePersonalInfo = async (req, res, next) => {
   try {
-    const { armyNo, unit, rank, dateOfCommission, firstName, middleName, lastName, email, mobileNo, dob, refreshToken } = req.body;
+    const { middleName, lastName, email, mobileNo } = req.body;
 
     // Find the user by army number
     const existingUser = await prisma.user.findFirst({
@@ -164,7 +178,7 @@ export const updatePersonalInfo = async (req, res, next) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({ error: 'User not found with the provided army number' });
+      throw new APIError('Not Found', HttpStatusCode.NOT_FOUND, 'User Not Found');
     }
 
     // Update the user data
@@ -182,7 +196,7 @@ export const updatePersonalInfo = async (req, res, next) => {
         email,
         mobileNo,
         dob,
-        refreshToken // Assuming refreshToken is part of the User model
+        refreshToken, // Assuming refreshToken is part of the User model
       },
     });
 
@@ -191,7 +205,6 @@ export const updatePersonalInfo = async (req, res, next) => {
     next(error);
   }
 };
-
 
 // Read Health Record
 export const getHealthRecord = async (req, res, next) => {
@@ -204,22 +217,20 @@ export const getHealthRecord = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // Find the patient based on the userId
     const patient = await prisma.patient.findFirst({
       where: { userId: user.id },
-      
     });
 
-
     const medicalRecord = await prisma.medical.findMany({
-      where: { patientId: patient.id},
-    })
+      where: { patientId: patient.id },
+    });
 
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found" });
+      return res.status(404).json({ error: 'Patient not found' });
     }
 
     // Extract medical records from the patient
@@ -231,12 +242,21 @@ export const getHealthRecord = async (req, res, next) => {
   }
 };
 
-
-
 // Update Health Record
 export const updateHealthRecord = async (req, res, next) => {
   try {
-    const { heightCm, weightKg, chest, BMI, waist, bloodPressure, disabilities, bloodGroup, onDrug, date } = req.body;
+    const {
+      heightCm,
+      weightKg,
+      chest,
+      BMI,
+      waist,
+      bloodPressure,
+      disabilities,
+      bloodGroup,
+      onDrug,
+      date,
+    } = req.body;
     const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
 
     // Find the patient by army number
@@ -282,7 +302,6 @@ export const updateHealthRecord = async (req, res, next) => {
   }
 };
 
-
 // Read Personal Medical History
 export const getTreatmentRecord = async (req, res, next) => {
   try {
@@ -302,40 +321,45 @@ export const getTreatmentRecord = async (req, res, next) => {
     const patientId = patient.id;
 
     // Fetch treatment records associated with the patient
-    
+
     const treatmentRecords = await prisma.Treatment.findMany({
       where: {
         patientId,
       },
       include: {
-        Medication: true
+        Medication: true,
       },
     });
 
-    if(treatmentRecords){
+    if (treatmentRecords) {
       const description = JSON.parse(treatmentRecords.description);
-
     }
-    
 
     res.json({
       presentingComplaints: description.presentingComplaints,
       diagnosis: description.diagnosis,
       treatmentGiven: description.treatmentGiven,
       miscellaneous: description.miscellaneous,
-      
+      medicationRecords,
     });
   } catch (error) {
     next(error);
   }
 };
 
-
 // Update Treatment Records
 export const updateTreatmentRecord = async (req, res, next) => {
   try {
-    const { armyNo, presentingComplaints, diagnosis, treatmentGiven, miscellaneous, medication, medicationDes, } = req.body;
-    
+    const {
+      armyNo,
+      presentingComplaints,
+      diagnosis,
+      treatmentGiven,
+      miscellaneous,
+      medication,
+      medicationDes,
+    } = req.body;
+
     // Find the patient by army number
     const patient = await prisma.patient.findFirst({
       where: {
@@ -354,29 +378,25 @@ export const updateTreatmentRecord = async (req, res, next) => {
       presentingComplaints: presentingComplaints,
       diagnosis: diagnosis,
       treatmentGiven: treatmentGiven,
-      miscellaneous: miscellaneous
+      miscellaneous: miscellaneous,
     });
 
     const newTreatment = await prisma.Treatment.create({
       data: {
-            description:description,
-            //doctorId: doctorId,
-            patientId,
-
+        description: description,
+        //doctorId: doctorId,
+        patientId,
       },
-     
     });
 
-    
     // Accessing related data directly from newMedicalRecord
     res.json({
-      newTreatment
+      newTreatment,
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 // Read Family History
 export const getFamilyHistory = async (req, res, next) => {
@@ -384,7 +404,7 @@ export const getFamilyHistory = async (req, res, next) => {
     // Ensure the ID is provided
     const userId = req.body.id;
     if (!userId) {
-      return res.status(400).json({ error: "User ID must be provided." });
+      return res.status(400).json({ error: 'User ID must be provided.' });
     }
 
     const patient = await prisma.patient.findFirst({
@@ -398,7 +418,7 @@ export const getFamilyHistory = async (req, res, next) => {
 
     // Check if patient information exists
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found." });
+      return res.status(404).json({ error: 'Patient not found.' });
     }
 
     const patientId = patient.id;
@@ -407,31 +427,30 @@ export const getFamilyHistory = async (req, res, next) => {
         patientId,
       },
       include: {
-        familyhistories: true
+        familyhistories: true,
       },
     });
 
     // Flatten family histories from medical records
-    const familyhistories = Medical.flatMap(record => record.familyhistories);
+    const familyhistories = Medical.flatMap((record) => record.familyhistories);
 
     // Check if family histories are found
     if (familyhistories.length === 0) {
-      return res.status(404).json({ message: "No family history records found." });
+      return res.status(404).json({ message: 'No family history records found.' });
     }
 
     res.json({ familyhistories });
   } catch (error) {
-    console.error("Failed to retrieve family history:", error);
-    res.status(500).json({ error: "Internal server error." });
+    console.error('Failed to retrieve family history:', error);
+    res.status(500).json({ error: 'Internal server error.' });
     next(error);
   }
 };
 
-
 // Update Family History
 export const updateFamilyHistory = async (req, res, next) => {
   try {
-    console.log("updatefamilyhistoryroute");
+    console.log('updatefamilyhistoryroute');
     const { hypertension, diabetesMellitus, anyUnnaturalDeath, otherSignificantHistory } = req.body;
     const patient = await prisma.patient.findFirst({
       where: {
@@ -443,7 +462,7 @@ export const updateFamilyHistory = async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found" });
+      return res.status(404).json({ error: 'Patient not found' });
     }
     const patientId = patient.id;
 
@@ -455,30 +474,25 @@ export const updateFamilyHistory = async (req, res, next) => {
             hypertension,
             diabetesMellitus,
             anyUnnaturalDeath,
-            otherSignificantHistory
-          }
+            otherSignificantHistory,
+          },
         },
       },
       include: {
-        familyhistories: true
-      }
+        familyhistories: true,
+      },
     });
-    
-    res.status(200).json({ message: "Family history updated", data: newMedicalRecord });
+
+    res.status(200).json({ message: 'Family history updated', data: newMedicalRecord });
   } catch (error) {
     next(error);
   }
 };
 
-
-  
-  // Error handling middleware
-  export const errorHandler = (err, req, res, next) => {
-    console.error(err.stack);
-    res.status(err.status || 500).json({
-      message: err.message || 'Internal Server Error',
-    });
-  };
-  
-  
-  
+// Error handling middleware
+export const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+  });
+};

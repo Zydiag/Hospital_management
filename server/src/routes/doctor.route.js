@@ -21,13 +21,13 @@ router.get('/test', (req, res) => {
 router.post('/personal-info', (req, res, next) => {
   console.log('Inside POST /personal-info route');
   getPersonalInfo(req, res, next);
-});//checked
+}); //checked
 
-router.put('/personal-info', updatePersonalInfo);//checked
-router.get('/health-record', getHealthRecord);//checked
-router.post('/health-record', updateHealthRecord);//checked
-router.get('/treatment-record', getTreatmentRecord);//checked
-router.post('/treatment-record', updateTreatmentRecord);//checked
+router.put('/personal-info', updatePersonalInfo); //checked
+router.get('/health-record', getHealthRecord); //checked
+router.post('/health-record', updateHealthRecord); //checked
+router.get('/treatment-record', getTreatmentRecord); //checked
+router.post('/treatment-record', updateTreatmentRecord); //checked
 router.get('/family-history', getFamilyHistory);
 router.post('/family-history', updateFamilyHistory);
 //router.delete('/present-referral-details', deletePresentReferralDetails);

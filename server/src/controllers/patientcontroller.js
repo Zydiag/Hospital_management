@@ -6,11 +6,10 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { Router } from 'express';
-
+import bcrypt from 'bcrypt';
 const { Client } = pkg;
 const prisma = new PrismaClient();
 const router = Router();
-
 // Function to generate a refresh token
 const generateRefreshToken = (user) => {
   return jwt.sign(
@@ -22,28 +21,55 @@ const generateRefreshToken = (user) => {
 //patient sets up profile
 export const profilepatient = async(req,res)=>{
     console.log("you are inside patient profile creation");
-    const{armyNo,password}=req.body;
-    const user =await prisma.user.findUnique({where:{armyNo}});
-    if(!user||user.isSetupComplete){
+    console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
+    const{armyNo,password,confirmpassword}=req.body;
+    if(!armyNo||!password||!confirmpassword){
+      res.send("ArmyNo,password required");
+    }
+    if(password!=confirmpassword){
+      res.send("Password doesn't match");
+    }
+    const user =await prisma.user.findFirst({where:{armyNo}});
+    console.log(user);
+    if(!user){
         return res.status(400).send('Invalid army number or profile already set up');
     }
     try {
-        jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    
-        const hashedPassword = await bcrypt.hash(password, 10);
-        await prisma.user.update({
-          where: { armyNumber },
+      console.log('User refresh token:', user.refreshToken); 
+      // Debugging statement
+      jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      
+      console.log('Refresh token verified successfully'); // Debugging statement
+      const hashedPassword = await bcrypt.hash(password, 10);
+      console.log(hashedPassword);
+      console.log(armyNo);
+       
+        console.log('Password hashed successfully'); 
+        console.log('Updating user...');// Debugging statement
+        const use =await prisma.user.findUnique({
+          where:{armyNo}
+        })
+        console.log(use);
+        
+        const used=await prisma.user.update({
+       
+          where: { armyNo:armyNo },
+         
           data: {
+            refreshToken:null,
            password: hashedPassword,
-            refreshToken: null,
-            isSetupComplete: true
           }
-        });
-    
+       });
+        console.log('User updated successfully'); 
         res.send('Profile set up successfully');
       } catch (error) {
-        res.status(400).send('Invalid refresh token');
-      }
+        if (error.name === 'TokenExpiredError') {
+          res.status(401).send('Refresh token expired');
+        } else if (error.name === 'JsonWebTokenError') {
+          res.status(500).send('Invalid refresh token');
+        } else {
+          res.status(500).send('Internal server error ');
+      }}
 
 }
 //login patient
@@ -52,14 +78,18 @@ export const loginpatient = async(req,res)=>{
     const {armyNo, password}=req.body;
     const user=await prisma.user.findUnique({
         where:{
-            armyNo:armyNo,
-            password:password
+           armyNo:armyNo     
         }
     })
-    if(!user){
-        res.status(200).send("User not found");
-    }
-    res.json(user);
+    bcrypt.compare(password, user.password, function(err, result) {
+      if (err) {
+        res.send("Password is incorrect");
+      } else if(result) {
+        res.json(user);
+      } 
+      else{
+        res.send("password is incorrect");}
+    });
 }
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {

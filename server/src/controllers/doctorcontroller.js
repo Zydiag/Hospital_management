@@ -323,7 +323,7 @@ export const getTreatmentRecord = async (req, res, next) => {
       diagnosis: description.diagnosis,
       treatmentGiven: description.treatmentGiven,
       miscellaneous: description.miscellaneous,
-      medicationRecords
+      
     });
   } catch (error) {
     next(error);

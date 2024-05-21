@@ -50,8 +50,8 @@ model Patient {
   userId        String?        @unique
   user          User?          @relation(fields: [userId], references: [id])
   medical       Medical[]
-  treatments    Treatment[]
-  familyHistory FamilyHistory?
+  treatments    treatment[]
+  familyHistory familyHistory?
 }
 
 // Medical record model with relationships and enhanced data types
@@ -134,7 +134,7 @@ model Doctor {
   status         Status      @default(PENDING)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
-  treatment      Treatment[]
+  treatment      treatment[]
   user           User        @relation(fields: [userId], references: [id])
   request        Request?
 }
@@ -155,7 +155,7 @@ model Request {
 }
 
 // Treatment model with relationships
-model Treatment {
+model treatment {
   id             String   @id @default(uuid())
   diagnosis      String
   test           Test[]
@@ -176,11 +176,11 @@ model Test {
   testFor     String
   imageUrl    String
   result      String
-  treatment   Treatment? @relation(fields: [treatmentId], references: [id])
+  treatment   treatment? @relation(fields: [treatmentId], references: [id])
   treatmentId String?
 }
 
-model FamilyHistory {
+model familyHistory {
   id                      String   @id @default(uuid())
   hypertension            String
   diabetesMellitus        String

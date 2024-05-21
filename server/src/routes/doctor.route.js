@@ -23,6 +23,7 @@ router.post('/get-personal-info', asyncHandler(getPersonalInfo));
 router.post('/get-health-record', asyncHandler(getHealthRecord));
 router.post('/get-treatment-record', asyncHandler(getTreatmentRecord));
 router.post('/get-family-history', asyncHandler(getFamilyHistory));
+router.post('/get-all-test-reports', asyncHandler(getAllTestReports));
 
 // Protected routes
 router.post('/create-doctor-profile', verifyjwt, authorizeAdmin, asyncHandler(createDoctorProfile));
@@ -30,6 +31,7 @@ router.post('/update-personal-info', verifyjwt, authorizeDoctor, asyncHandler(up
 router.post('/update-health-record', verifyjwt, authorizeDoctor, asyncHandler(updateHealthRecord));
 router.post('/update-treatment-record', verifyjwt, authorizeDoctor, asyncHandler(updateTreatmentRecord));
 router.post('/update-family-history', verifyjwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
+router.post('/add-test-report', verifyjwt, authorizeDoctor, asyncHandler(addTestReport));
 
 // Error handling middleware
 //router.use(errorHandler);

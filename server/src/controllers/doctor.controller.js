@@ -374,6 +374,251 @@ export const updateFamilyHistory = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(HttpStatusCode.OK, newFamilyHistory, 'Family history updated successfully'));
 });
 
+export const getAllTestReports = asyncHandler(async (req, res) => {
+  const { armyNo } = req.body;
+
+  // Find the user by army number
+  const user = await prisma.user.findFirst({
+    where: { armyNo },
+    select: { id: true },
+  });
+
+  // If user not found, throw an error
+  if (!user) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'User not found');
+  }
+
+  // Find all AME, AME2, and PME test reports associated with the user
+  const ameReports = await prisma.aME.findMany({
+    where: { medical: { patientId: user.id } },
+    include: { medical: true },
+  });
+
+  const ame2Reports = await prisma.aME2.findMany({
+    where: { medical: { patientId: user.id } },
+    include: { medical: true },
+  });
+
+  const pmeReports = await prisma.pME.findMany({
+    where: { medical: { patientId: user.id } },
+    include: { medical: true },
+  });
+
+  // Combine all reports into a single array
+  const allReports = [...ameReports, ...ame2Reports, ...pmeReports];
+
+  // If no reports found, return an empty array
+  if (!allReports || allReports.length === 0) {
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
+  }
+
+  // Return all the test reports
+  res.json(new ApiResponse(HttpStatusCode.OK, allReports, 'All test reports retrieved successfully'));
+});
+
+// Function to calculate age based on date of birth
+export const calculateAge = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
+// Function to determine the test type based on age
+export const getTestType = (age) => {
+  if ((age >= 25 && age <= 26) || (age >= 30 && age <= 31) || (age >= 37 && age <= 38) ||
+      (age >= 42 && age <= 43) || (age >= 47 && age <= 48) || (age >= 49 && age <= 50) ||
+      (age >= 51 && age <= 53) || (age >= 54 && age <= 57) || (age >= 58 && age <= 59)) {
+    return 'AME2';
+  } else if ((age >= 35 && age <= 36) || (age >= 40 && age <= 41) || (age >= 45 && age <= 46) ||
+             (age >= 50 && age <= 51) || (age >= 53 && age <= 54) || (age >= 57 && age <= 58)) {
+    return 'PME';
+  } else {
+    return 'AME1';
+  }
+};
+
+//Function to update AME1
+export const updateAME1 = asyncHandler(async (req, res) => {
+  // Extract required parameters from request body
+  const { id, date, bloodHb, TLC, DLC, urineRE, urineSpGravity } = req.body;
+
+  // Find the existing AME1 record by ID
+  const ame1 = await prisma.aME.findUnique({
+    where: { id },
+  });
+
+  // If AME1 record not found, throw an error
+  if (!ame1) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'AME1 record not found');
+  }
+
+  // Update the AME1 record with new data
+  const updatedAME1 = await prisma.aME.update({
+    where: { id },
+    data: {
+      date: new Date(date),
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+    },
+  });
+
+  // Send response with updated AME1 record
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedAME1, 'AME1 test report updated successfully'));
+});
+
+//Function to update AME2
+export const updateAME2 = asyncHandler(async (req, res) => {
+  // Extract required parameters from request body
+  const {
+    id,
+    date,
+    bloodHb,
+    TLC,
+    DLC,
+    urineRE,
+    urineSpGravity,
+    bloodSugarFasting,
+    bloodSugarPP,
+    restingECG,
+  } = req.body;
+
+  // Find the existing AME2 record by ID
+  const ame2 = await prisma.aME2.findUnique({
+    where: { id },
+  });
+
+  // If AME2 record not found, throw an error
+  if (!ame2) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'AME2 record not found');
+  }
+
+  // Update the AME2 record with new data
+  const updatedAME2 = await prisma.aME2.update({
+    where: { id },
+    data: {
+      date: new Date(date),
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+      bloodSugarFasting,
+      bloodSugarPP,
+      restingECG,
+    },
+  });
+
+  // Send response with updated AME2 record
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedAME2, 'AME2 test report updated successfully'));
+});
+
+//Function to update PME
+export const updatePME = asyncHandler(async (req, res) => {
+  // Extract required parameters from request body
+  const {
+    id,
+    date,
+    bloodHb,
+    TLC,
+    DLC,
+    urineRE,
+    urineSpGravity,
+    bloodSugarFasting,
+    bloodSugarPP,
+    restingECG,
+    uricAcid,
+    urea,
+    creatinine,
+    cholesterol,
+    lipidProfile,
+    xrayChestPA,
+  } = req.body;
+
+  // Find the existing PME record by ID
+  const pme = await prisma.pME.findUnique({
+    where: { id },
+  });
+
+  // If PME record not found, throw an error
+  if (!pme) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'PME record not found');
+  }
+
+  // Update the PME record with new data
+  const updatedPME = await prisma.pME.update({
+    where: { id },
+    data: {
+      date: new Date(date),
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+      bloodSugarFasting,
+      bloodSugarPP,
+      restingECG,
+      uricAcid,
+      urea,
+      creatinine,
+      cholesterol,
+      lipidProfile,
+      xrayChestPA,
+    },
+  });
+
+  // Send response with updated PME record
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedPME, 'PME test report updated successfully'));
+});
+
+// Route to add a test report
+export const addTestReport = asyncHandler(async (req, res) => {
+  const { armyNo } = req.body;
+
+  // Fetch user's date of birth using army number
+  const user = await prisma.user.findFirst({
+    where: { armyNo },
+    select: { dob: true },
+  });
+
+  if (!user || !user.dob) {
+    throw new APIError(HttpStatusCode.NOT_FOUND, 'User not found or date of birth not available');
+  }
+
+  // Calculate age based on date of birth
+  const age = calculateAge(user.dob);
+
+  // Determine the test to be performed based on age
+  const testType = getTestType(age);
+
+  // Call the respective update test function based on test type
+  let updatedTest;
+  switch (testType) {
+    case 'AME1':
+      updatedTest = await updateAME1Test(armyNo);
+      break;
+    case 'AME2':
+      updatedTest = await updateAME2Test(armyNo);
+      break;
+    case 'PME':
+      updatedTest = await updatePMETest(armyNo);
+      break;
+    default:
+      throw new APIError(HttpStatusCode.BAD_REQUEST, 'Invalid test type');
+  }
+
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedTest, 'Test report added successfully'));
+});
+
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {
   console.error(err.stack);

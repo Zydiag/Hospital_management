@@ -55,7 +55,7 @@ model Patient {
 
 // Medical record model with relationships and enhanced data types
 model Medical {
-  id            String   @id @default(uuid())
+  id            String         @id @default(uuid())
   heightCm      Int?
   weightKg      Float?
   BMI           Float?
@@ -65,26 +65,64 @@ model Medical {
   disabilities  String?
   allergies     String?
   bloodGroup    String?
-  AME           AME[]
-  PME           PME[]
-  patient       Patient  @relation(fields: [patientId], references: [id])
   patientId     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  AMEs          AME[]
+  AME2s         AME2[]
+  PMEs          PME[]
 }
 
 model AME {
-  id        String   @id @default(uuid())
-  medical   Medical  @relation(fields: [medicalId], references: [id])
-  medicalId String
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+  medicalId     String
+  medical       Medical   @relation(fields: [medicalId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  bloodHb       Float?
+  TLC           Float?
+  DLC           Float?
+  urineRE       String?
+  urineSpGravity Float?
+}
+
+model AME2 {
+  id            String    @id @default(uuid())
+  medicalId     String
+  medical       Medical   @relation(fields: [medicalId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  bloodHb       Float?
+  TLC           Float?
+  DLC           Float?
+  urineRE       String?
+  urineSpGravity Float?
+  bloodSugarFasting Float?
+  bloodSugarPP Float?
+  restingECG    String?
 }
 
 model PME {
-  id        String   @id @default(uuid())
-  medical   Medical  @relation(fields: [medicalId], references: [id])
-  medicalId String
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+  medicalId     String
+  medical       Medical   @relation(fields: [medicalId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  bloodHb       Float?
+  TLC           Float?
+  DLC           Float?
+  urineRE       String?
+  urineSpGravity Float?
+  bloodSugarFasting Float?
+  bloodSugarPP Float?
+  restingECG    String?
+  uricAcid      Float?
+  urea          Float?
+  creatinine    Float?
+  cholesterol   Float?
+  lipidProfile  String?
+  xrayChestPA   String?
 }
 
 //Doctor model with relationships

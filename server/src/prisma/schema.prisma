@@ -26,6 +26,7 @@ model User {
   refreshToken     String
   createdAt        DateTime
   updatedAt        DateTime  @updatedAt
+  password         String?
 }
 
 model Admin {

@@ -1,0 +1,19 @@
+.row {
+  border: solid 4px #9095a1;
+  width: 85vw;
+  margin: 1vh auto;
+  border-radius: 8px;
+  display: flex;
+  flex: row;
+  justify-content: space-between;
+  height: 10vh;
+}
+
+.row p {
+  font-size: 24px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  
+}

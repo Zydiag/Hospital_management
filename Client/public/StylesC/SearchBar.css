@@ -1,0 +1,40 @@
+body {
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.searchBar input {
+  width: 60vw;
+  height: 5vh;
+  border-radius: 4px;
+  font-size: 20px;
+  border: solid 2px #9095a1;
+}
+
+.searchBar .search-icon {
+  position: relative;
+  left: 2%;
+  font-size: 20px;
+}
+
+.searchBar button {
+  height: 5.8vh;
+  width: 10vw;
+  font-size: 22px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #E99A01;
+  color: aliceblue;
+  border: none;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+.searchBar button:hover{
+    background-color: aliceblue;
+    color: #E99A01;
+    border: solid 2px #E99A01;
+}

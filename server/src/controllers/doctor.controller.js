@@ -422,13 +422,17 @@ export const calculateAge = (dob) => {
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
 
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
+  // Calculate the fraction of the current year that has elapsed
+  const fractionOfYear = (monthDiff * 30 + dayDiff) / 365;
+
+  // Calculate age as a float value
+  age += fractionOfYear;
 
   return age;
 };
+
 
 // Function to determine the test type based on age
 export const getTestType = (age) => {

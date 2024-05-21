@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField'
 import { styled } from '@mui/system'
 import '../../public/StylesC/Dropdown.css'
 
-const DropDown = ({ obj, defaultValue, label, helperText }) => {
+const DropDown = ({ obj, defaultValue, label, helperText, onChange ,value}) => {
   const CustomTextField = styled(TextField)`
     width: 500px;
     & .MuiSelect-root {
@@ -28,6 +28,8 @@ const DropDown = ({ obj, defaultValue, label, helperText }) => {
         <CustomTextField
           id='outlined-select-currency-native'
           select
+          value={value}
+          onChange={onChange}
           label={label}
           defaultValue={defaultValue}
           SelectProps={{

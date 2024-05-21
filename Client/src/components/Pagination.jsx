@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faForward } from '@fortawesome/free-solid-svg-icons'
 import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
-function Pagination() {
+function Pagination({total}) {
+
+    const [currentPage, setCurrentpage] = useState();
   return (
     <div>
         <ButtonGroup variant='contained' aria-label='Basic button group'>

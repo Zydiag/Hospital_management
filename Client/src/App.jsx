@@ -4,13 +4,16 @@ import { useState } from 'react'
 import DoctorProfilePage from './pages/Admin/DoctorProfilePage'
 import AdminSearchPage from './pages/Admin/AdminSearchPage'
 
+
 function App () {
   return(
    <>
     {/* <SignUp /> */}
     {/* <Login /> */}
     {/* <DoctorProfilePage /> */}
-    <AdminSearchPage />
+    {/* <AdminSearchPage /> */}
+    <DoctorProfilePage />
+    
    </>
   )
 }

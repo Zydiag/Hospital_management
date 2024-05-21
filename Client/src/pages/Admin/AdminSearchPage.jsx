@@ -52,6 +52,10 @@ function AdminSearchPage () {
     setArrayNumber(statusIndex)
   }
 
+  const handlePageChange = (newpage) => {
+
+  }
+
   return (
     <>
       <Navbar />
@@ -90,7 +94,7 @@ function AdminSearchPage () {
         />
       </div>
       <div className='pagination'>
-        <Pagination />
+      <Pagination total={20} onPageChange={handlePageChange} />
       </div>
     </>
   )

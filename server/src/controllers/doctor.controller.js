@@ -608,13 +608,13 @@ export const addTestReport = asyncHandler(async (req, res) => {
   let updatedTest;
   switch (testType) {
     case 'AME1':
-      updatedTest = await updateAME1Test(armyNo);
+      updatedTest = await updateAME1Test(req,res);
       break;
     case 'AME2':
-      updatedTest = await updateAME2Test(armyNo);
+      updatedTest = await updateAME2Test(req,res);
       break;
     case 'PME':
-      updatedTest = await updatePMETest(armyNo);
+      updatedTest = await updatePMETest(req,res);
       break;
     default:
       throw new APIError(HttpStatusCode.BAD_REQUEST, 'Invalid test type');

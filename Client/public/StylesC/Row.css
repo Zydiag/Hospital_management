@@ -1,0 +1,72 @@
+.row {
+  border: solid 4px #9095a1;
+  width: 85vw;
+  margin: 1vh auto;
+  border-radius: 8px;
+  display: flex;
+  flex: row;
+  justify-content: space-between;
+  height: 10vh;
+  align-items: center;
+}
+
+.row p {
+  font-size: 22px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
+}
+
+.row .doctor{
+  margin-left: 3vw;
+}
+
+.row .rowButton{
+  text-align: center;
+  align-self: center;
+  margin-right: 3vw;
+}
+
+.row .button1{
+  height: 5vh;
+  width: 6vw;
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #E99A01;
+  color: aliceblue;
+  border: none;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+.row .button1:hover{
+  background-color: white;
+  border: solid 2px #E99A01;
+  color: #E99A01;
+}
+
+.row .button2{
+  height: 5vh;
+  width: 6vw;
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  color: #9095A1;
+  border: solid 2px #9095A1;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+
+.row .button2:hover{
+  background-color: #9095A1;
+  color: white;
+  border: solid 2px #9095A1;
+}

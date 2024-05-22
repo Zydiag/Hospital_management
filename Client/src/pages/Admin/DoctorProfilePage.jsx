@@ -4,7 +4,6 @@ import Button from '@mui/material/Button'
 import '../../../public/StylesP/DoctorProfilePages.css'
 import vector from '../../assets/Vector.png'
 
-
 function DoctorProfilePage () {
   return (
     <>
@@ -20,11 +19,19 @@ function DoctorProfilePage () {
           <input value='15 YEARS'></input>
           <label>Units/Service/Arms</label>
           <input value='NSDFJ'></input>
-          <Stack spacing={2} direction='row'>
-            <Button variant='contained'>Edit</Button>
-            <Button variant='outlined'>Save</Button>
-            <Button variant='contained'>Exit</Button>
-          </Stack>
+          <div className='adminButton'>
+            <Stack spacing={2} direction='row'>
+              <Button className='editButton' variant='contained'>
+                Edit
+              </Button>
+              <Button className='saveButton' variant='outlined'>
+                Save
+              </Button>
+              <Button className='exitButton' variant='contained'>
+                Exit
+              </Button>
+            </Stack>
+          </div>
         </form>
       </div>
     </>

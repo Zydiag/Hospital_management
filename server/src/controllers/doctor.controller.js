@@ -79,13 +79,14 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
     throw new APIError(HttpStatusCode.INTERNAL_SERVER_ERROR, 'Something went wrong while registering user');
   }
 
-  const newDoctorRequest = await prisma.Request.create({
+  // store doctor request in database 
+  await prisma.request.create({
     data: {
       armyNo,
       firstName,
       lastName,
       unit,
-      rank,
+      rank, 
     },
   });
 
@@ -93,9 +94,79 @@ const createDoctorProfile = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new apiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet')
+      new ApiResponse(200, createdDoctor, 'Doctor created successfully but it is not verified yet')
     );
 });
+
+// login doctor
+export const loginDoctor = asyncHandler(async (req, res) => {
+  const { armyNo, password } = req.body;
+  // check if all fields are filled
+  if (!password || !armyNo) {
+    throw new APIError(400, 'All fields are  required');
+  }  
+  const doctor = await prisma.user.findUnique({
+    where: {
+      armyNo: armyNo,
+    },
+  });
+  if (!doctor) {
+    throw new APIError(404, 'User(doctor) not found');
+  }
+  // check if password is correct
+  const isCorrect = await bcrypt.compare(password, doctor.password);
+  if (!isCorrect) {
+    throw new APIError(401, 'Incorrect password');
+  }
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(doctor);
+  await prisma.user.update({
+    where: {
+      id: doctor.id,
+    },
+    data: { refreshToken },
+  });
+  //cookies ke liya hai , options for which cookie to be sent
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .cookie('refreshToken', refreshToken, options)
+    .cookie('accessToken', accessToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+        },
+        'Doctor logged in successfully'
+      )
+    );
+});
+
+//  Doctor Logout
+export const logoutAdmin = asyncHandler(async (req, res) => {
+  await prisma.user.update({
+    where: {
+      id: req.user.id
+    },
+    data: {
+      refreshToken: null
+    }
+  })
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", options)
+    .json(new ApiResponse(200, {}, "Doctor logout successfully"));
+});
+
 
 // Get Personal Info of patient by Army Number
 export const getPersonalInfo = asyncHandler(async (req, res) => {
@@ -380,4 +451,19 @@ export const errorHandler = (err, req, res, next) => {
   const status = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
   const message = err.message || 'Internal Server Error';
   res.status(status).json(new ApiResponse(status, null, message));
+};
+
+const generateAccessAndRefreshToken = async (user) => {
+  try {
+    const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_SECRET, {
+      expiresIn: '15m',
+    });
+    const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: '8h',
+    });
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.log('error: ', error);
+    throw new APIError(500, 'Something went wrong while generating access and refresh token');
+  }
 };

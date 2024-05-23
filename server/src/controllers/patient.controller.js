@@ -30,6 +30,12 @@ export const profilepatient = async(req,res)=>{
       res.send("Password doesn't match");
     }
     const user =await prisma.user.findFirst({where:{armyNo}});
+    if(user.refreshToken==NULL&&user.password!=NULL){
+      res.send("user has already signed up, please go to login page");
+    }
+    if(user.refreshToken==NULL&&user.password==NULL){
+      res.send("access denied");
+    }
     console.log(user);
     if(!user){
         return res.status(400).send('Invalid army number or profile already set up');
@@ -223,6 +229,56 @@ export const getFamilyHistory=async(req,res)=>{
   res.json(family);
 
 }
+
+export const getAllTestReports = async (req, res) => {
+  const { armyNo } = req.body;
+
+  // Find the user by army number
+  const user = await prisma.user.findFirst({
+    where: { armyNo },
+    select: { id: true },
+  });
+
+  // If user not found, throw an error
+  if (!user) {
+   res.send("user not found");
+  }
+ const patient=await prisma.patient.findFirst({
+  where:{
+    userId:user.id,
+  }
+ })
+ const medical = await prisma.Medical.findFirst({
+  where:{
+    patientId:patient.id,
+  }
+ })
+  // Find all AME, AME2, and PME test reports associated with the user
+  const ameReports = await prisma.AME.findMany({
+    where: {medicalId:medical.id},
+  });
+   console.log(ameReports);
+  const ame2Reports = await prisma.AME2.findMany({
+    where: { medicalId: medical.id },
+  });
+
+  const pmeReports = await prisma.PME.findMany({
+    where: { medical: { patientId: user.id } },
+    include: { medical: true },
+  });
+
+  // Combine all reports into a single array
+  const allReports = [...ameReports, ...ame2Reports, ...pmeReports];
+
+  // If no reports found, return an empty array
+  if (!allReports || allReports.length === 0) {
+    return res.json("NO TEST REPORT FOUND");
+  }
+
+  // Return all the test reports
+  res.json(allReports);
+};
+
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {
     console.error(err.stack);

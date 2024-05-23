@@ -1,33 +1,33 @@
-import React from 'react'
-import Stack from '@mui/material/Stack'
-import Button from '@mui/material/Button'
-import '../../../public/StylesP/DoctorProfilePages.css'
-import vector from '../../assets/Vector.png'
+import React from 'react';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import '../../styles/StylesP/DoctorProfilePages.css';
+import vector from '../../assets/Vector.png';
 
-function DoctorProfilePage () {
+function DoctorProfilePage() {
   return (
     <>
-      <div className='doctorProfile'>
+      <div className="doctorProfile">
         <img src={vector}></img>
         <h1>Doctor Profile</h1>
         <form>
           <label>Name of the Doctor</label>
-          <input value='Mrs Hanuman Singh'></input>
+          <input value="Mrs Hanuman Singh"></input>
           <label>ARMY NUMBER</label>
-          <input value='MQR12681437'></input>
+          <input value="MQR12681437"></input>
           <label>Age/Service</label>
-          <input value='15 YEARS'></input>
+          <input value="15 YEARS"></input>
           <label>Units/Service/Arms</label>
-          <input value='NSDFJ'></input>
-          <div className='adminButton'>
-            <Stack spacing={2} direction='row'>
-              <Button className='editButton' variant='contained'>
+          <input value="NSDFJ"></input>
+          <div className="adminButton">
+            <Stack spacing={2} direction="row">
+              <Button className="editButton" variant="contained">
                 Edit
               </Button>
-              <Button className='saveButton' variant='outlined'>
+              <Button className="saveButton" variant="outlined">
                 Save
               </Button>
-              <Button className='exitButton' variant='contained'>
+              <Button className="exitButton" variant="contained">
                 Exit
               </Button>
             </Stack>
@@ -35,7 +35,7 @@ function DoctorProfilePage () {
         </form>
       </div>
     </>
-  )
+  );
 }
 
-export default DoctorProfilePage
+export default DoctorProfilePage;

@@ -4,19 +4,20 @@ body {
   overflow: hidden;
 }
 
-.login{
+.login {
   width: 70%;
   height: 80vh;
   margin: 10vh auto 10vh;
   display: flex;
   flex-direction: row;
   justify-content: center;
-  box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2), 0 8px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow:
+    0 8px 8px 0 rgba(0, 0, 0, 0.2),
+    0 8px 20px 0 rgba(0, 0, 0, 0.19);
   border-radius: 15px;
-  
 }
 
-.loginForm{
+.loginForm {
   flex: 50%;
   border-radius: 0 15px 15px 0;
   display: flex;
@@ -24,57 +25,51 @@ body {
   background-color: #79b3bd;
 }
 
-.loginForm h2{
-  font-family: "Manrope", sans-serif;
+.loginForm h2 {
+  font-family: 'Manrope', sans-serif;
   font-size: 50px;
   width: 70%;
   margin: 20vh auto 0;
   color: aliceblue;
-  
 }
 
-form{
+form {
   display: flex;
   flex-direction: column;
   width: 70%;
   margin: 0 auto;
 }
 
-Button{
+Button {
   height: 5vh;
   font-size: 25px;
-  
 }
 
-
-
-.loginDescription{
+.loginDescription {
   flex: 50%;
-  
 }
 
-.loginDescription h1{
-  font-family: "Lexend", sans-serif;
+.loginDescription h1 {
+  font-family: 'Lexend', sans-serif;
   font-weight: 500;
   font-size: 48px;
-  color: #7CC6CF;
+  color: #7cc6cf;
   width: 70%;
   margin: 20vh auto 0;
 }
 
-span{
+span {
   font-size: 54px;
 }
 
-.loginDescription p{
-  font-family: "Manrope", sans-serif;
+.loginDescription p {
+  font-family: 'Manrope', sans-serif;
   font-size: 22px;
   width: 70%;
   margin: 20px auto 0;
-
 }
 
-.loginDescription img{
+.loginDescription img {
   width: 55%;
   float: right;
   margin-top: -60px;

@@ -1,10 +1,10 @@
-import React from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import { styled } from '@mui/system'
-import '../../public/StylesC/Dropdown.css'
+import React from 'react';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import { styled } from '@mui/system';
+import '../styles/StylesC/Dropdown.css';
 
-const DropDown = ({ obj, defaultValue, label, helperText, onChange ,value}) => {
+const DropDown = ({ obj, defaultValue, label, helperText, onChange, value }) => {
   const CustomTextField = styled(TextField)`
     width: 500px;
     & .MuiSelect-root {
@@ -13,31 +13,31 @@ const DropDown = ({ obj, defaultValue, label, helperText, onChange ,value}) => {
     & .MuiSelect-select {
       font-size: 20px; /* Increase text size of options */
     }
-  `
+  `;
 
   return (
-    <div className='dropDown'>
+    <div className="dropDown">
       <Box
-        component='form'
+        component="form"
         sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' }
+          '& .MuiTextField-root': { m: 1, width: '25ch' },
         }}
         noValidate
-        autoComplete='off'
+        autoComplete="off"
       >
         <CustomTextField
-          id='outlined-select-currency-native'
+          id="outlined-select-currency-native"
           select
           value={value}
           onChange={onChange}
           label={label}
           defaultValue={defaultValue}
           SelectProps={{
-            native: true
+            native: true,
           }}
           helperText={helperText}
         >
-          {obj.map(option => (
+          {obj.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -45,7 +45,7 @@ const DropDown = ({ obj, defaultValue, label, helperText, onChange ,value}) => {
         </CustomTextField>
       </Box>
     </div>
-  )
-}
+  );
+};
 
-export default DropDown
+export default DropDown;

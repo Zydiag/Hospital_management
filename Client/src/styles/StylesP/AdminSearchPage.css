@@ -1,0 +1,32 @@
+.adminSearchBar {
+  margin-top: 5vh;
+  background-color: rgb(255, 195, 76, 0.5);
+  padding: 10vh 0;
+}
+
+.pagination {
+  text-align: center;
+  margin: 8vh auto;
+}
+
+.pagination Button {
+  width: 4vw;
+  height: 5vh;
+  background-color: #efb034;
+  font-size: 20px;
+  color: #5d4108;
+}
+
+.pagination Button:hover {
+  width: 4vw;
+  height: 5vh;
+  background-color: white;
+  border: solid 2px #efb034;
+  font-size: 20px;
+  color: #5d4108;
+}
+
+.pagination Button:active {
+  background-color: white;
+  border: solid 2px #efb034;
+}

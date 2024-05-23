@@ -1,21 +1,10 @@
-import { useState } from 'react'
-// import Login from './pages/Login'
-// import SignUp from './pages/SignUp'
-import DoctorProfilePage from './pages/Admin/DoctorProfilePage'
-import AdminSearchPage from './pages/Admin/AdminSearchPage'
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes/AllRoutes';
 
+import './styles/global.css';
 
-function App () {
-  return(
-   <>
-    {/* <SignUp /> */}
-    {/* <Login /> */}
-    {/* <DoctorProfilePage /> */}
-    {/* <AdminSearchPage /> */}
-    <DoctorProfilePage />
-    
-   </>
-  )
+function App() {
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

@@ -8,7 +8,28 @@ import '../../../public/StylesP/AdminSearchPage.css'
 import Row from '../../components/Row'
 
 function AdminSearchPage () {
-  const [selectedStatus, setSelectedStatus] = useState('Requested')
+
+  const [selectedStatus, setSelectedStatus] = useState('Requested');
+
+  const rows = [
+    { armyNumber: 'ARMY001', doctorName: 'Dr. Alice' },
+    { armyNumber: 'ARMY002', doctorName: 'Dr. Bob' },
+    { armyNumber: 'ARMY003', doctorName: 'Dr. Charlie' },
+    { armyNumber: 'ARMY004', doctorName: 'Dr. Diana' },
+    { armyNumber: 'ARMY005', doctorName: 'Dr. Ethan' },
+    { armyNumber: 'ARMY006', doctorName: 'Dr. Fiona' },
+    { armyNumber: 'ARMY007', doctorName: 'Dr. George' },
+    { armyNumber: 'ARMY008', doctorName: 'Dr. Hannah' },
+    { armyNumber: 'ARMY009', doctorName: 'Dr. Ian' },
+    { armyNumber: 'ARMY010', doctorName: 'Dr. Julia' },
+    { armyNumber: 'ARMY011', doctorName: 'Dr. Kyle' },
+    { armyNumber: 'ARMY012', doctorName: 'Dr. Laura' },
+    { armyNumber: 'ARMY013', doctorName: 'Dr. Mike' },
+    { armyNumber: 'ARMY014', doctorName: 'Dr. Nancy' },
+    { armyNumber: 'ARMY015', doctorName: 'Dr. Oliver' }
+  ];
+
+  
 
   const status = [
     {
@@ -52,9 +73,22 @@ function AdminSearchPage () {
     setArrayNumber(statusIndex)
   }
 
-  const handlePageChange = (newpage) => {
+  //for pagination
+  const [currentPage, setCurrentPage] = useState(1); // Current page state
+  const rowPerPage = 1;
+  const totalRows = rows.length;
+  const totalPages = Math.ceil(totalRows / rowPerPage)
 
+
+  const handlePageChange = newpage => {
+    setCurrentPage(newpage)
   }
+
+  // Calculate range of rows to display
+  const indexOfLastRow = currentPage * rowPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowPerPage;
+  const currentRows = rows.slice(indexOfFirstRow, indexOfLastRow);
+
 
   return (
     <>
@@ -72,29 +106,18 @@ function AdminSearchPage () {
           helperText='Select the option'
         />
 
-        <Row
-          button1={ButtonStatus[arrayNumber].Button1}
-          button2={ButtonStatus[arrayNumber].Button2}
-        />
-        <Row
-          button1={ButtonStatus[arrayNumber].Button1}
-          button2={ButtonStatus[arrayNumber].Button2}
-        />
-        <Row
-          button1={ButtonStatus[arrayNumber].Button1}
-          button2={ButtonStatus[arrayNumber].Button2}
-        />
-        <Row
-          button1={ButtonStatus[arrayNumber].Button1}
-          button2={ButtonStatus[arrayNumber].Button2}
-        />
-        <Row
-          button1={ButtonStatus[arrayNumber].Button1}
-          button2={ButtonStatus[arrayNumber].Button2}
-        />
+        {currentRows.map(row => (
+          <Row
+            key={row.armyNumber}
+            armyNumber={row.armyNumber}
+            doctorName={row.doctorName}
+            button1={ButtonStatus[arrayNumber].Button1}
+            button2={ButtonStatus[arrayNumber].Button2}
+          />
+        ))}
       </div>
       <div className='pagination'>
-      <Pagination total={20} onPageChange={handlePageChange} />
+        <Pagination total={totalPages} onPageChange={handlePageChange} />
       </div>
     </>
   )

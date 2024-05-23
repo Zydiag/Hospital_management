@@ -11,8 +11,8 @@ function App () {
     {/* <SignUp /> */}
     {/* <Login /> */}
     {/* <DoctorProfilePage /> */}
-    {/* <AdminSearchPage /> */}
-    <DoctorProfilePage />
+    <AdminSearchPage />
+    {/* <DoctorProfilePage /> */}
     
    </>
   )

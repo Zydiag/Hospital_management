@@ -27,7 +27,7 @@ function DoctorProfilePage () {
               <Button className='saveButton' variant='outlined'>
                 Save
               </Button>
-              <Button className='exitButton' variant='contained'>
+              <Button  className='exitButton' variant='contained'>
                 Exit
               </Button>
             </Stack>

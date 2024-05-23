@@ -3,11 +3,11 @@ import '../../public/StylesC/Row.css'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
 
-function Row ({button1,button2}) {
+function Row ({button1,button2, doctorName, armyNumber}) {
   return (
     <div className='row'>
-      <p className='doctor'>Doctor Name</p>
-      <p>ARMY NUMBER</p>
+      <p className='doctor'>{doctorName}</p>
+      <p>{armyNumber}</p>
       <div className='rowButton'>
         <Stack spacing={2} direction='row'>
           <Button

@@ -1,145 +1,119 @@
-import React, { useState } from 'react';
-import { z } from 'zod';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import '../styles/StylesP/Login.css'
-import loginImg from "../assets/LoginImg.png";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
+import {
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
 
-// Define the validation schema using Zod
-const loginSchema = z.object({
-  role: z.enum(['doctor', 'patient', 'admin']),
-  armyNumber: z
-    .string()
-    .regex(/^[a-zA-Z0-9]{16}$/, 'Army Number must be exactly 16 alphanumeric characters'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters long')
-    .regex(/[a-z]/, 'Password must include at least one lowercase letter')
-    .regex(/[A-Z]/, 'Password must include at least one uppercase letter')
-    .regex(/[0-9]/, 'Password must include at least one number')
-    .regex(/[^a-zA-Z0-9]/, 'Password must include at least one special character')
-});
+import LoginSideImage from '../assets/login-side-image.jpg';
+import { useState } from 'react';
+import { AccountType } from '../constants';
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    role: '',
-    armyNumber: '',
-    password: ''
-  });
+export default function Login() {
+  const [profession, setProfession] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setErrors(prev => ({ ...prev, [name]: '' })); // Clear specific field error on change
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    try {
-      loginSchema.parse(formData);
-      setErrors({});
-      alert('Login successful!');
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors(Object.fromEntries(
-          error.errors.map(err => [err.path[0], err.message])
-        ));
-      }
-    }
-  };
+  const [password, setPassword] = useState('');
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleMouseDownPassword = (event) => {
+  const handleLogin = () => {
+    // Implement your signup logic here
+    console.log('Login:', { profession, password, confirmPassword });
+  };
+  const handleSubmit = (event) => {
     event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    console.log({
+      email: data.get('email'),
+      password: data.get('password'),
+    });
+  };
+
+  const handleChange = (event) => {
+    setProfession(event.target.value);
   };
 
   return (
-    <div className='login'>
-       <div className='loginDescription'>
-         <h1>Welcome back to <span>DHRAM</span></h1>
-         <p>Defence Health Automated Record Management</p>
-         <img src={loginImg} alt='login'></img>
-       </div>
-
-       <div className='loginForm'>
-       <h2>Sign In</h2>
-    <form onSubmit={handleSubmit}>
-      <TextField
-        select
-        label="Role"
-        name="role"
-        value={formData.role}
-        onChange={handleChange}
-        margin="normal"
-        variant="outlined"
-        error={Boolean(errors.role)}
-        helperText={errors.role}
-      >
-        <MenuItem value="doctor">Doctor</MenuItem>
-        <MenuItem value="patient">Patient</MenuItem>
-        <MenuItem value="admin">Admin</MenuItem>
-      </TextField>
-      <TextField
-        type="text"
-        name="armyNumber"
-        label="Army Number"
-        value={formData.armyNumber}
-        onChange={handleChange}
-        placeholder="Enter 16-digit Army Number"
-        margin="normal"
-        variant="outlined"
-        error={Boolean(errors.armyNumber)}
-        helperText={errors.armyNumber}
-      />
-      <FormControl  margin="normal" variant="outlined" error={Boolean(errors.password)}>
-        <InputLabel htmlFor="password">Password</InputLabel>
-        <OutlinedInput
-          id="password"
-          type={showPassword ? 'text' : 'password'}
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label="Password"
+    <div className="flex justify-center items-center w-full h-screen">
+      <div className="flex items-center justify-center border drop-shadow-sm relative rounded-md w-[80%] p-3 m-10 max-w-[1280px]">
+        <img
+          src={LoginSideImage}
+          alt="login page side image"
+          className="hidden md:block md:w-1/2 lg:w-[40%] object-cover rounded "
         />
-        
-        {errors.password && <p style={{ color: '#d32f2f', fontSize: '0.8rem', fontFamily: 'sans-serif' }}>{errors.password}</p>}
-      </FormControl>
-      <Button type="submit" variant="contained" >
-        Login
-      </Button>
-    </form>
-    </div>
+        <div className="text-white absolute z-10 top-[50%] translate-y-[-50%] left-20">
+          <h1 className="text-4xl font-bold">Welcome to </h1>
+          <h1 className="text-4xl font-bold">DHARAM</h1>
+          <p className="text-gray-100 mt-5">Defence Health Automated Record Management</p>
+        </div>
+        <div className="bg-gray-600 absolute bottom-10 p-4 rounded-md left-[5%] w-[30%]">
+          <p className="text-white">
+            "In this modern era of military healthcare, an advanced solution is crucial to
+            effectively meet the evolving needs of our troops."
+          </p>
+        </div>
+
+        <div className="relative flex-1 flex justify-center items-center">
+          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full">
+            <h1 className="text-4xl font-bold">Get Started</h1>
+            <p className="text-lg">Create your account now</p>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Account Type</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={profession}
+                label="Account Type"
+                onChange={handleChange}
+              >
+                <MenuItem value={AccountType.Admin}>Admin</MenuItem>
+                <MenuItem value={AccountType.Doctor}>Doctor</MenuItem>
+                <MenuItem value={AccountType.Patient}>Patient</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField fullWidth id="outlined-basic" label="Name" variant="outlined" />
+            <TextField
+              id="outlined-password"
+              type={showPassword ? 'text' : 'password'}
+              label="Password"
+              variant="outlined"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleLogin}
+              style={{
+                backgroundColor: '#EFB034', // Your theme color
+                height: '56px', // Match the height of the TextField component
+                color: '#ffffff',
+              }}
+            >
+              Login
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Login;
+}

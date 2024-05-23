@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import '../../public/StylesC/SearchBar.css';
+import '../styles/StylesC/SearchBar.css';
 
 function SearchBar() {
   const [hideIcon, setHideIcon] = useState(false);
@@ -17,14 +17,15 @@ function SearchBar() {
       <center>
         <form>
           {!hideIcon && (
-            <FontAwesomeIcon className='search-icon' icon={faSearch} />
+            <FontAwesomeIcon className='searchIcon' icon={faSearch} />
           )}
           <input
+            className='searchBarInput'
             onClick={handleClick}
             type='text'
             placeholder={!hidePlaceholder ? '        Search the Doctor by Army Number' : ''}
           />
-          <button>Search</button>
+          <button className='searchBarButton'>Search</button>
         </form>
       </center>
     </div>

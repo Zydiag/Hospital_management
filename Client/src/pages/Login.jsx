@@ -10,7 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import '../style/Login.css';
+import '../styles/StylesP/Login.css'
 import loginImg from "../assets/LoginImg.png";
 
 

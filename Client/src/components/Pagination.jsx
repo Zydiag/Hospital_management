@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faForward } from '@fortawesome/free-solid-svg-icons'
 import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import Button from '@mui/material/Button'
-import ButtonGroup from '@mui/material/ButtonGroup'
+import ButtonGroup from '@mui/material/ButtonGroup';
+import '../styles/StylesC/Pagination.css'
 
 function Pagination ({ total, onPageChange }) {
   const [currentPage, setCurrentpage] = useState(0)
@@ -23,13 +24,14 @@ function Pagination ({ total, onPageChange }) {
   };
 
   return (
-    <div>
+    <div className='pagination'>
       <ButtonGroup variant='contained' aria-label='Basic button group'>
-        <Button onClick={handleBackward} disabled={currentPage === 1}>
+        <Button className="paginationButton" onClick={handleBackward} disabled={currentPage === 1}>
           <FontAwesomeIcon icon={faBackward} />
         </Button>
         {Array.from({ length: total }, (_, i) => i + 1).map(page => (
           <Button
+            className="paginationButton"
             key={page}
             onClick={() => {
               setCurrentpage(page)
@@ -44,7 +46,7 @@ function Pagination ({ total, onPageChange }) {
             {page}
           </Button>
         ))}
-        <Button onClick={handleForward} disabled={currentPage === total}>
+        <Button className="paginationButton" onClick={handleForward} disabled={currentPage === total}>
           <FontAwesomeIcon icon={faForward} />
         </Button>
       </ButtonGroup>

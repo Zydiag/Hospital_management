@@ -1,5 +1,5 @@
 import React from 'react'
-import '../../public/StylesC/Row.css'
+import '../styles/StylesC/Row.css'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
 
@@ -10,7 +10,7 @@ function Row ({button1,button2, doctorName, armyNumber}) {
       <p>{armyNumber}</p>
       <div className='rowButton'>
         <Stack spacing={2} direction='row'>
-          <Button
+          <Button href='/doctor-profile'
             className='button1'
             variant='contained'
           >

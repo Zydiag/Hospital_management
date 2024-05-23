@@ -4,7 +4,7 @@ import Pagination from '../../components/Pagination'
 import Navbar from '../../components/Navbar'
 import SearchBar from '../../components/SearchBar'
 import Dropdown from '../../components/DropDown'
-import '../../../public/StylesP/AdminSearchPage.css'
+import '../../styles/StylesP/AdminSearchPage.css'
 import Row from '../../components/Row'
 
 function AdminSearchPage () {
@@ -75,7 +75,7 @@ function AdminSearchPage () {
 
   //for pagination
   const [currentPage, setCurrentPage] = useState(1); // Current page state
-  const rowPerPage = 1;
+  const rowPerPage = 4;
   const totalRows = rows.length;
   const totalPages = Math.ceil(totalRows / rowPerPage)
 
@@ -116,7 +116,7 @@ function AdminSearchPage () {
           />
         ))}
       </div>
-      <div className='pagination'>
+      <div className='adminPagination'>
         <Pagination total={totalPages} onPageChange={handlePageChange} />
       </div>
     </>

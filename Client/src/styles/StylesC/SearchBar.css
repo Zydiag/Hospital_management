@@ -1,10 +1,5 @@
-body {
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
-}
 
-.searchBar input {
+.searchBar .searchBarInput{
   width: 60vw;
   height: 5vh;
   border-radius: 4px;
@@ -12,13 +7,11 @@ body {
   border: solid 2px #9095a1;
 }
 
-.searchBar .search-icon {
-  position: relative;
-  left: 2%;
+.searchBar .searchIcon {
   font-size: 20px;
 }
 
-.searchBar button {
+.searchBar .searchBarButton {
   height: 5.8vh;
   width: 10vw;
   font-size: 22px;
@@ -33,7 +26,7 @@ body {
   border-radius: 4px;
 }
 
-.searchBar button:hover{
+.searchBar .searchBarButton:hover{
     background-color: aliceblue;
     color: #E99A01;
     border: solid 2px #E99A01;

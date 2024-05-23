@@ -8,8 +8,8 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/login" element={<Login />} />
-      <Route path="doctor-profile" element={<DoctorProfilePage />} />
-      <Route path="admin-panel" element={<AdminSearchPage />} />
+      <Route path="/doctor-profile" element={<DoctorProfilePage />} />
+      <Route path="/admin-panel" element={<AdminSearchPage />} />
       <Route path="/" element={<SignUp />}></Route>
     </>
   )

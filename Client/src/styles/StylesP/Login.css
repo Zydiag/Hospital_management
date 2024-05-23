@@ -4,7 +4,7 @@ body {
   overflow: hidden;
 }
 
-.login {
+.signUp {
   width: 70%;
   height: 80vh;
   margin: 10vh auto 10vh;
@@ -17,7 +17,7 @@ body {
   border-radius: 15px;
 }
 
-.loginForm {
+.signUpForm {
   flex: 50%;
   border-radius: 0 15px 15px 0;
   display: flex;
@@ -25,7 +25,7 @@ body {
   background-color: #79b3bd;
 }
 
-.loginForm h2 {
+.signUpForm h2 {
   font-family: 'Manrope', sans-serif;
   font-size: 50px;
   width: 70%;
@@ -45,11 +45,11 @@ Button {
   font-size: 25px;
 }
 
-.loginDescription {
+.signUpDescription {
   flex: 50%;
 }
 
-.loginDescription h1 {
+.signUpDescription h1 {
   font-family: 'Lexend', sans-serif;
   font-weight: 500;
   font-size: 48px;
@@ -62,14 +62,14 @@ span {
   font-size: 54px;
 }
 
-.loginDescription p {
+.signUpDescription p {
   font-family: 'Manrope', sans-serif;
   font-size: 22px;
   width: 70%;
   margin: 20px auto 0;
 }
 
-.loginDescription img {
+.signUpDescription img {
   width: 55%;
   float: right;
   margin-top: -60px;

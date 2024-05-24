@@ -4,3 +4,10 @@
     padding: 10vh 0;
 }
 
+.adminDropdown{
+    margin-left: -10vw;
+}
+
+.modalButton{
+    font-size: 30px;
+}

@@ -1,14 +1,21 @@
-
+.searchBarForm{
+  display: flex;
+  flex-direction: row;
+}
 .searchBar .searchBarInput{
   width: 60vw;
-  height: 5vh;
+  height: 6vh;
   border-radius: 4px;
   font-size: 20px;
   border: solid 2px #9095a1;
+
 }
 
 .searchBar .searchIcon {
   font-size: 20px;
+  position: absolute;
+  left: 16%;
+  top: 26.8%;
 }
 
 .searchBar .searchBarButton {

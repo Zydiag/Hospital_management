@@ -18,7 +18,35 @@ const generateAccessAndRefreshToken = async (Admin) => {
     throw new apiError(500, 'Something went wrong while generating access and refresh token');
   }
 };
+//for fetching doctor's profile
+export const getDoctorProfile=asyncHandler(async(req,res)=>{
+  //armyNo:-armyNo of doctor;
+  const {armyNo}=req.body;
+  const user =await prisma.User.findFirst({
+    where:{
+      armyNo:armyNo,
+      role:"DOCTOR",
+    },
+    select:{
+      armyNo:true,
+      firstName:true,
+    }
+  })
+  const doctor=await prisma.Doctor.findFirst({
+    where:{
+      userId:user.id,
+    },
+    select:{
+      specialization:true,
+      status:true
+    }
 
+  })
+  if(!user){
+    throw new apiError(400, 'Doctor not found');
+  }
+  res.json(new ApiResponse(HttpStatusCode.OK, {user.armyNo,user.firstName,doctor.specialization,doctor.status},"Doctor's Credentials:-"));
+})
 //Admin login
 export const loginAdmin = asynchandler(async (req, res) => {
   const { id, password } = req.body;

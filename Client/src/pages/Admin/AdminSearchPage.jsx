@@ -83,44 +83,44 @@ function AdminSearchPage () {
   const status = [
     {
       value: 'Requested',
-      label: 'Requested'
+      label: 'Requested',
     },
     {
       value: 'Accepted',
-      label: 'Accepted'
+      label: 'Accepted',
     },
     {
       value: 'Declined',
-      label: 'Declined'
-    }
-  ]
+      label: 'Declined',
+    },
+  ];
 
   const ButtonStatus = [
     {
       label: 'Requested',
       Button1: 'View',
-      Button2: 'Accept'
+      Button2: 'Accept',
     },
     {
       label: 'Accepted',
       Button1: 'View',
-      Button2: 'Block'
+      Button2: 'Block',
     },
     {
       label: 'Declined',
       Button1: 'Review',
-      Button2: 'Block'
-    }
-  ]
+      Button2: 'Block',
+    },
+  ];
 
   // Declare arrayNumber state variable
-  const [arrayNumber, setArrayNumber] = useState(0)
+  const [arrayNumber, setArrayNumber] = useState(0);
 
-  const handleDropdownChange = event => {
-    setSelectedStatus(event.target.value)
-    const statusIndex = status.findIndex(s => s.value === event.target.value)
-    setArrayNumber(statusIndex)
-  }
+  const handleDropdownChange = (event) => {
+    setSelectedStatus(event.target.value);
+    const statusIndex = status.findIndex((s) => s.value === event.target.value);
+    setArrayNumber(statusIndex);
+  };
 
   //for pagination
   const [currentPage, setCurrentPage] = useState(1) // Current page state

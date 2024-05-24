@@ -82,7 +82,7 @@ export const CreateDoctorProfile = asyncHandler( async (req, res) => {
 });
 
 // Get Personal Info of patient by Army Number
-export const getPersonalInfo =  asyncHandler(async (req, res) => {
+export const addPersonalInfo =  asyncHandler(async (req, res) => {
   console.log('Inside getPersonalInfo function');
   console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
 

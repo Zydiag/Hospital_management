@@ -4,7 +4,7 @@ import { authorizeAdmin } from '../middlewares/authmiddlewares.js';
 import { authorizeDoctor } from '../middlewares/authmiddlewares.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
-  getPersonalInfo,
+  addPersonalInfo,
   updatePersonalInfo,
   getHealthRecord,
   updateHealthRecord,
@@ -27,13 +27,14 @@ router.get('/test', (req, res) => {
   res.send('Test endpoint working');
 });
 
-router.post('/personal-info', asyncHandler(getPersonalInfo));
+
 router.get('/health-record', asyncHandler(getHealthRecord));
 router.get('/treatment-record', asyncHandler(getTreatmentRecord));
 router.get('/family-history', asyncHandler(getFamilyHistory));
 router.get('/testreports', asyncHandler(getAllTestReports));
-
+//protected routes
 router.post('/doctor-profile',verifyjwt,authorizeAdmin,asyncHandler(CreateDoctorProfile));
+router.post('/personal-info',verifyjwt,authorizeDoctor, asyncHandler(addPersonalInfo));
 router.post('/health-record',verifyjwt,authorizeDoctor,asyncHandler(updateHealthRecord));//checked
 router.post('/treatment-record',verifyjwt,authorizeDoctor,asyncHandler(updateTreatmentRecord));//checked
 router.post('/family-history',verifyjwt,authorizeDoctor,asyncHandler(updateFamilyHistory));

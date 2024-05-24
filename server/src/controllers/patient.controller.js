@@ -1,3 +1,4 @@
+import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
@@ -19,26 +20,26 @@ const generateRefreshToken = (user) => {
   );
 };
 //patient sets up profile
-export const profilepatient = async(req,res)=>{
+export const profilepatient = asyncHandler(async(req,res)=>{
     console.log("you are inside patient profile creation");
     console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
     const{armyNo,password,confirmpassword}=req.body;
     if(!armyNo||!password||!confirmpassword){
-      res.send("ArmyNo,password required");
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'armyNo,Password required');
     }
     if(password!=confirmpassword){
-      res.send("Password doesn't match");
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Password does not match');
     }
-    const user =await prisma.user.findFirst({where:{armyNo}});
-    if(user.refreshToken==NULL&&user.password!=NULL){
-      res.send("user has already signed up, please go to login page");
+    const user =await prisma.User.findFirst({where:{armyNo}});
+    if(user.refreshToken==null&&user.password!=null){
+      res.json(new ApiResponse(HttpStatusCode.OK, user, 'user has signed up already'));
     }
-    if(user.refreshToken==NULL&&user.password==NULL){
-      res.send("access denied");
+    if(user.refreshToken==null&&user.password==null){
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Access Denied');
     }
     console.log(user);
     if(!user){
-        return res.status(400).send('Invalid army number or profile already set up');
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
     }
     try {
       console.log('User refresh token:', user.refreshToken); 
@@ -52,22 +53,16 @@ export const profilepatient = async(req,res)=>{
        
         console.log('Password hashed successfully'); 
         console.log('Updating user...');// Debugging statement
-        const use =await prisma.user.findUnique({
-          where:{armyNo}
-        })
-        console.log(use);
         
-        const used=await prisma.user.update({
-       
+        const used=await prisma.User.update({
           where: { armyNo:armyNo },
-         
           data: {
             refreshToken:null,
            password: hashedPassword,
           }
        });
         console.log('User updated successfully'); 
-        res.send('Profile set up successfully');
+        res.json(new ApiResponse(HttpStatusCode.OK, updatedTest, 'Profile set up successfully'));
       } catch (error) {
         if (error.name === 'TokenExpiredError') {
           res.status(401).send('Refresh token expired');
@@ -77,38 +72,35 @@ export const profilepatient = async(req,res)=>{
           res.status(500).send('Internal server error ');
       }}
 
-}
+});
 //login patient
-export const loginpatient = async(req,res)=>{
+export const loginpatient = asyncHandler(async(req,res)=>{
     console.log("you are inside login system of patient");
     const {armyNo, password}=req.body;
-    const user=await prisma.user.findUnique({
+    const user=await prisma.User.findUnique({
         where:{
            armyNo:armyNo     
         }
     })
     bcrypt.compare(password, user.password, function(err, result) {
       if (err) {
-        res.send("Password is incorrect");
+        throw new apiError(HttpStatusCode.NOT_FOUND, 'Password is incorrect');
       } else if(result) {
-        res.json(user);
+        res.json(new ApiResponse(HttpStatusCode.OK, user, 'user login successful'));
       } 
       else{
-        res.send("password is incorrect");}
+        throw new apiError(HttpStatusCode.NOT_FOUND, 'Password is incorrect');}
     });
-}
+})
 //perosnal-info-section1-patient
-export const getpersonalinfo=async(req,res)=>{
+export const getpersonalinfo=asyncHandler(async(req,res)=>{
   console.log("we are inside getpersonalinfo route");
-  const {armyNo,date}=req.body;
-  if(!date){
-    res.send("date is missing");
-  }
+  const {armyNo}=req.body;
   
-  const user=await prisma.user.findFirst({
+  const user=await prisma.User.findFirst({
     where:{
       armyNo:armyNo,
-      createdAt:new Date(date),
+      role:"PATIENT",
     },
     select:{
       armyNo:true,
@@ -119,30 +111,32 @@ export const getpersonalinfo=async(req,res)=>{
     }
   })
   if(!user){
-    res.send("date is not present in record");
+    res.json(new ApiResponse(HttpStatusCode.OK, medicalRecord, 'date is not present in the record'));
   }
 
-  res.json(
-    user,
-  )
+  res.json(new ApiResponse(HttpStatusCode.OK, user, 'user personal info:'));
 
-};
+});
 
 //read-health-record
-export const getHealthRecord=async(req,res)=>{
+export const getHealthRecord=asyncHandler(async(req,res)=>{
   console.log("You are inside getHealthRecord Route");
   const {armyNo, date}=req.body;
-  const user =await prisma.user.findFirst({
+  const user =await prisma.User.findFirst({
     where:{
       armyNo:armyNo,
+      role:"PATIENT",
     }
   })
   const healthId=user.id;
-  const patient=await prisma.patient.findFirst({
+  const patient=await prisma.Patient.findFirst({
     where:{
       userId:healthId
     }
   })
+  if(!patient){
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
   const health=await prisma.Medical.findFirst({
     where:{
       patientId:patient.id,
@@ -158,25 +152,28 @@ export const getHealthRecord=async(req,res)=>{
     }
   })
   if(!health){
-    res.send("date does not exist in record");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date does not exist in record');
   }
-  res.json(health);
-}
+  res.json(new ApiResponse(HttpStatusCode.OK, health, 'Health record:-'));
+});
 //Read personal medical history
-export const getPersonalMedicalHistory=async(req,res)=>{
+export const getPersonalMedicalHistory=asyncHandler(async(req,res)=>{
   console.log("you are inside Personal Medical History Route");
   const {armyNo,date}=req.body;
-  const user =await prisma.user.findFirst({
+  const user =await prisma.User.findFirst({
     where:{
       armyNo:armyNo,
     }
   })
   const userId=user.id;
-  const patient=await prisma.patient.findFirst({
+  const patient=await prisma.Patient.findFirst({
     where:{
       userId:userId,
     }
   })
+  if(!patient){
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
   const patientId=patient.id;
   const treat=await prisma.treatment.findFirst({
     where:{
@@ -190,27 +187,30 @@ export const getPersonalMedicalHistory=async(req,res)=>{
     }
   })
   if(!treat){
-    res.send("date is not present in database");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date is not present in record');
   }
-  res.json(treat);
-}
+  res.json(new ApiResponse(HttpStatusCode.OK, treat, 'Treatment Record:'));
+});
 
 //Read Family History
-export const getFamilyHistory=async(req,res)=>{
+export const getFamilyHistory=asyncHandler(async(req,res)=>{
   console.log("you are inside familyhistory route");
   const {armyNo,date}=req.body;
-  const user =await prisma.user.findFirst({
+  const user =await prisma.User.findFirst({
    where:{
     armyNo:armyNo
    }
   })
   const userId=user.id;
   console.log(userId);
-  const patient =await prisma.patient.findFirst({
+  const patient =await prisma.Patient.findFirst({
     where:{
       userId:userId
     }
   })
+  if(!patient){
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
   const family=await prisma.familyHistory.findFirst({
     where:{
       patientId:patient.id,
@@ -224,60 +224,57 @@ export const getFamilyHistory=async(req,res)=>{
     }
   })
   if(!family){
-    res.send("date does not exist");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date does not exist');
   }
-  res.json(family);
+  res.json(new ApiResponse(HttpStatusCode.OK, family, 'FamilyHistory:'));
 
-}
+});
 
-export const getAllTestReports = async (req, res) => {
-  const { armyNo } = req.body;
+export const getAllTestReports = asyncHandler(async (req, res) => {
+  const { armyNo,date } = req.body;
 
   // Find the user by army number
-  const user = await prisma.user.findFirst({
+  const user = await prisma.User.findFirst({
     where: { armyNo },
     select: { id: true },
   });
 
   // If user not found, throw an error
   if (!user) {
-   res.send("user not found");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
   }
- const patient=await prisma.patient.findFirst({
+ const patient=await prisma.Patient.findFirst({
   where:{
     userId:user.id,
   }
  })
- const medical = await prisma.Medical.findFirst({
-  where:{
-    patientId:patient.id,
-  }
- })
+ if(!patient){
+  throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+ }
   // Find all AME, AME2, and PME test reports associated with the user
   const ameReports = await prisma.AME.findMany({
-    where: {medicalId:medical.id},
+    where: {patientId:patient.id,createdAt:new Date(date)},
   });
-   console.log(ameReports);
+  console.log(ameReports);
   const ame2Reports = await prisma.AME2.findMany({
-    where: { medicalId: medical.id },
+    where: {patientId:patient.id,createdAt:new Date(date)},
   });
-
+  console.log(ame2Reports);
   const pmeReports = await prisma.PME.findMany({
-    where: { medical: { patientId: user.id } },
-    include: { medical: true },
+    where: {patientId:patient.id,createdAt:new Date(date)},
   });
-
+  console.log(pmeReports);
   // Combine all reports into a single array
   const allReports = [...ameReports, ...ame2Reports, ...pmeReports];
 
   // If no reports found, return an empty array
   if (!allReports || allReports.length === 0) {
-    return res.json("NO TEST REPORT FOUND");
+    res.json(new ApiResponse(HttpStatusCode.OK, [], 'No test report found'));
   }
 
   // Return all the test reports
-  res.json(allReports);
-};
+  res.json(new ApiResponse(HttpStatusCode.OK, allReports, 'Test-reports:-'));
+});
 
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {

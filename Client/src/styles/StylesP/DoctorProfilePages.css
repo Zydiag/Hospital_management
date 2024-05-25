@@ -1,12 +1,7 @@
-body {
-  padding: 0;
-  margin: 0;
-}
-
 .doctorProfile {
   box-shadow: 3px 5px 10px -5px grey;
   width: 60%; /* Set a specific width */
-  height: 110vh;
+  height: 100vh;
   margin: 10vh auto;
   display: flex;
   flex-direction: column;
@@ -24,15 +19,15 @@ body {
   font-style: normal;
   font-size: 50px;
   position: relative;
-  top: -28%;
+  top: -30%;
 }
 
-.doctorProfile form {
+.doctorProfile .doctorProfileForm{
   position: relative;
-  top: -25%;
+  top: -22%;
 }
 
-.doctorProfile label {
+.doctorProfile .doctorProfileLabel {
   display: block;
   text-align: left;
   font-family: 'Manrope', sans-serif;
@@ -45,20 +40,17 @@ body {
 
 }
 
-.doctorProfile input{
+.doctorProfile .doctorProfileInput{
+   margin: 0 auto 2vh;
     width: 60%;
     height: 5vh;
     border: solid 2px #A8ADB7;
     border-radius: 6px;
     font-size: 20px;
-    margin-bottom: 2vh;
     background-color: #F3F4F6;
 }
 
-.doctorProfile Button{
-    width: 6vw;
-    height: 5vh;
-}
+
 
 .adminButton {
     display: flex;

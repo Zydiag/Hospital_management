@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { verifyJwt ,authorizeAdmin} from '../middlewares/auth.middlewares.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   createAdmin,
   loginAdmin,
@@ -9,7 +8,8 @@ import {
   approveRequest,
   approvedRequests,
   pendingRequests,
-  getCurrentUser
+  getCurrentUser,
+  blokingAcceptedDoctor
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -22,4 +22,5 @@ router.route('/all-pending-doctor-requests').get(verifyJwt,authorizeAdmin, pendi
 router.route('/all-approved-doctor-requests').get(verifyJwt, authorizeAdmin,approvedRequests);
 router.route('/reject-request').post(verifyJwt,authorizeAdmin, rejectRequest);
 router.route('/approve-request').post(verifyJwt, authorizeAdmin,approveRequest);
+router.route('/blocking-accepted-doctor').post(verifyJwt,authorizeAdmin, blokingAcceptedDoctor);
 export default router;

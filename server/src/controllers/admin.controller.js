@@ -11,7 +11,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 //
-const generateAccessAndRefreshToken = async (user) => {
+const generateAccessAndRefreshToken = asyncHandler(async (user) => {
   try {
     const accessToken = jwt.sign({ id: user.id}, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '15m',
@@ -24,11 +24,11 @@ const generateAccessAndRefreshToken = async (user) => {
     console.log('error: ', error);
     throw new APIError(500, 'Something went wrong while generating access and refresh token');
   }
-};
+});
 
 // create admin profile
 
-export const createAdmin = async (req, res) => {
+export const createAdmin = asyncHandler(async (req, res) => {
   const { adminId, firstName, lastName, email, dob, password } = req.body;
   // Check if all fields are filled
   if (!adminId || !firstName || !dob || !password) {
@@ -66,7 +66,44 @@ export const createAdmin = async (req, res) => {
   } catch (error) {
     throw new APIError(401, error?.message || 'Something went wrong while creating doctor request');
   }
-};
+});
+
+//for fetching doctor's profile
+
+export const getDoctorProfile=asyncHandler(async(req,res)=>{
+  //armyNo:-armyNo of doctor;
+  const {armyNo}=req.body;
+  const user =await prisma.user.findFirst({
+    where:{
+      armyNo:armyNo,
+      role:"DOCTOR",
+    },
+    select:{
+      armyNo:true,
+      firstName:true,
+    }
+  })
+  const doctor=await prisma.doctor.findFirst({
+    where:{
+      userId:user.id,
+    },
+    select:{
+      specialization:true,
+      status:true
+    }
+
+  })
+  if(!user){
+    throw new APIError(400, 'Doctor not found');
+  }
+  let ourDoctor={
+    armyNo:user.armyNo,
+    firstName:user.firstName,
+    specialization:doctor.specialization,
+    status:doctor.status
+  }
+  res.json(new ApiResponse(HttpStatusCode.OK, ourDoctor,"Doctor's Credentials:-"));
+})
 
 //Admin login
 export const loginAdmin = asyncHandler(async (req, res) => {
@@ -131,7 +168,7 @@ const user= await prisma.user.findUnique({
 });
 
 // fetch  doctor requests which is not approved(pending)
-export const pendingRequests = async (req, res) => {
+export const pendingRequests = asyncHandler(async (req, res)=> {
   try {
     const requests = await prisma.request.findMany({
       where: {
@@ -169,10 +206,10 @@ export const pendingRequests = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "An error occurred while fetching the requests." });
   }
-};
+});
 
 // fetch  doctor requests which is approved(Accepted)
-export const approvedRequests = async (req, res) => {
+export const approvedRequests = asyncHandler( async (req, res) => {
   try {
     const requests = await prisma.request.findMany({
       where: {
@@ -210,11 +247,11 @@ export const approvedRequests = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "An error occurred while fetching the requests." });
   }
-};
+});
 
 
 // approve request
-export const approveRequest = async (req, res) => {
+export const approveRequest = asyncHandler(async (req, res)=> {
   const { doctorId } = req.body;
   const request = await prisma.request.findUnique({ where: { doctorId } });
   if (!request) {
@@ -226,9 +263,9 @@ export const approveRequest = async (req, res) => {
     data: { status: 'APPROVED' },
   });
   console.log(updatedRequest);
-};
+});
 // reject request
-export const rejectRequest = async (req, res) => {
+export const rejectRequest = asyncHandler(async (req, res) => {
   const { doctorId } = req.body;
   const request = await prisma.request.findUnique({ where: {id: doctorId } });
   if (!request) {
@@ -241,11 +278,11 @@ export const rejectRequest = async (req, res) => {
   // clear the request after rejection
   await prisma.request.delete({ where: { doctorId } });
   res.json(updatedRequest);
-};
+});
 
 
-// reject request after accepting
-export const rejectingAfterAccepting = async (req, res) => {
+// reject(block) accepted Doctor
+export const blokingAcceptedDoctor = asyncHandler(async (req, res) => {
   const { doctorId } = req.body;
   const request = await prisma.request.findUnique({ where: { doctorId } });
   if (!request) {
@@ -258,7 +295,7 @@ export const rejectingAfterAccepting = async (req, res) => {
   // clear the request after rejection
   await prisma.request.delete({ where: { doctorId } });
   res.json(updatedRequest);
-}
+});
 
 
 // Admin Logout
@@ -282,7 +319,6 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
     .clearCookie('accessToken', options)
     .json(new ApiResponse(200, {}, 'Admin logout successfully'));
 });
-
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
   console.log(`req.user.id: ${req.user.id}`);

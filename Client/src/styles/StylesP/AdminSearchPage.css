@@ -1,0 +1,13 @@
+.adminSearchBar{
+    margin-top: 5vh;
+    background-color: rgb(255, 195, 76, 0.5) ;
+    padding: 10vh 0;
+}
+
+.adminDropdown{
+    margin-left: -10vw;
+}
+
+.modalButton{
+    font-size: 30px;
+}

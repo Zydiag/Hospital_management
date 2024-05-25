@@ -1,24 +1,24 @@
-body {
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
+.searchBarForm{
+  display: flex;
+  flex-direction: row;
 }
-
-.searchBar input {
+.searchBar .searchBarInput{
   width: 60vw;
-  height: 5vh;
+  height: 6vh;
   border-radius: 4px;
   font-size: 20px;
   border: solid 2px #9095a1;
+
 }
 
-.searchBar .search-icon {
-  position: relative;
-  left: 2%;
+.searchBar .searchIcon {
   font-size: 20px;
+  position: absolute;
+  left: 16%;
+  top: 26.8%;
 }
 
-.searchBar button {
+.searchBar .searchBarButton {
   height: 5.8vh;
   width: 10vw;
   font-size: 22px;
@@ -33,7 +33,7 @@ body {
   border-radius: 4px;
 }
 
-.searchBar button:hover{
+.searchBar .searchBarButton:hover{
     background-color: aliceblue;
     color: #E99A01;
     border: solid 2px #E99A01;

@@ -23,17 +23,20 @@ model User {
   role             Role      @default(PATIENT)
   patient          Patient?
   doctor           Doctor?
-  refreshToken     String
-  createdAt        DateTime
+  admin            Admin?
+  refreshToken     String?  
+  createdAt        DateTime @default(now())
   updatedAt        DateTime  @updatedAt
   password         String?
 }
 
 model Admin {
   id           String  @id @default(uuid())
-  adminId      String
+  userId       String  @unique
+  adminId      String  @unique
   password     String
   refreshToken String?
+  user         User?       @relation(fields: [userId], references: [id])
 }
 
 // Role model for user access control

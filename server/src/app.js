@@ -1,14 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import doctorRoutes from './routes/doctorroute.js';
-import patientroutes from './routes/patientroute.js';
+import doctorRoutes from './routes/doctor.route.js';
+import adminRoutes from './routes/admin.route.js';
+import patientroutes from './routes/patient.route.js';
 export const app = express();
 
 app.use(express.json({ type: 'application/json' }));
-
+app.use(express.json({ limit: '32kb' }));
+app.use(express.urlencoded({ extended: true, limit: '32kb' }));
+// app.use(express.static("public"));
+app.use(cookieParser());
 app.use('/api/doctor', doctorRoutes);
-app.use('/api/patient',patientroutes);
+app.use('/api/patient', patientroutes);
+app.use('/api/admin', adminRoutes);
 app.use(
   cors({
     origin: process.env.CORS_ORIGINS || 'http://localhost:3000',

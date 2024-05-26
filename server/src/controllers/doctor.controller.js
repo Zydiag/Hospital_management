@@ -193,7 +193,7 @@ export const logoutDoctor = asyncHandler(async (req, res) => {
 });
 
 // Get Personal Info of patient by Army Number
-export const getPersonalInfo = asyncHandler(async (req, res) => {
+export const getPersonalInfo =  asyncHandler(async (req, res) => {
   console.log('Inside getPersonalInfo function');
   console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
 
@@ -202,10 +202,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   console.log(armyNo);
 
   if (!armyNo) {
-    console.log(req.body);
-    return res.status(400).json({
-      error: 'Army number is required'
-    });
+    throw new apiError(HttpStatusCode.BAD_REQUEST, 'Army number is required');
   }
 
   let user = await prisma.User.findFirst({
@@ -217,8 +214,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   if (!user) {
     // Validation for all required fields
     if (!unit || !rank || !firstName || !lastName || !dob||!date) {
-      console.log("abs");
-      return res.status(400).json({ error: 'All fields are required to create a new user' });
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
     }
 
     // Generate a refresh token for the new user
@@ -267,7 +263,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
-  res.json(user);
+  res.json(new ApiResponse(HttpStatusCode.OK, user, 'User retrieved successfully'));
 });
 
 // Update Personal Info
@@ -326,7 +322,7 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User Not Found" });
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
     }
 
     // Find the patient based on the userId
@@ -334,7 +330,7 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
       where: { userId: user.id },
     });
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found" });
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
     }
 
     const medicalRecord = await prisma.Medical.findMany({
@@ -346,7 +342,7 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
     // Extract medical records from the patient
     //const medicalRecords = patient.Medical;
 
-    res.json({ medicalRecord });
+    res.json(new ApiResponse(HttpStatusCode.OK, medicalRecord, 'Health records retrieved successfully'));
   } catch (error) {
     next(error);
   }
@@ -382,11 +378,11 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       }
     })
     if(!doctor){
-      return res.send("doctor not found");
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Doctor not found with the provided army number');
     }
     // If patient is not found, handle the error
     if (!patient) {
-      return res.status(404).json({ error: 'Patient not found with the provided army number' });
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found with the provided army number');
     }
 
     const patientId = patient.id;
@@ -410,7 +406,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     });
 
     // Send a JSON response in Postman
-    res.json({ message: 'Medical record created successfully', medicalRecord: newMedicalRecord });
+    res.json(new ApiResponse(HttpStatusCode.OK, newMedicalRecord, 'Medical record created successfully'));
   } catch (error) {
     next(error);
   }
@@ -437,7 +433,7 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
     }
 
     const patientId = patient.id;
@@ -452,12 +448,14 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
       include: {
        diagnosis:true,
        note:true,
-       medicationName:true
+       medicationName:true,
+       miscellaneous:true,
+       knownAllergies:true,
       },
     });
     
 
-    res.json(treatmentRecords);
+    res.json(new ApiResponse(HttpStatusCode.OK, { treatmentRecords, descriptions }, 'Treatment records retrieved successfully'));
   } catch (error) {
     next(error);
   }
@@ -467,7 +465,7 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
 // Update Treatment Records
 export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
   try {
-    const { diagnosis, note,medicationName,date,armyNo,armyNo1} = req.body;
+    const { diagnosis, note,medicationName,date,knownAllergies,miscellaneous,armyNo,armyNo1} = req.body;
     
     // Find the patient by army number
     const patient = await prisma.Patient.findFirst({
@@ -491,10 +489,10 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
       },
     });
     if(!doctor){
-      return res.send("docotor not found");
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Doctor not found');
     }
     if(!patient){
-      res.send("user is not patient");
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
     }
     const patientId = patient.id;
 
@@ -510,6 +508,8 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
             diagnosis:diagnosis,
             note:note,
             medicationName:medicationName,
+            knownAllergies:knownAllergies,
+            miscellaneous:miscellaneous,
             createdAt:new Date(date),
             updatedAt:new Date(date),
             patientId:patientId,
@@ -521,9 +521,7 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
 
     
     // Accessing related data directly from newMedicalRecord
-    res.json({
-      newTreatment
-    });
+    res.json(new ApiResponse(HttpStatusCode.OK, newTreatment, 'Treatment record created successfully'));
   } catch (error) {
     next(error);
   }
@@ -543,7 +541,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
     })
     const userId=user.id;
     if(!user){
-      res.send("user is not a patient");
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'User not found');
     }
 
     const patient = await prisma.Patient.findFirst({
@@ -557,7 +555,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
 
     // Check if patient information exists
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found." });
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'patient not found');
     }
 
     const patientId = patient.id;
@@ -567,7 +565,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
       },
     });
 
-    res.json({ familyhistories });
+    res.json(new ApiResponse(HttpStatusCode.OK, familyHistories, 'Family history records retrieved successfully'));
   } catch (error) {
     console.error("Failed to retrieve family history:", error);
     res.status(500).json({ error: "Internal server error." });
@@ -606,10 +604,10 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
       },
     });
     if(!doctor){
-      return res.send("doctor not found");
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'Doctor not found');
     }
     if (!patient) {
-      return res.status(404).json({ error: "Patient not found" });
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'Patient not found');
     }
     const patientId = patient.id;
     const existfamily=await prisma.familyHistory.findFirst({
@@ -632,7 +630,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
         createdAt:new Date(date),
       }
     })
-    return res.json(exfamily);
+    res.json(new ApiResponse(HttpStatusCode.OK, exfamily, 'Family history updated successfully'));
    }
    const family=await prisma.familyHistory.create({
     data:{
@@ -646,7 +644,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
     }
    })
     
-    res.status(200).json({ message: "Family history updated", data: family });
+   res.json(new ApiResponse(HttpStatusCode.OK, family, 'Family history created successfully'));
   } catch (error) {
     next(error);
   }
@@ -663,7 +661,7 @@ export const getAllTestReports = asyncHandler(async (req, res) => {
 
   // If user not found, throw an error
   if (!user) {
-   res.send("user not found");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
   }
  const patient=await prisma.Patient.findFirst({
   where:{
@@ -688,11 +686,11 @@ export const getAllTestReports = asyncHandler(async (req, res) => {
 
   // If no reports found, return an empty array
   if (!allReports || allReports.length === 0) {
-    return res.json("NO TEST REPORT FOUND");
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
   }
 
   // Return all the test reports
-  res.json(allReports);
+  res.json(new ApiResponse(HttpStatusCode.OK, allReports, 'All test reports retrieved successfully'));
 });
 
 // Function to calculate age based on date of birth
@@ -745,7 +743,7 @@ export const updateAME1 = asyncHandler(async (req, res) => {
     }
   })
   if(!patient){
-    res.send("user is not patient");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
@@ -759,6 +757,16 @@ export const updateAME1 = asyncHandler(async (req, res) => {
       id: true, // Select only the id field
     },
   });
+
+  // Find the existing AME1 record by ID
+  const ame1 = await prisma.AME.findFirst({
+    where: { patientId:patient.id},
+  });
+
+  // If AME1 record not found, throw an error
+  if (!ame1) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'AME1 record not found');
+  }
   const description = JSON.stringify({
     bloodHb,
       TLC,
@@ -778,7 +786,7 @@ export const updateAME1 = asyncHandler(async (req, res) => {
   });
 
   // Send response with updated AME1 record
-  res.json(updatedAME1);
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedAME1, 'AME1 test report updated successfully'));
 });
 
 //Function to update AME2
@@ -809,7 +817,7 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     }
   })
   if(!patient){
-    res.send("user is not patient");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
@@ -824,6 +832,14 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     },
   });
   // Find the existing AME2 record by ID
+  const ame2 = await prisma.AME2.findFirst({
+    where: {patientId:patient.id, doctorId:doctor.id},
+  });
+  
+  // If AME2 record not found, throw an error
+  if (!ame2) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'AME2 record not found');
+  }
   const description=JSON.stringify({
     bloodHb,
       TLC,
@@ -846,7 +862,7 @@ export const updateAME2 = asyncHandler(async (req, res) => {
   });
 
   // Send response with updated AME2 record
-  res.json(updatedAME2);
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedAME2, 'AME2 test report updated successfully'));
 });
 
 //Function to update PME
@@ -883,7 +899,7 @@ export const updatePME = asyncHandler(async (req, res) => {
     }
   })
   if(!patient){
-    res.send("user is not patient");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'patient not found');
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
@@ -898,6 +914,14 @@ export const updatePME = asyncHandler(async (req, res) => {
     },
   });
   // Find the existing PME record by ID
+  const pme = await prisma.PME.findUnique({
+    where: {patientId:patient.id},
+  });
+
+  // If PME record not found, throw an error
+  if (!pme) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'PME record not found');;
+  }
   const description=JSON.stringify({
     bloodHb,
     TLC,
@@ -926,7 +950,7 @@ export const updatePME = asyncHandler(async (req, res) => {
   });
 
   // Send response with updated PME record
-  res.json(updatedPME);
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedPME, 'PME test report updated successfully'));
 });
 
 // Route to add a test report
@@ -941,7 +965,7 @@ export const addTestReport = asyncHandler(async (req, res) => {
   });
   console.log(user);
   if (!user || !user.dob) {
-    res.send("user is not patient ");
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found or date of birth not available');
   }
 
   // Calculate age based on date of birth
@@ -963,8 +987,9 @@ export const addTestReport = asyncHandler(async (req, res) => {
       updatedTest = await updatePME(req,res);
       break;
     default:
-      res.send("no test");
+      throw new apiError(HttpStatusCode.BAD_REQUEST, 'Invalid test type');
   }
+  res.json(new ApiResponse(HttpStatusCode.OK, updatedTest, 'Test report added successfully'));
 });
 
   
@@ -974,7 +999,7 @@ export const addTestReport = asyncHandler(async (req, res) => {
     res.status(err.status || 500).json({
       message: err.message || 'Internal Server Error',
     });
-  }
+  };
   
   
   

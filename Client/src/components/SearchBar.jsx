@@ -1,44 +1,42 @@
-import React, { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import '../styles/StylesC/SearchBar.css'
+import React, { useState } from 'react';
+import '../styles/StylesC/SearchBar.css';
 
-function SearchBar () {
-  const [hideIcon, setHideIcon] = useState(false)
-  const [hidePlaceholder, setHidePlaceholder] = useState(false)
+function SearchBar ({ handleSearch, onChange, value, placeholder ,href }) {
+  const [hidePlaceholder, setHidePlaceholder] = useState(false);
 
   function handleClick () {
-    setHideIcon(true)
-    setHidePlaceholder(true)
+    setHideIcon(true);
+    setHidePlaceholder(true);
   }
 
   return (
     <div className='searchBar'>
-      <center>
-        <form className='searchBarForm'>
-          <div>
-            {!hideIcon && (
-              <FontAwesomeIcon className='searchIcon' icon={faSearch} />
-            )}
-            <input
-              className='searchBarInput'
-              onClick={handleClick}
-              type='text'
-              placeholder={
-                !hidePlaceholder
-                  ? '        Search the Doctor by Army Number'
-                  : ''
-              }
-            />
-          </div>
-          <div>
-            {' '}
-            <button className='searchBarButton'>Search</button>
-          </div>
+      <div>
+        <form className='searchBarForm' onSubmit={e => e.preventDefault()}>
+          <input
+            typeof='text'
+            className='searchBarInput'
+            onClick={handleClick}
+            value={value}
+            type='text'
+            onChange={onChange}
+            placeholder={!hidePlaceholder ? placeholder : ''}
+          />
         </form>
-      </center>
+      </div>
+      <div>
+        <button
+          className='searchBarButton'
+          onClick={e => {
+            e.preventDefault();
+            handleSearch();
+          }}
+        >
+          Search
+        </button>
+      </div>
     </div>
-  )
+  );
 }
 
-export default SearchBar
+export default SearchBar;

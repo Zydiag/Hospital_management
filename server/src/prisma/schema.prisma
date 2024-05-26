@@ -10,7 +10,7 @@ generator client {
 // User model with enhanced data types and relationships
 model User {
   id               String    @id @default(uuid())
-  armyNo           String
+  armyNo           String    @unique
   unit             String?
   rank             String?
   dateOfCommission DateTime?
@@ -22,11 +22,12 @@ model User {
   dob              DateTime
   role             Role      @default(PATIENT)
   patient          Patient?
+  admin            Admin?
   doctor           Doctor?
   refreshToken     String
   createdAt        DateTime
   updatedAt        DateTime  @updatedAt
-  password         String?
+  password         String?   @unique
 }
 
 model Admin {
@@ -34,6 +35,8 @@ model Admin {
   adminId      String
   password     String
   refreshToken String?
+  userId        String?        @unique
+  user          User?          @relation(fields: [userId], references: [id])
 }
 
 // Role model for user access control
@@ -51,12 +54,15 @@ model Patient {
   user          User?          @relation(fields: [userId], references: [id])
   medical       Medical[]
   treatments    treatment[]
+  AMEs          AME[]
+  AME2s         AME2[]
+  PMEs          PME[]
   familyHistory familyHistory?
 }
 
 // Medical record model with relationships and enhanced data types
 model Medical {
-  id            String   @id @default(uuid())
+  id            String         @id @default(uuid())
   heightCm      Int?
   weightKg      Float?
   BMI           Float?
@@ -66,26 +72,45 @@ model Medical {
   disabilities  String?
   allergies     String?
   bloodGroup    String?
-  AME           AME[]
-  PME           PME[]
-  patient       Patient  @relation(fields: [patientId], references: [id])
   patientId     String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  doctor                  Doctor @relation(fields: [doctorId], references: [id])
+  doctorId                String   
 }
 
 model AME {
-  id        String   @id @default(uuid())
-  medical   Medical  @relation(fields: [medicalId], references: [id])
-  medicalId String
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+  patientId     String
+  patient       Patient   @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  description   String
+}
+
+model AME2 {
+  id            String    @id @default(uuid())
+ patientId     String
+  patient       Patient   @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  description   String
 }
 
 model PME {
-  id        String   @id @default(uuid())
-  medical   Medical  @relation(fields: [medicalId], references: [id])
-  medicalId String
-  createdAt DateTime @default(now())
+  id            String    @id @default(uuid())
+ patientId     String
+  patient       Patient   @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt     DateTime  @default(now())
+  date          DateTime
+  description   String
 }
 
 //Doctor model with relationships
@@ -96,9 +121,14 @@ model Doctor {
   status         Status      @default(PENDING)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
-  treatment      treatment[]
   user           User        @relation(fields: [userId], references: [id])
   request        Request?
+  AMEs          AME[]
+  AME2s         AME2[]
+  PMEs          PME[]
+  Mediacls      Medical[]
+  Treatments    treatment[]
+  familyhistories  familyHistory?
 }
 
 enum Status {
@@ -113,7 +143,7 @@ model Request {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   doctor    Doctor   @relation(fields: [doctorId], references: [id])
-  doctorId  String   @unique
+  doctorId  String   
 }
 
 // Treatment model with relationships
@@ -123,32 +153,26 @@ model treatment {
   test           Test[]
   note           String
   medicationName String
+  knownAllergies String
+  miscellaneous  String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  doctor         Doctor   @relation(fields: [doctorId], references: [id])
-  doctorId       String
   patient        Patient? @relation(fields: [patientId], references: [id])
   patientId      String?
+  doctor                  Doctor @relation(fields: [doctorId], references: [id])
+  doctorId                String   
 }
 
 // Test model with relationships
-model Test {
-  id          String     @id @default(uuid())
-  date        DateTime
-  testFor     String
-  imageUrl    String
-  result      String
-  treatment   treatment? @relation(fields: [treatmentId], references: [id])
-  treatmentId String?
-}
-
 model familyHistory {
   id                      String   @id @default(uuid())
   hypertension            String
   diabetesMellitus        String
   anyUnnaturalDeath       String
   otherSignificantHistory String
-  medical                 Patient  @relation(fields: [patientId], references: [id])
+  patient                 Patient  @relation(fields: [patientId], references: [id])
   patientId               String   @unique
+  doctor                  Doctor @relation(fields: [doctorId], references: [id])
+  doctorId                String   
   createdAt               DateTime @default(now())
 }

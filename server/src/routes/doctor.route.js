@@ -1,10 +1,9 @@
-import { Router } from 'express';
+import express from 'express';
 import { verifyjwt } from '../middlewares/authmiddlewares.js';
 import { authorizeAdmin } from '../middlewares/authmiddlewares.js';
 import { authorizeDoctor } from '../middlewares/authmiddlewares.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
-  createDoctorProfile,
   getPersonalInfo,
   updatePersonalInfo,
   getHealthRecord,
@@ -12,26 +11,36 @@ import {
   getTreatmentRecord,
   updateTreatmentRecord,
   getFamilyHistory,
-  updateFamilyHistory
-} from '../controllers/yourController.js';
-//import { errorHandler } from '../middlewares/errorHandler.js';
+  updateFamilyHistory,
+  CreateDoctorProfile,
+  addTestReport,
+  getAllTestReports,updateAME1,
+  updateAME2,
+  updatePME
+  //deletePresentReferralDetails,
+} from '../controllers/doctorcontroller.js'; // Updated import path
 
-const router = Router();
+const router = express.Router();
 
-// Unprotected routes
-router.post('/get-personal-info', asyncHandler(getPersonalInfo));
-router.post('/get-health-record', asyncHandler(getHealthRecord));
-router.post('/get-treatment-record', asyncHandler(getTreatmentRecord));
-router.post('/get-family-history', asyncHandler(getFamilyHistory));
+// In doctorroute.js
+router.get('/test', (req, res) => {
+  res.send('Test endpoint working');
+});
 
-// Protected routes
-router.post('/create-doctor-profile', verifyjwt, authorizeAdmin, asyncHandler(createDoctorProfile));
-router.post('/update-personal-info', verifyjwt, authorizeDoctor, asyncHandler(updatePersonalInfo));
-router.post('/update-health-record', verifyjwt, authorizeDoctor, asyncHandler(updateHealthRecord));
-router.post('/update-treatment-record', verifyjwt, authorizeDoctor, asyncHandler(updateTreatmentRecord));
-router.post('/update-family-history', verifyjwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
+router.post('/personal-info', asyncHandler(getPersonalInfo));
+router.get('/health-record', asyncHandler(getHealthRecord));
+router.get('/treatment-record', asyncHandler(getTreatmentRecord));
+router.get('/family-history', asyncHandler(getFamilyHistory));
+router.get('/testreports', asyncHandler(getAllTestReports));
 
-// Error handling middleware
-//router.use(errorHandler);
+//router.post('/doctor-profile',verifyjwt,authorizeAdmin,asyncHandler(CreateDoctorProfile));
+router.post('/health-record',verifyjwt,authorizeDoctor,asyncHandler(updateHealthRecord));//checked
+router.post('/treatment-record',verifyjwt,authorizeDoctor,asyncHandler(updateTreatmentRecord));//checked
+router.post('/family-history',verifyjwt,authorizeDoctor,asyncHandler(updateFamilyHistory));
+router.post('/testreport',verifyjwt,authorizeDoctor,asyncHandler(addTestReport));
+router.post('/updateAME1',verifyjwt,authorizeDoctor,asyncHandler(updateAME1));
+router.post('/updateAME2',verifyjwt,authorizeDoctor,asyncHandler(updateAME2));
+router.post('/updatePME', verifyjwt,authorizeDoctor,asyncHandler(updatePME));
+//router.delete('/present-referral-details', deletePresentReferralDetails);
 
 export default router;

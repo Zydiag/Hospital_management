@@ -19,25 +19,11 @@
     "@fortawesome/react-fontawesome": "^0.2.1",
     "@hookform/resolvers": "^3.3.4",
     "@mui/icons-material": "^5.15.18",
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "@mui/material": "^5.15.18",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@mui/x-date-pickers": "^6.20.0",
     "axios": "^1.7.2",
     "dayjs": "^1.11.11",
-=======
-<<<<<<< Updated upstream
-    "@mui/material": "^5.15.15",
-    "axios": "^1.7.2",
-=======
     "@mui/material": "^5.15.18",
->>>>>>> Stashed changes
->>>>>>> f54a3fe (conflict)
-=======
-    "@mui/material": "^5.15.15",
-    "axios": "^1.7.2",
->>>>>>> 749cf91 (conflict package.json)
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.4",

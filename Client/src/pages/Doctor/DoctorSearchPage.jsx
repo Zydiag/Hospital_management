@@ -11,7 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
 import '../../styles/StylesP/DoctorSearchPage.css';
 
-function patientSearchPage () {
+function patientSearchPage() {
   const patientData = [
     { armyNumber: 'ARMY001', patientName: 'Dr. Alice' },
     { armyNumber: 'ARMY002', patientName: 'Dr. Bob' },
@@ -35,7 +35,7 @@ function patientSearchPage () {
   const [errorMessagePatient, setErrorMessagePatient] = React.useState('');
   const [selectedRowPatient, setSelectedRowPatient] = useState(null);
 
-  const handleSearchChange = event => {
+  const handleSearchChange = (event) => {
     setSearchValuePatient(event.target.value);
   };
 
@@ -45,7 +45,7 @@ function patientSearchPage () {
       setErrorMessagePatient('Search Input is empty.');
       console.log('Error: Input is empty'); // Add this line to debug
     } else {
-      const foundData = patientData.find(data => data.armyNumber === searchValuePatient);
+      const foundData = patientData.find((data) => data.armyNumber === searchValuePatient);
       if (foundData) {
         setSelectedRowPatient(foundData);
         setErrorMessagePatient('');
@@ -86,20 +86,20 @@ function patientSearchPage () {
     <div>
       <React.Fragment>
         <Navbar />
-        <div className='doctorSearchBar'>
+        <div className="doctorSearchBar">
           <h1>Patient Search</h1>
           <SearchBar
             handleSearch={handleSearch}
             onChange={handleSearchChange}
             value={searchValuePatient}
-            placeholder='Search the doctor by Army Number'
+            placeholder="Search the doctor by Army Number"
           />
-          {errorMessagePatient && <p className='searchError'>{errorMessagePatient}</p>}
+          {errorMessagePatient && <p className="searchError">{errorMessagePatient}</p>}
           <center>
             <Button
-              className='newProfileButton'
-              variant='contained'
-              size='large'
+              className="newProfileButton"
+              variant="contained"
+              size="large"
               onClick={handleClickOpen}
             >
               Create Patient Profile
@@ -110,21 +110,21 @@ function patientSearchPage () {
           </center>
         </div>
         {selectedRowPatient && (
-          <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
-            <p className='SearchPara'>Look, What we found?</p>
+          <div className="searchRow" id="patientSearch" ref={patientSearchRef}>
+            <p className="SearchPara">Look, What we found?</p>
             <RowPatient
               key={selectedRowPatient.armyNumber}
               armyNumber={selectedRowPatient.armyNumber}
               patientName={selectedRowPatient.patientName}
-              button1='View Patient History'
-              href='/patient-history'
+              button1="View Patient History"
+              href="/patient-history"
             />
           </div>
         )}
 
         <BootstrapDialog
           onClose={handleClose}
-          aria-labelledby='customized-dialog-title'
+          aria-labelledby="customized-dialog-title"
           open={open}
           sx={{
             '& .MuiPaper-root': {
@@ -153,13 +153,13 @@ function patientSearchPage () {
             Create a Patient Profile
           </DialogTitle> */}
           <IconButton
-            aria-label='close'
+            aria-label="close"
             onClick={handleClose}
             sx={{
               position: 'absolute',
               right: 8,
               top: 8,
-              color: theme => theme.palette.grey[500],
+              color: (theme) => theme.palette.grey[500],
             }}
           >
             <CloseIcon />
@@ -173,30 +173,30 @@ function patientSearchPage () {
               marginTop: '20px',
             }}
           >
-            <form className='patientProfileForm'>
-            <h1>Create a Patient Profile</h1>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Name of the Doctor</label>
-                <input className='patientProfileInput' placeholder='Name..'></input>
+            <form className="patientProfileForm">
+              <h1>Create a Patient Profile</h1>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Name of the Doctor</label>
+                <input className="patientProfileInput" placeholder="Name.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>ARMY NUMBER</label>
-                <input className='patientProfileInput' placeholder='Army Number..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">ARMY NUMBER</label>
+                <input className="patientProfileInput" placeholder="Army Number.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Age/Service</label>
-                <input className='patientProfileInput' placeholder='Service..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Age/Service</label>
+                <input className="patientProfileInput" placeholder="Service.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Units/Service/Arms</label>
-                <input className='patientProfileInput' placeholder='Units..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Units/Service/Arms</label>
+                <input className="patientProfileInput" placeholder="Units.."></input>
               </div>
             </form>
           </DialogContent>
           <DialogActions>
             <Button
-              variant='outlined'
-              className='modalButton'
+              variant="outlined"
+              className="modalButton"
               autoFocus
               style={{
                 fontSize: '16px',

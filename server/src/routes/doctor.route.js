@@ -12,7 +12,7 @@ import {
   updateTreatmentRecord,
   getFamilyHistory,
   updateFamilyHistory,
-  CreateDoctorProfile,
+  createDoctorProfile,
   addTestReport,
   getAllTestReports,
   updateAME1,
@@ -28,13 +28,15 @@ router.get('/test', (req, res) => {
   res.send('Test endpoint working');
 });
 
-router.post('/personal-info', asyncHandler(getPersonalInfo));
+router.get('/personal-info', asyncHandler(getPersonalInfo));
 router.get('/health-record', asyncHandler(getHealthRecord));
 router.get('/treatment-record', asyncHandler(getTreatmentRecord));
 router.get('/family-history', asyncHandler(getFamilyHistory));
 router.get('/testreports', asyncHandler(getAllTestReports));
 
-//router.post('/doctor-profile',verifyjwt,authorizeAdmin,asyncHandler(CreateDoctorProfile));
+
+router.post('/doctor-profile',asyncHandler( createDoctorProfile));
+router.post('/personal-info',verifyjwt,authorizeDoctor,asyncHandler(updatePersonalInfo));
 router.post('/health-record', verifyjwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked
 router.post('/treatment-record', verifyjwt, authorizeDoctor, asyncHandler(updateTreatmentRecord)); //checked
 router.post('/family-history', verifyjwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
@@ -45,3 +47,4 @@ router.post('/updatePME', verifyjwt, authorizeDoctor, asyncHandler(updatePME));
 //router.delete('/present-referral-details', deletePresentReferralDetails);
 
 export default router;
+

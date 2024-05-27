@@ -246,12 +246,12 @@ export const getFamilyHistory=asyncHandler(async(req,res)=>{
 
 });
 
-export const getAllTestReports = asyncHandler(async (req, res) => {
-  const { armyNo,date } = req.body;
+export const getAmeReports = asyncHandler(async (req, res) => {
+  const { armyNo ,date} = req.body;
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
-    where: { armyNo },
+    where: { armyNo ,role:"PATIENT"},
     select: { id: true },
   });
 
@@ -264,33 +264,85 @@ export const getAllTestReports = asyncHandler(async (req, res) => {
     userId:user.id,
   }
  })
- if(!patient){
-  throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
- }
   // Find all AME, AME2, and PME test reports associated with the user
   const ameReports = await prisma.AME.findMany({
     where: {patientId:patient.id,createdAt:new Date(date)},
   });
   console.log(ameReports);
-  const ame2Reports = await prisma.AME2.findMany({
-    where: {patientId:patient.id,createdAt:new Date(date)},
-  });
-  console.log(ame2Reports);
-  const pmeReports = await prisma.PME.findMany({
-    where: {patientId:patient.id,createdAt:new Date(date)},
-  });
-  console.log(pmeReports);
-  // Combine all reports into a single array
-  const allReports = [...ameReports, ...ame2Reports, ...pmeReports];
 
   // If no reports found, return an empty array
-  if (!allReports || allReports.length === 0) {
-    res.json(new ApiResponse(HttpStatusCode.OK, [], 'No test report found'));
+  if (!ameReports) {
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
   }
 
   // Return all the test reports
-  res.json(new ApiResponse(HttpStatusCode.OK, allReports, 'Test-reports:-'));
+  res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame test reports retrieved successfully'));
 });
+export const getAme1Reports = asyncHandler(async (req, res) => {
+  const { armyNo ,date} = req.body;
+
+  // Find the user by army number
+  const user = await prisma.User.findFirst({
+    where: { armyNo ,role:"PATIENT"},
+    select: { id: true },
+  });
+
+  // If user not found, throw an error
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
+  }
+ const patient=await prisma.Patient.findFirst({
+  where:{
+    userId:user.id,
+  }
+ })
+  // Find all AME, AME2, and PME test reports associated with the user
+  const ameReports = await prisma.AME1.findMany({
+    where: {patientId:patient.id,createdAt:new Date(date)},
+  });
+  console.log(ameReports);
+
+  // If no reports found, return an empty array
+  if (!ameReports) {
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
+  }
+
+  // Return all the test reports
+  res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame1 test reports retrieved successfully'));
+});
+export const getPmeReports = asyncHandler(async (req, res) => {
+  const { armyNo ,date} = req.body;
+
+  // Find the user by army number
+  const user = await prisma.User.findFirst({
+    where: { armyNo ,role:"PATIENT"},
+    select: { id: true },
+  });
+
+  // If user not found, throw an error
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
+  }
+ const patient=await prisma.Patient.findFirst({
+  where:{
+    userId:user.id,
+  }
+ })
+  // Find all AME, AME2, and PME test reports associated with the user
+  const ameReports = await prisma.PME.findMany({
+    where: {patientId:patient.id,createdAt:new Date(date)},
+  });
+  console.log(ameReports);
+
+  // If no reports found, return an empty array
+  if (!ameReports) {
+    return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
+  }
+
+  // Return all the test reports
+  res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Pme test reports retrieved successfully'));
+});
+
 
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {

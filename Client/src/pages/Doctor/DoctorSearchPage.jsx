@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import SearchBar from '../../components/SearchBar';
-import Button from '@mui/material/Button';
 import RowPatient from '../../components/RowPatient';
-import BootstrapDialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
+import { Dialog, DialogContent, DialogActions, IconButton, TextField, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import TextField from '@mui/material/TextField';
 import '../../styles/StylesP/DoctorSearchPage.css';
 
 function patientSearchPage() {
@@ -72,12 +67,10 @@ function patientSearchPage() {
 
   //for Dialog Box
 
-  const [open, setOpen] = React.useState(false);
-
+  const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -86,28 +79,30 @@ function patientSearchPage() {
     <div>
       <React.Fragment>
         <Navbar />
-        <div className="doctorSearchBar">
-          <h1>Patient Search</h1>
+        <div className="bg-tertiary py-10 flex flex-col gap-10 justify-center">
           <SearchBar
             handleSearch={handleSearch}
             onChange={handleSearchChange}
             value={searchValuePatient}
-            placeholder="Search the doctor by Army Number"
+            placeholder="Search Patient by Army no."
           />
           {errorMessagePatient && <p className="searchError">{errorMessagePatient}</p>}
-          <center>
+          <div className="flex justify-center items-center gap-5">
+            <p>Couldn't find the user? Create a New patient Record.</p>
             <Button
-              className="newProfileButton"
               variant="contained"
-              size="large"
+              color="primary"
+              className="h-full"
               onClick={handleClickOpen}
+              style={{
+                padding: '8px 32px', // Adjust the padding here
+                backgroundColor: '#E99B00',
+                color: '#ffffff',
+              }}
             >
               Create Patient Profile
             </Button>
-            <p style={{ fontSize: '20px', marginTop: '2vh' }}>
-              Couldn't find the user? Create a New patient Record.
-            </p>
-          </center>
+          </div>
         </div>
         {selectedRowPatient && (
           <div className="searchRow" id="patientSearch" ref={patientSearchRef}>
@@ -122,7 +117,7 @@ function patientSearchPage() {
           </div>
         )}
 
-        <BootstrapDialog
+        <Dialog
           onClose={handleClose}
           aria-labelledby="customized-dialog-title"
           open={open}
@@ -212,7 +207,7 @@ function patientSearchPage() {
               Create
             </Button>
           </DialogActions>
-        </BootstrapDialog>
+        </Dialog>
       </React.Fragment>
     </div>
   );

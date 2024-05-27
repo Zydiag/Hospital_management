@@ -4,6 +4,7 @@ export const AccountType = {
   Patient: 'Patient',
 };
 
+// use icon from material ui
 export const links = [
   { to: '/doctor-panel', label: 'Home', icon: 'Home' },
   { to: '/search-patient', label: 'Search Patient', icon: 'Search' },

@@ -1,4 +1,4 @@
-//import { apiError } from '../utils/apiError.js';
+import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
@@ -50,7 +50,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
     !password ||
     !specialization
   ) {
-    throw new APIError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
+    throw new apiError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
   }
   const parsedDob = new Date(dob);
 
@@ -62,7 +62,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
   if (existedDoctor) {
     // console.log("already exist ");
     // throw new error("Doctor already exists");
-    throw new APIError(400, 'Doctor already exists');
+    throw new apiError(400, 'Doctor already exists');
   }
 
   // Hash password
@@ -95,7 +95,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
       },
     });
   } catch (error) {
-    throw new APIError(401, error?.message || 'Something went wrong while creating doctor request');
+    throw new apiError(401, error?.message || 'Something went wrong while creating doctor request');
   }
 
   let createdDoctor = await prisma.user.findFirst({
@@ -114,7 +114,7 @@ export const loginDoctor = asyncHandler(async (req, res) => {
   const { armyNo, password } = req.body;
   // check if all fields are filled
   if (!password || !armyNo) {
-    throw new APIError(400, 'All fields are  required');
+    throw new apiError(400, 'All fields are  required');
   }
   const doctor = await prisma.user.findFirst({
     where: {
@@ -122,16 +122,16 @@ export const loginDoctor = asyncHandler(async (req, res) => {
     },
   });
   if (!doctor) {
-    throw new APIError(404, 'User(doctor) not found');
+    throw new apiError(404, 'User(doctor) not found');
   }
   // check if password is correct
   const isCorrect = await bcrypt.compare(password, doctor.password);
   if (!isCorrect) {
-    throw new APIError(401, 'Incorrect password');
+    throw new apiError(401, 'Incorrect password');
   }
 // check if user is a doctor
   if (doctor.role !== 'DOCTOR') {
-    throw new APIError(401, 'User is not a doctor');
+    throw new apiError(401, 'User is not a doctor');
   }
   let userDoctor = await prisma.doctor.findFirst({
     where: {
@@ -141,7 +141,7 @@ export const loginDoctor = asyncHandler(async (req, res) => {
   // check status of doctor ( pending or approved )
   if (userDoctor.status !== 'APPROVED') {
     res.json(new ApiResponse(401, user, 'Doctor is not approved yet, so you cannot login'));
-    throw new APIError(401, 'Doctor is not approved yet');
+    throw new apiError(401, 'Doctor is not approved yet');
   }
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(doctor);
   await prisma.user.update({
@@ -264,6 +264,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     next(error);
   }
 });
+
 
 // Read Health Record
 export const getHealthRecord = asyncHandler(async (req, res, next) => {

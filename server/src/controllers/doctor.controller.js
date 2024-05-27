@@ -197,7 +197,7 @@ export const getPersonalInfo =  asyncHandler(async (req, res) => {
   console.log('Inside getPersonalInfo function');
   console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
 
-  const { unit, rank, firstName, middleName, lastName, email, mobileNo, dob ,armyNo,date} = req.body;
+  const { armyNo} = req.body;
 
   console.log(armyNo);
 
@@ -208,68 +208,26 @@ export const getPersonalInfo =  asyncHandler(async (req, res) => {
   let user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
+      role:"PATIENT",
     },
   });
-
   if (!user) {
-    // Validation for all required fields
-    if (!unit || !rank || !firstName || !lastName || !dob||!date) {
-      throw new apiError(HttpStatusCode.BAD_REQUEST, 'All fields are required to create a new user');
-    }
-
-    // Generate a refresh token for the new user
-    const refreshToken = generateRefreshToken({ id: armyNo });
-    console.log (refreshToken);
-    user = await prisma.User.create({
-      data: {
-        armyNo,
-        unit,
-        rank,
-        firstName,
-        middleName,
-        lastName,
-        email,
-        mobileNo,
-        dob: new Date(dob), // Assuming dob is provided as a string in 'YYYY-MM-DD' format
-        role: 'PATIENT', // Default role for this example
-        refreshToken,
-       createdAt:new Date(date),
-       updatedAt:new Date(date)
-      },
-    });
-    
-    const userId = user.id; // Assuming you need the user ID for creating a patient entry
-    // Create a patient entry for the user
-   const  patient = await prisma.Patient.create({
-      data: {
-        userId: userId,
-      },
-    });
-   
-  } else if (!user.refreshToken) {
-    // If user exists but does not have a refresh token, generate a new refresh token and update the user
-    const refreshToken = generateRefreshToken(user);
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    });
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient is not Regestered');
   }
-
-  // Set the refresh token as an HTTP-only cookie
-  res.cookie('refreshToken', user.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Ensure the cookie is only sent over HTTPS in production
-    sameSite: 'Strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
-
-  res.json(new ApiResponse(HttpStatusCode.OK, user, 'User retrieved successfully'));
+  let info={
+    armyNo:user.armyNo,
+    fullname:user.firstName,
+    age:calculateAge(user.dob),
+    unit:user.unit
+  }
+  
+  res.json(new ApiResponse(HttpStatusCode.OK, info, 'Personal Record:-'));
 });
 
 // Update Personal Info
 export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
   try {
-    const { armyNo, unit, rank, dateOfCommission, firstName, middleName, lastName, email, mobileNo, dob, refreshToken } = req.body;
+    const { armyNo, unit, firstName, dob } = req.body;
 
     // Find the user by army number
     const existingUser = await prisma.User.findFirst({
@@ -279,25 +237,25 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({ error: 'User not found with the provided army number' });
+      await prisma.User.create({
+        armyNo:armyNo,
+        unit:unit,
+        firstName:firstName,
+        dob:dob,
+        role:"PATIENT",
+      })
     }
 
     // Update the user data
     const updatedUser = await prisma.User.update({
       where: {
-        id: existingUser.id, // Use id as the unique identifier
+       armyNo:armyNo, // Use id as the unique identifier
       },
       data: {
-        unit,
-        rank,
-        dateOfCommission,
-        firstName,
-        middleName,
-        lastName,
-        email,
-        mobileNo,
-        dob,
-        refreshToken // Assuming refreshToken is part of the User model
+        unit:unit,
+        firstName:firstName,
+        dob:dob,
+       // Assuming refreshToken is part of the User model
       },
     });
 
@@ -306,7 +264,6 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     next(error);
   }
 });
-
 
 // Read Health Record
 export const getHealthRecord = asyncHandler(async (req, res, next) => {

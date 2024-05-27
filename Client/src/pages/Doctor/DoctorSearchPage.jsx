@@ -4,7 +4,6 @@ import SearchBar from '../../components/SearchBar';
 import Button from '@mui/material/Button';
 import RowPatient from '../../components/RowPatient';
 import BootstrapDialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';

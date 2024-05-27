@@ -2,13 +2,14 @@ import React from 'react';
 import '../styles/StylesC/RowPatient.css';
 import Button from '@mui/material/Button';
 
-function RowPatient ({ button1, patientName, armyNumber, handleClick, href}) {
+function RowPatient ({ button1, patientName, armyNumber, handleClick,date, href}) {
 
   
   return (
     <div className='rowPatient'>
       <p className='Patient'>{patientName}</p>
       <p className='armyNumber'>{armyNumber}</p>
+      <p className='entryDate' >{date}</p>
       <div className='rowPatientButton'>
         
           <Button

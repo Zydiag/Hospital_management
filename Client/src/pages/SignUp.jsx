@@ -43,18 +43,23 @@ export default function SignUp() {
 
   return (
     <div className="flex justify-center items-center w-full h-screen">
-      <div className="flex items-center justify-center border drop-shadow-sm relative rounded-md w-[80%] p-3 m-10 max-w-[1280px]">
+      <div className="flex items-center justify-center border border-gray-300 drop-shadow-md relative rounded-md w-[80%] p-3 m-10 max-w-[1280px]">
         <img
           src={SignUpSideImage}
           alt="login page side image"
           className="hidden md:block md:w-1/2 lg:w-[40%] object-cover rounded "
         />
-        <div className="text-white absolute z-10 top-[50%] translate-y-[-50%] left-20">
-          <h1 className="text-4xl font-bold">Welcome to </h1>
-          <h1 className="text-4xl font-bold">DHARAM</h1>
-          <p className="text-gray-100 mt-5">Defence Health Automated Record Management</p>
+        <div
+          className="text-white absolute flex flex-col flex-wrap z-10 top-[50%] translate-y-[-50%] left-[0%]
+					xl:translate-x-[20%] lg:translate-x-[10%]"
+        >
+          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">Welcome to </h1>
+          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">DHARAM</h1>
+          <p className="text-gray-100 mt-5  md:hidden lg:block lg:text-sm xl:text-base hidden">
+            Defence Health Automated Record Management
+          </p>
         </div>
-        <div className="bg-gray-600 absolute bottom-10 p-4 rounded-md left-[5%] w-[30%]">
+        <div className="bg-gray-600 absolute bottom-10 p-4 hidden xl:block rounded-md left-[5%] w-[30%]">
           <p className="text-white">
             "In this modern era of military healthcare, an advanced solution is crucial to
             effectively meet the evolving needs of our troops."

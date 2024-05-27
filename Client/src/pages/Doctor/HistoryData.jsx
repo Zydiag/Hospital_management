@@ -1,15 +1,15 @@
 import React from 'react';
 import CustomTable from '../../components/CustomTable';
 
-function HistoryData() {
-    const rows =[
+import { rows } from '../../constants';
 
-    ]
+function HistoryData() {
   return (
     <div>
-      <CustomTable />
+      <CustomTable headings={rows} rows={rows} />
     </div>
-  )
+  );
 }
 
-export default HistoryData
+export default HistoryData;
+

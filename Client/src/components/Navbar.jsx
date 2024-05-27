@@ -12,17 +12,12 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
+import { links } from '../constants';
 
 export const getIconComponent = (iconName) => {
   const IconComponent = Icons[iconName];
   return IconComponent ? <IconComponent /> : null;
 };
-
-const links = [
-  { to: '/doctor-panel', label: 'Home', icon: 'Home' },
-  { to: '/search-patient', label: 'Search Patient', icon: 'Search' },
-  { to: '/create-patient', label: 'Create Patient', icon: 'Add' },
-];
 
 function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

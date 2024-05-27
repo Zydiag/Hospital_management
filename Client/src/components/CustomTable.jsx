@@ -8,11 +8,9 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 function CustomTable({ headings, rows }) {
-
-  
-function createData() {
-  return { name, calories, fat, carbs, protein };
-}
+  function createData() {
+    return { name, calories, fat, carbs, protein };
+  }
 
   return (
     <TableContainer component={Paper}>
@@ -20,12 +18,12 @@ function createData() {
         <TableHead>
           <TableRow>
             {headings.map((heading, index) => (
-              <TableCell key={index}>{heading}</TableCell>
+              <TableCell key={index}>{heading[0]}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {{rows}.map((row, rowIndex) => (
+          {rows.map((row, rowIndex) => (
             <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell>{Object.values(row)[0]}</TableCell>
               <TableCell align="right">{Object.values(row)[1]}</TableCell>

@@ -1,4 +1,4 @@
-import { APIError } from '../utils/apiError.js';
+import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
@@ -22,7 +22,7 @@ const generateAccessAndRefreshToken = asyncHandler(async (user) => {
     return { accessToken, refreshToken };
   } catch (error) {
     console.log('error: ', error);
-    throw new APIError(500, 'Something went wrong while generating access and refresh token');
+    throw new apiError(500, 'Something went wrong while generating access and refresh token');
   }
 });
 
@@ -32,7 +32,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
   const { adminId, firstName, lastName, email, dob, password } = req.body;
   // Check if all fields are filled
   if (!adminId || !firstName || !dob || !password) {
-    throw new APIError(400, 'All fields are required to create a new user');
+    throw new apiError(400, 'All fields are required to create a new user');
   }
   const armyNo= adminId;
   const parsedDob = new Date(dob);
@@ -64,7 +64,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
     });
     res.status(201).json(newAdmin);
   } catch (error) {
-    throw new APIError(401, error?.message || 'Something went wrong while creating doctor request');
+    throw new apiError(401, error?.message || 'Something went wrong while creating doctor request');
   }
 });
 
@@ -94,7 +94,7 @@ export const getDoctorProfile=asyncHandler(async(req,res)=>{
 
   })
   if(!user){
-    throw new APIError(400, 'Doctor not found');
+    throw new apiError(400, 'Doctor not found');
   }
   let ourDoctor={
     armyNo:user.armyNo,
@@ -111,10 +111,10 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 
   // check if all fields are filled
   if (!adminId) {
-    throw new APIError(400, 'id  required');
+    throw new apiError(400, 'id  required');
   }
   if (!password) {
-    throw new APIError(400, 'password  required');
+    throw new apiError(400, 'password  required');
   }
 
   // check if user exists
@@ -125,13 +125,13 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   });
 
   if (!Admin) {
-    throw new APIError(404, 'User not found');
+    throw new apiError(404, 'User not found');
   }
 
   // check if password is correct
   const isCorrect = await bcrypt.compare(password, Admin.password);
   if (!isCorrect) {
-    throw new APIError(401, 'Incorrect password');
+    throw new apiError(401, 'Incorrect password');
   }
 const user= await prisma.User.findUnique({
   where: {
@@ -255,7 +255,7 @@ export const approveRequest = asyncHandler(async (req, res)=> {
   const { doctorId } = req.body;
   const request = await prisma.Request.findUnique({ where: { doctorId } });
   if (!request) {
-    throw new APIError(404, 'Request not found');
+    throw new apiError(404, 'Request not found');
   }
   
   const updatedRequest = await prisma.Doctor.update({
@@ -269,7 +269,7 @@ export const rejectRequest = asyncHandler(async (req, res) => {
   const { doctorId } = req.body;
   const request = await prisma.Request.findUnique({ where: {id: doctorId } });
   if (!request) {
-    throw new APIError(404, 'Request not found');
+    throw new apiError(404, 'Request not found');
   }
   const updatedRequest = await prisma.Doctor.update({
     where: { doctorId },
@@ -286,7 +286,7 @@ export const blokingAcceptedDoctor = asyncHandler(async (req, res) => {
   const { doctorId } = req.body;
   const request = await prisma.Request.findUnique({ where: { doctorId } });
   if (!request) {
-    throw new APIError(404, 'Request not found');
+    throw new apiError(404, 'Request not found');
   }
   const updatedRequest = await prisma.Doctor.update({
     where: { doctorId },

@@ -29,7 +29,7 @@
 
 // export { BaseError, APIError };
 
-class APIError extends Error {
+class apiError extends Error {
   constructor(
       stsatusCode,
       message= "something went wrong",
@@ -51,4 +51,4 @@ class APIError extends Error {
       }
   }
 }
-export {APIError}
+export {apiError}

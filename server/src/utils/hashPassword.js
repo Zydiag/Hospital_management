@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { APIError } from './apiError.js';
+import { apiError } from './apiError.js';
 
 export const hashPassword = asyncHandler(async (password) => {
   try {
@@ -12,6 +12,6 @@ export const hashPassword = asyncHandler(async (password) => {
 
     return hash;
   } catch (error) {
-    throw new APIError(500, error.message);
+    throw new apiError(500, error.message);
   }
 });

@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyjwt } from '../middlewares/auth.middlewares.js';
+import { verifyJwt } from '../middlewares/auth.middlewares.js';
 //import { authorizeAdmin } from '../middlewares/authmiddlewares.js';
 import { authorizeDoctor } from '../middlewares/auth.middlewares.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -36,15 +36,14 @@ router.get('/testreports', asyncHandler(getAllTestReports));
 
 
 router.post('/doctor-profile',asyncHandler( createDoctorProfile));
-router.post('/personal-info',verifyjwt,authorizeDoctor,asyncHandler(updatePersonalInfo));
-router.post('/health-record', verifyjwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked
-router.post('/treatment-record', verifyjwt, authorizeDoctor, asyncHandler(updateTreatmentRecord)); //checked
-router.post('/family-history', verifyjwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
-router.post('/testreport', verifyjwt, authorizeDoctor, asyncHandler(addTestReport));
-router.post('/updateAME1', verifyjwt, authorizeDoctor, asyncHandler(updateAME1));
-router.post('/updateAME2', verifyjwt, authorizeDoctor, asyncHandler(updateAME2));
-router.post('/updatePME', verifyjwt, authorizeDoctor, asyncHandler(updatePME));
+router.post('/personal-info',verifyJwt,authorizeDoctor,asyncHandler(updatePersonalInfo));
+router.post('/health-record', verifyJwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked
+router.post('/treatment-record', verifyJwt, authorizeDoctor, asyncHandler(updateTreatmentRecord)); //checked
+router.post('/family-history', verifyJwt, authorizeDoctor, asyncHandler(updateFamilyHistory));
+router.post('/testreport', verifyJwt, authorizeDoctor, asyncHandler(addTestReport));
+router.post('/updateAME1', verifyJwt, authorizeDoctor, asyncHandler(updateAME1));
+router.post('/updateAME2', verifyJwt, authorizeDoctor, asyncHandler(updateAME2));
+router.post('/updatePME', verifyJwt, authorizeDoctor, asyncHandler(updatePME));
 //router.delete('/present-referral-details', deletePresentReferralDetails);
 
 export default router;
-

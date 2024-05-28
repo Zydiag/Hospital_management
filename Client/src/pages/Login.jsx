@@ -1,5 +1,4 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-
 import {
   TextField,
   FormControl,
@@ -10,35 +9,44 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
-
-import LoginSideImage from '../assets/login-side-image.jpg';
 import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import LoginSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
 
+// Zod schema for validation
+const loginSchema = z.object({
+  profession: z.enum([AccountType.Admin, AccountType.Doctor, AccountType.Patient], {
+    required_error: 'Account type is required',
+  }),
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(50, 'Name must be less than 50 characters')
+    .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 export default function Login() {
-  const [profession, setProfession] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('');
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleLogin = () => {
-    // Implement your signup logic here
-    console.log('Login:', { profession, password, confirmPassword });
-  };
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleChange = (event) => {
-    setProfession(event.target.value);
+  const onSubmit = (data) => {
+    console.log('Login data:', data);
+    // Implement your login logic here
   };
 
   return (
@@ -51,7 +59,7 @@ export default function Login() {
         />
         <div
           className="text-white absolute flex flex-col flex-wrap z-10 top-[50%] translate-y-[-50%] left-[0%]
-					xl:translate-x-[20%] lg:translate-x-[10%]"
+          xl:translate-x-[20%] lg:translate-x-[10%]"
         >
           <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">Welcome to </h1>
           <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">DHARAM</h1>
@@ -70,52 +78,87 @@ export default function Login() {
           <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full">
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Account Type</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={profession}
-                label="Account Type"
-                onChange={handleChange}
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="account-type-label">Account Type</InputLabel>
+                <Controller
+                  name="profession"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      labelId="account-type-label"
+                      label="Account Type"
+                      error={!!errors.profession}
+                    >
+                      <MenuItem value={AccountType.Admin}>Admin</MenuItem>
+                      <MenuItem value={AccountType.Doctor}>Doctor</MenuItem>
+                      <MenuItem value={AccountType.Patient}>Patient</MenuItem>
+                    </Select>
+                  )}
+                />
+                {errors.profession && (
+                  <span className="text-red-500">{errors.profession.message}</span>
+                )}
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <Controller
+                  name="name"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Name"
+                      variant="outlined"
+                      error={!!errors.name}
+                      helperText={errors.name ? errors.name.message : ''}
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <Controller
+                  name="password"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      type={showPassword ? 'text' : 'password'}
+                      label="Password"
+                      variant="outlined"
+                      error={!!errors.password}
+                      helperText={errors.password ? errors.password.message : ''}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={handleClickShowPassword} edge="end">
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+              </FormControl>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{
+                  backgroundColor: '#EFB034', // Your theme color
+                  height: '56px', // Match the height of the TextField component
+                  color: '#ffffff',
+                  margin: '8px 0',
+                }}
               >
-                <MenuItem value={AccountType.Admin}>Admin</MenuItem>
-                <MenuItem value={AccountType.Doctor}>Doctor</MenuItem>
-                <MenuItem value={AccountType.Patient}>Patient</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField fullWidth id="outlined-basic" label="Name" variant="outlined" />
-            <TextField
-              id="outlined-password"
-              type={showPassword ? 'text' : 'password'}
-              label="Password"
-              variant="outlined"
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleClickShowPassword} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={handleLogin}
-              style={{
-                backgroundColor: '#EFB034', // Your theme color
-                height: '56px', // Match the height of the TextField component
-                color: '#ffffff',
-              }}
-            >
-              Login
-            </Button>
+                Login
+              </Button>
+            </form>
           </div>
         </div>
       </div>

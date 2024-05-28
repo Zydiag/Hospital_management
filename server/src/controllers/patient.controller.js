@@ -23,78 +23,30 @@ const generateRefreshToken = (user) => {
 export const profilepatient = asyncHandler(async(req,res)=>{
     console.log("you are inside patient profile creation");
     console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
-    const{armyNo,password,confirmpassword}=req.body;
-    if(!armyNo||!password||!confirmpassword){
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'armyNo,Password required');
+    const{armyNo,dob,firstName,password}=req.body;
+    if(!armyNo||!password||!dob||!firstName){
+      throw new apiError(HttpStatusCode.NOT_FOUND, 'all feilds are required');
     }
-    if(password!=confirmpassword){
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'Password does not match');
-    }
-    const user =await prisma.User.findFirst({where:{armyNo}});
+    const user =await prisma.User.findFirst({where:{armyNo,role:"PATIENT"}});
     if(!user){
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
-    }
-    if(user.refreshToken==null&&user.password!=null){
-      res.json(new ApiResponse(HttpStatusCode.OK, user, 'user has signed up already'));
-    }
-    if(user.refreshToken==null&&user.password==null){
       throw new apiError(HttpStatusCode.NOT_FOUND, 'Access Denied');
     }
-    console.log(user);
-  
-    try {
-      console.log('User refresh token:', user.refreshToken); 
-      // Debugging statement
-      jwt.verify(user.refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      
-      console.log('Refresh token verified successfully'); // Debugging statement
-      const hashedPassword = await bcrypt.hash(password, 10);
-      console.log(hashedPassword);
-      console.log(armyNo);
-       
-        console.log('Password hashed successfully'); 
-        console.log('Updating user...');// Debugging statement
-        
-        const used=await prisma.User.update({
-          where: { armyNo:armyNo },
-          data: {
-            refreshToken:null,
-           password: hashedPassword,
-          }
-       });
-        console.log('User updated successfully'); 
-        res.json(new ApiResponse(HttpStatusCode.OK, updatedTest, 'Profile set up successfully'));
-      } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-          res.status(401).send('Refresh token expired');
-        } else if (error.name === 'JsonWebTokenError') {
-          res.status(500).send('Invalid refresh token');
-        } else {
-          res.status(500).send('Internal server error ');
-      }}
-
-});
-//login patient
-export const loginpatient = asyncHandler(async(req,res)=>{
-    console.log("you are inside login system of patient");
-    const {armyNo, password}=req.body;
-    const user=await prisma.User.findUnique({
-        where:{
-           armyNo:armyNo     
-        }
-    })
-    if(!user){
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
+    if(user.password!=null){
+      res.json(new ApiResponse(HttpStatusCode.OK, user, 'user has signed up already'));
     }
-    bcrypt.compare(password, user.password, function(err, result) {
-      if (err) {
-        throw new apiError(HttpStatusCode.NOT_FOUND, 'Password is incorrect');
-      } else if(result) {
-        res.json(new ApiResponse(HttpStatusCode.OK, user, 'user login successful'));
-      } 
-      else{
-        throw new apiError(HttpStatusCode.NOT_FOUND, 'Password is incorrect');}
-    });
+    console.log(user);
+    if(user.password==null){
+      await prisma.User.update({
+        data:{
+          armyNo:armyNo,
+          dob:dob,
+          firstName:firstName,
+          password:password,
+        }
+      })
+    }
+  
+    
 })
 //perosnal-info-section1-patient
 export const getpersonalinfo=asyncHandler(async(req,res)=>{
@@ -171,6 +123,7 @@ export const getPersonalMedicalHistory=asyncHandler(async(req,res)=>{
   const user =await prisma.User.findFirst({
     where:{
       armyNo:armyNo,
+      role:"PATIENT",
     }
   })
     if(!user){
@@ -278,6 +231,7 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   // Return all the test reports
   res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame test reports retrieved successfully'));
 });
+
 export const getAme1Reports = asyncHandler(async (req, res) => {
   const { armyNo ,date} = req.body;
 
@@ -310,6 +264,7 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   // Return all the test reports
   res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame1 test reports retrieved successfully'));
 });
+
 export const getPmeReports = asyncHandler(async (req, res) => {
   const { armyNo ,date} = req.body;
 
@@ -335,6 +290,7 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   console.log(ameReports);
 
   // If no reports found, return an empty array
+ 
   if (!ameReports) {
     return res.json(new ApiResponse(HttpStatusCode.NOT_FOUND, [], 'No test reports found'));
   }
@@ -342,8 +298,6 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   // Return all the test reports
   res.json(new ApiResponse(HttpStatusCode.OK, ameReports, 'Pme test reports retrieved successfully'));
 });
-
-
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {
     console.error(err.stack);
@@ -351,3 +305,4 @@ export const errorHandler = (err, req, res, next) => {
       message: err.message || 'Internal Server Error',
     });
   };
+

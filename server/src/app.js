@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import doctorRoutes from './routes/doctor.route.js';
 import adminRoutes from './routes/admin.route.js';
 import patientroutes from './routes/patient.route.js';
+import { corsOptions } from './config/index.js';
 export const app = express();
 
 app.use(express.json({ type: 'application/json' }));
@@ -14,12 +15,7 @@ app.use(cookieParser());
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientroutes);
 app.use('/api/admin', adminRoutes);
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGINS || 'http://localhost:3000',
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

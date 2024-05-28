@@ -158,7 +158,7 @@ export default function Login() {
                   margin: '8px 0',
                 }}
               >
-                Sign Up
+                Login
               </Button>
             </form>
           </div>

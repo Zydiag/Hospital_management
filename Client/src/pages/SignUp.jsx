@@ -10,11 +10,14 @@ import {
   IconButton,
 } from '@mui/material';
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import SignUpSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
+import useAuthStore from '../stores/authStore';
 
 // Zod schema form validation
 const signUpSchema = z
@@ -22,11 +25,13 @@ const signUpSchema = z
     profession: z.enum([AccountType.Admin, AccountType.Doctor, AccountType.Patient], {
       required_error: 'Account type is required',
     }),
+    armyNo: z.string().min(1, 'Army No. is required'),
     name: z
       .string()
       .min(1, 'Name is required')
       .max(50, 'Name must be less than 50 characters')
       .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
+    dob: z.string().min(1, 'Date of birth is required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
   })
@@ -37,10 +42,9 @@ const signUpSchema = z
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  const signup = useAuthStore((state) => state.signup);
+  const error = useAuthStore((state) => state.error);
+  const navigate = useNavigate();
 
   const {
     handleSubmit,
@@ -50,38 +54,57 @@ export default function SignUp() {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log('SignUp data:', data);
-    //signup here
+  const watchProfession = useWatch({
+    control,
+    name: 'profession',
+    defaultValue: '',
+  });
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const onSubmit = async (data) => {
+    const formData = {
+      ...data,
+      adminId: data.profession,
+      dob: new Date(data.dob).toISOString(), // Adjust date format if necessary
+    };
+    await signup(formData);
+    if (!error) {
+      navigate('/dashboard');
+    }
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-screen">
-      <div className="flex items-center justify-center border border-gray-300 drop-shadow-md relative rounded-md w-[80%] p-3 m-10 max-w-[1280px]">
-        <img
-          src={SignUpSideImage}
-          alt="signup page side image"
-          className="hidden md:block md:w-1/2 lg:w-[40%] object-cover rounded "
-        />
+    <div className="flex justify-center items-center w-full h-screen p-0 md:p-4 lg:px-12">
+      <div
+        className="h-full flex items-center justify-center border border-gray-300 drop-shadow-md relative rounded-md
+				 w-full md:w-[80%] p-3 md:m-10 max-w-[1280px]"
+      >
         <div
-          className="text-white absolute flex flex-col flex-wrap z-10 top-[50%] translate-y-[-50%] left-[0%]
-          xl:translate-x-[20%] lg:translate-x-[10%]"
+          className="h-full relative flex-1 overflow-hidden rounded-md  flex-col justify-end
+					gap-48  p-4 md:p-10 hidden md:flex"
         >
-          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">Welcome to </h1>
-          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">DHARAM</h1>
-          <p className="text-gray-100 mt-5  md:hidden lg:block lg:text-sm xl:text-base hidden">
-            Defence Health Automated Record Management
-          </p>
+          <img
+            src={SignUpSideImage}
+            alt="signup page side image"
+            className="absolute top-0 left-0 h-full object-cover -z-10 xl:w-full"
+          />
+          <div className="text-white">
+            <h1 className="text-4xl md:text-5xl font-semibold">Welcome to </h1>
+            <h1 className="text-4xl md:text-5xl font-bold">DHARAM</h1>
+            <p className="text-sm md:text-base">Defence Health Automated Record Management</p>
+          </div>
+          <div className="p-2 md:p-5 bg-gray-600  rounded-md">
+            <p className="text-white text-xs md:text-sm">
+              "In this modern era of military healthcare, an advanced solution is crucial to
+              effectively meet the evolving needs of our troops."
+            </p>
+          </div>
         </div>
-        <div className="bg-gray-600 absolute bottom-10 p-4 hidden xl:block rounded-md left-[5%] w-[30%]">
-          <p className="text-white">
-            "In this modern era of military healthcare, an advanced solution is crucial to
-            effectively meet the evolving needs of our troops."
-          </p>
-        </div>
-
-        <div className="relative flex-1 flex justify-center items-center">
-          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full">
+        <div className="relative flex-1 flex justify-center items-center h-full">
+          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -110,16 +133,52 @@ export default function SignUp() {
               </FormControl>
               <FormControl fullWidth margin="normal">
                 <Controller
-                  name="name"
+                  name="armyNo"
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Name"
+                      label="Army No."
                       variant="outlined"
-                      error={!!errors.name}
-                      helperText={errors.name ? errors.name.message : ''}
+                      error={!!errors.armyNo}
+                      helperText={errors.armyNo ? errors.armyNo.message : ''}
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <Controller
+                  name="fullName"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Full Name"
+                      variant="outlined"
+                      error={!!errors.fullName}
+                      helperText={errors.fullName ? errors.fullName.message : ''}
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <Controller
+                  name="dob"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Date of Birth"
+                      type="date"
+                      variant="outlined"
+                      error={!!errors.dob}
+                      helperText={errors.dob ? errors.dob.message : ''}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
                     />
                   )}
                 />
@@ -176,6 +235,25 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
+              {/* Specialization Field - Render only if the profession is Doctor */}
+              {watchProfession === AccountType.Doctor && (
+                <FormControl fullWidth margin="normal">
+                  <Controller
+                    name="specialization"
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Specialization"
+                        variant="outlined"
+                        error={!!errors.specialization}
+                        helperText={errors.specialization ? errors.specialization.message : ''}
+                      />
+                    )}
+                  />
+                </FormControl>
+              )}
               <Button
                 type="submit"
                 variant="contained"

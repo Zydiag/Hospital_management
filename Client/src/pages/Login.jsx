@@ -21,11 +21,11 @@ const loginSchema = z.object({
   profession: z.enum([AccountType.Admin, AccountType.Doctor, AccountType.Patient], {
     required_error: 'Account type is required',
   }),
-  name: z
+  armyNo: z
     .string()
-    .min(1, 'Name is required')
-    .max(50, 'Name must be less than 50 characters')
-    .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
+    .min(1, 'ArmyNo is required')
+    .max(50, 'ArmyNo must be less than 50 characters')
+    .regex(/^[a-zA-Z\s]*$/, 'ArmyNo should only contain letters and spaces'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -50,32 +50,34 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-screen">
-      <div className="flex items-center justify-center border border-gray-300 drop-shadow-md relative rounded-md w-[80%] p-3 m-10 max-w-[1280px]">
-        <img
-          src={LoginSideImage}
-          alt="login page side image"
-          className="hidden md:block md:w-1/2 lg:w-[40%] object-cover rounded "
-        />
+    <div className="flex justify-center items-center w-full h-screen p-0 md:p-4 lg:p-12">
+      <div
+        className="h-full flex items-center justify-center border border-gray-300 drop-shadow-md relative rounded-md
+				 w-full md:w-[80%] p-3 md:m-10 max-w-[1280px]"
+      >
         <div
-          className="text-white absolute flex flex-col flex-wrap z-10 top-[50%] translate-y-[-50%] left-[0%]
-          xl:translate-x-[20%] lg:translate-x-[10%]"
+          className="h-full relative flex-1 overflow-hidden rounded-md  flex-col justify-end
+					gap-48  p-4 md:p-10 hidden md:flex"
         >
-          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">Welcome to </h1>
-          <h1 className="xl:text-4xl font-bold hidden lg:block lg:text-3xl">DHARAM</h1>
-          <p className="text-gray-100 mt-5  md:hidden lg:block lg:text-sm xl:text-base hidden">
-            Defence Health Automated Record Management
-          </p>
+          <img
+            src={LoginSideImage}
+            alt="signup page side image"
+            className="absolute top-0 left-0 h-full object-cover -z-10 xl:w-full"
+          />
+          <div className="text-white">
+            <h1 className="text-4xl md:text-5xl font-semibold">Welcome to </h1>
+            <h1 className="text-4xl md:text-5xl font-bold">DHARAM</h1>
+            <p className="text-sm md:text-base">Defence Health Automated Record Management</p>
+          </div>
+          <div className="p-2 md:p-5 bg-gray-600  rounded-md">
+            <p className="text-white text-xs md:text-sm">
+              "In this modern era of military healthcare, an advanced solution is crucial to
+              effectively meet the evolving needs of our troops."
+            </p>
+          </div>
         </div>
-        <div className="bg-gray-600 absolute bottom-10 p-4 hidden xl:block rounded-md left-[5%] w-[30%]">
-          <p className="text-white">
-            "In this modern era of military healthcare, an advanced solution is crucial to
-            effectively meet the evolving needs of our troops."
-          </p>
-        </div>
-
-        <div className="relative flex-1 flex justify-center items-center">
-          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full">
+        <div className="relative flex-1 flex justify-center items-center h-full">
+          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -104,16 +106,16 @@ export default function Login() {
               </FormControl>
               <FormControl fullWidth margin="normal">
                 <Controller
-                  name="name"
+                  name="armyNo"
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Name"
+                      label="Army No."
                       variant="outlined"
-                      error={!!errors.name}
-                      helperText={errors.name ? errors.name.message : ''}
+                      error={!!errors.armyNo}
+                      helperText={errors.armyNo ? errors.armyNo.message : ''}
                     />
                   )}
                 />
@@ -150,13 +152,13 @@ export default function Login() {
                 color="primary"
                 fullWidth
                 style={{
-                  backgroundColor: '#EFB034', // Your theme color
-                  height: '56px', // Match the height of the TextField component
+                  backgroundColor: '#EFB034',
+                  height: '56px',
                   color: '#ffffff',
                   margin: '8px 0',
                 }}
               >
-                Login
+                Sign Up
               </Button>
             </form>
           </div>

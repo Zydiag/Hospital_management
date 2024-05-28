@@ -3,8 +3,17 @@ import axios from 'axios';
 
 const useAuthStore = create((set) => ({
   user: null,
+  error: null,
   accessToken: null,
   refreshToken: null,
+  signup: async (formData) => {
+    try {
+      const response = await axios.post('/api/admin/signup', formData);
+      set({ user: response.data, error: null });
+    } catch (error) {
+      set({ user: null, error: error.response.data.message });
+    }
+  },
   login: async (adminId, password) => {
     try {
       const response = await axios.post('/api/auth/login', { adminId, password });

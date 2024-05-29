@@ -19,26 +19,7 @@ import SignUpSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
 import useAuthStore from '../stores/authStore';
 import axios from 'axios';
-
-const splitFullName = (fullName) => {
-  const nameParts = fullName.trim().split(' ');
-  let firstName = '';
-  let middleName = '';
-  let lastName = '';
-
-  if (nameParts.length === 1) {
-    firstName = nameParts[0];
-  } else if (nameParts.length === 2) {
-    firstName = nameParts[0];
-    lastName = nameParts[1];
-  } else if (nameParts.length >= 3) {
-    firstName = nameParts[0];
-    middleName = nameParts.slice(1, -1).join(' '); // Join middle names with spaces
-    lastName = nameParts[nameParts.length - 1];
-  }
-
-  return { firstName, middleName, lastName };
-};
+import { signup } from '../api/signUpService';
 
 export default function SignUp() {
   // const signUpSchema = z
@@ -62,8 +43,8 @@ export default function SignUp() {
   //   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const signup = useAuthStore((state) => state.signup);
-  const error = useAuthStore((state) => state.error);
+  // const signup = useAuthStore((state) => state.signup);
+  // const error = useAuthStore((state) => state.error);
   const navigate = useNavigate();
 
   const {
@@ -87,48 +68,9 @@ export default function SignUp() {
   const onError = (error) => {
     console.log(error);
   };
-  const api = 'http://localhost:3000/api';
 
-  const onSubmit = async (data) => {
-    console.log('/api');
-    console.log('something');
-    console.log('FormData', data);
-    try {
-      let firstName = '';
-      let middleName = '';
-      let lastName = '';
-
-      if (data.fullName) {
-        const {
-          firstName: fName,
-          middleName: mName,
-          lastName: lName,
-        } = splitFullName(data.fullName);
-        firstName = fName;
-        middleName = mName;
-        lastName = lName;
-      }
-      const formData = {
-        ...data,
-        firstName,
-        middleName,
-        lastName,
-        dob: new Date(data.dob).toISOString(),
-      };
-      delete formData.name;
-      console.log('url', `${api}/admin/create-admin-profile`);
-
-      const response = await axios.post(`${api}/admin/create-admin-profile`, formData, {
-        withCredentials: true,
-      });
-      console.log(response.status);
-      console.log(response);
-      if (response.status === 200 || response.status === 201) {
-        navigate('/admin-panel');
-      }
-    } catch (error) {
-      console.error('Error creating profile:', error.response?.data || error.message);
-    }
+  const onSubmit = (data) => {
+    signup(data, navigate);
   };
 
   return (

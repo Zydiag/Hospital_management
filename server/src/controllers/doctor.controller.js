@@ -42,10 +42,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
   // Check if all fields are filled
   if (
     !armyNo ||
-    !unit ||
-    !rank ||
     !firstName ||
-    !lastName ||
     !dob ||
     !password ||
     !specialization
@@ -80,12 +77,8 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
               create: {
                 armyNo,
                 firstName,
-                lastName,
-                unit,
-                rank,
                 role: 'DOCTOR',
                 dob: parsedDob,
-                email,
                 password: hashedPassword,
               },
             },

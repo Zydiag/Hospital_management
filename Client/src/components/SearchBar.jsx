@@ -1,44 +1,41 @@
-import React, { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import '../styles/StylesC/SearchBar.css'
+import React from 'react';
+import { Button, TextField } from '@mui/material';
 
-function SearchBar () {
-  const [hideIcon, setHideIcon] = useState(false)
-  const [hidePlaceholder, setHidePlaceholder] = useState(false)
-
-  function handleClick () {
-    setHideIcon(true)
-    setHidePlaceholder(true)
-  }
+function SearchBar({ onChange, value, placeholder }) {
+  const record = ['person1', 'person2', 'person3', 'person4', 'person5', 'person6', 'person7'];
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(e.target[0].value);
+  };
 
   return (
-    <div className='searchBar'>
-      <center>
-        <form className='searchBarForm'>
-          <div>
-            {!hideIcon && (
-              <FontAwesomeIcon className='searchIcon' icon={faSearch} />
-            )}
-            <input
-              className='searchBarInput'
-              onClick={handleClick}
-              type='text'
-              placeholder={
-                !hidePlaceholder
-                  ? '        Search the Doctor by Army Number'
-                  : ''
-              }
-            />
-          </div>
-          <div>
-            {' '}
-            <button className='searchBarButton'>Search</button>
-          </div>
-        </form>
-      </center>
+    <div className="flex px-10">
+      <form className="flex items-center w-full gap-4 px-20" onSubmit={(e) => handleSubmit(e)}>
+        <TextField
+          id="outlined-basic"
+          fullWidth
+          label={placeholder || 'Search'}
+          variant="outlined"
+          className=""
+          value={value}
+          onChange={onChange}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          className="h-full border-2"
+          style={{
+            padding: '8px 32px', // Adjust the padding here
+            backgroundColor: '#8b6119',
+            color: '#ffffff',
+          }}
+        >
+          Search
+        </Button>
+      </form>
     </div>
-  )
+  );
 }
 
-export default SearchBar
+export default SearchBar;

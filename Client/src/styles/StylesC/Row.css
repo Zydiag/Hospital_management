@@ -8,9 +8,10 @@
   justify-content: space-between;
   height: 10vh;
   align-items: center;
+  background-color: white;
 }
 
-.row p {
+.row .armyNumber {
   font-size: 22px;
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
@@ -20,6 +21,12 @@
 }
 
 .row .doctor{
+  font-size: 22px;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
   margin-left: 3vw;
 }
 
@@ -38,7 +45,7 @@
   font-weight: 500;
   font-style: normal;
   background-color: #E99A01;
-  color: aliceblue;
+  color: white;
   border: none;
   margin-left: 1vw;
   border-radius: 4px;

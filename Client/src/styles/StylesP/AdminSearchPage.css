@@ -1,13 +1,81 @@
-.adminSearchBar{
-    margin-top: 5vh;
-    background-color: rgb(255, 195, 76, 0.5) ;
-    padding: 10vh 0;
+.adminSearchBar {
+  margin-top: 5vh;
+  margin-bottom: 5vh;
+  background-color: rgb(247, 186, 63);
+  padding: 15vh 0;
+}
+.adminSearchBar h1 {
+  text-align: left;
+  font-size: 35px;
+  width: 70%;
+  margin: 1vh auto 3vh;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: black;
+}
+.searchError{
+  text-align: right;
+  font-size: 2vh;
+  width: 50%;
+  margin: 1vh auto 0;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  color: #35250A;
 }
 
-.adminDropdown{
-    margin-left: -10vw;
+.searchRow .SearchPara{
+  text-align: left;
+  font-size: 35px;
+  width: 85%;
+  margin: 1vh auto 3vh;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  color: black;
 }
 
-.modalButton{
-    font-size: 30px;
+.searchRow{
+  /* margin-top: 3vh; */
+  padding: 12vh 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchRow {
+  animation: slideDown 1s ease-in-out;
+}
+
+.SearchPara {
+  animation: slideDown 0.5s ease-in-out;
+  animation-delay: 0.1s;
+}
+
+
+
+
+.adminDropdown {
+  margin-left: -10vw;
+}
+
+.modalButton {
+  font-size: 30px;
+}
+
+.doctorStatus{
+  background-color: #F7F7F7;
+  padding: 6vh 0 3vh 0;
 }

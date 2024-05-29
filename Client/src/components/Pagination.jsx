@@ -68,8 +68,10 @@ function Pagination({ total, onPageChange }) {
       pages.push(
         <Button
           style={{
-            backgroundColor: '#fff',
-            color: '#EFB034',
+            backgroundColor: '#EFB034',
+            color: '#5D4108',
+            fontSize: '18px',
+            fontWeight: "bold"
           }}
           key="dots"
         >
@@ -108,8 +110,10 @@ function Pagination({ total, onPageChange }) {
       pages.push(
         <Button
           style={{
-            backgroundColor: '#fff',
-            color: '#EFB034',
+            backgroundColor: '#EFB034',
+            color: '#5D4108',
+            fontSize: '18px',
+            fontWeight: "bold"
           }}
           key="dots"
         >

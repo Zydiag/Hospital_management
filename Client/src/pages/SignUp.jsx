@@ -116,11 +116,15 @@ export default function SignUp() {
         dob: new Date(data.dob).toISOString(),
       };
       delete formData.name;
-
       console.log('url', `${api}/admin/create-admin-profile`);
-      const response = await axios.post(`${api}/admin/create-admin-profile`, formData);
-      if (response.status === 200) {
-        navigate('/dashboard');
+
+      const response = await axios.post(`${api}/admin/create-admin-profile`, formData, {
+        withCredentials: true,
+      });
+      console.log(response.status);
+      console.log(response);
+      if (response.status === 200 || response.status === 201) {
+        navigate('/admin-panel');
       }
     } catch (error) {
       console.error('Error creating profile:', error.response?.data || error.message);

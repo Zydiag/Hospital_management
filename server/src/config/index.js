@@ -5,13 +5,15 @@ const allowedOrigins = [
 ];
 
 export const corsOptions = {
-  origin: function (origin, callback) {
-    console.log('origin:', origin);
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  // origin: function (origin, callback) {
+  //   console.log('origin:', origin);
+  //   if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+  //     console.log('origin', origin);
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error('Not allowed by CORS'));
+  //   }
+  // },
+  origin: '*',
   credentials: true,
 };

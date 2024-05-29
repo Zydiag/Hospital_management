@@ -12,11 +12,12 @@ app.use(express.json({ limit: '32kb' }));
 app.use(express.urlencoded({ extended: true, limit: '32kb' }));
 // app.use(express.static("public"));
 app.use(cookieParser());
+app.use(cors({ origin: true, credentials: true }));
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientroutes);
 app.use('/api/admin', adminRoutes);
 // app.use(cors(corsOptions));
-app.use(cors({ origin: true, credentials: true }));
+// app.use(cors({ origin: true, credentials: true }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

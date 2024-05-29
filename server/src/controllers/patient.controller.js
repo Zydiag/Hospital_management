@@ -48,6 +48,21 @@ export const profilepatient = asyncHandler(async(req,res)=>{
   
     
 })
+
+export const loginpatient=asyncHandler(async(req,res)=>{
+  const {armyNo, password}=req.body;
+  const user =await prisma.User.findFirst({
+    where:{
+      armyNo:armyNo,
+      role:"PATIENT",
+      password:password,
+    }
+  })
+  if(!user){
+    throw new apiError(HttpStatusCode.NOT_FOUND,'User not found');
+  }
+  res.json(new ApiResponse(HttpStatusCode.ok,user,'User Login Successful'));
+})
 //perosnal-info-section1-patient
 export const getpersonalinfo=asyncHandler(async(req,res)=>{
   console.log("we are inside getpersonalinfo route");
@@ -305,4 +320,3 @@ export const errorHandler = (err, req, res, next) => {
       message: err.message || 'Internal Server Error',
     });
   };
-

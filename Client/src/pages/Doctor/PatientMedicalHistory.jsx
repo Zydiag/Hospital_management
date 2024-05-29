@@ -63,8 +63,8 @@ function PatientMedicalHistory () {
         <h1>Patients Medical History</h1>
           <p>Create new patient data enteries and view AME/PME status of the patient.</p>
           <div className='dataButton'>
-            <Button className="add" variant='contained'>Add patient Data</Button>
-            <Button className="test" variant='outlined'>View Record Test</Button>
+            <Button className="add" variant='contained' href='/createData'>Add patient Data</Button>
+            <Button className="test" variant='outlined' href='/test-record'>View Record Test</Button>
           </div>
         </div>
           
@@ -98,7 +98,7 @@ function PatientMedicalHistory () {
             date={selectedRowDate.date}
             patientName={selectedRowDate.patientName}
             button1='View Patient History'
-            // href='/patient-history'
+            href='/history-data'
           />
         </div>
       ) : (

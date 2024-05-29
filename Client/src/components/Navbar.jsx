@@ -7,13 +7,13 @@ function Navbar () {
   return (
     <div className='navbar'>
       <div className='navItems'>
-        <a className='navAnchor'>Home</a>
+        <a className='navAnchor' href='/login'>Home</a>
         <a className='navAnchor'>Contact</a>
       </div>
 
       <div className='logout'>
         <button className='navbarButton' href='/login'>
-          <FontAwesomeIcon className='logoutIcon' icon={faRightFromBracket} /> Logout
+          <FontAwesomeIcon className='logoutIcon' icon={faRightFromBracket} /> 
         </button>
       </div>
     </div>

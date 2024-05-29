@@ -1,17 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import SearchBar from '../../components/SearchBar';
-import Button from '@mui/material/Button';
 import RowPatient from '../../components/RowPatient';
-import BootstrapDialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
+import { Dialog, DialogContent, DialogActions, IconButton, TextField, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import TextField from '@mui/material/TextField';
 import '../../styles/StylesP/DoctorSearchPage.css';
 
-function patientSearchPage () {
+function patientSearchPage() {
   const patientData = [
     { armyNumber: 'ARMY001', patientName: 'Dr. Alice' },
     { armyNumber: 'ARMY002', patientName: 'Dr. Bob' },
@@ -35,7 +30,7 @@ function patientSearchPage () {
   const [errorMessagePatient, setErrorMessagePatient] = React.useState('');
   const [selectedRowPatient, setSelectedRowPatient] = useState(null);
 
-  const handleSearchChange = event => {
+  const handleSearchChange = (event) => {
     setSearchValuePatient(event.target.value);
   };
 
@@ -45,7 +40,7 @@ function patientSearchPage () {
       setErrorMessagePatient('Search Input is empty.');
       console.log('Error: Input is empty'); // Add this line to debug
     } else {
-      const foundData = patientData.find(data => data.armyNumber === searchValuePatient);
+      const foundData = patientData.find((data) => data.armyNumber === searchValuePatient);
       if (foundData) {
         setSelectedRowPatient(foundData);
         setErrorMessagePatient('');
@@ -72,12 +67,10 @@ function patientSearchPage () {
 
   //for Dialog Box
 
-  const [open, setOpen] = React.useState(false);
-
+  const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -86,45 +79,47 @@ function patientSearchPage () {
     <div>
       <React.Fragment>
         <Navbar />
-        <div className='doctorSearchBar'>
-          <h1>Patient Search</h1>
+        <div className="bg-tertiary py-10 flex flex-col gap-10 justify-center">
           <SearchBar
             handleSearch={handleSearch}
             onChange={handleSearchChange}
             value={searchValuePatient}
-            placeholder='Search the doctor by Army Number'
+            placeholder="Search Patient by Army no."
           />
-          {errorMessagePatient && <p className='searchError'>{errorMessagePatient}</p>}
-          <center>
+          {errorMessagePatient && <p className="searchError">{errorMessagePatient}</p>}
+          <div className="flex justify-center items-center gap-5">
+            <p>Couldn't find the user? Create a New patient Record.</p>
             <Button
-              className='newProfileButton'
-              variant='contained'
-              size='large'
+              variant="contained"
+              color="primary"
+              className="h-full"
               onClick={handleClickOpen}
+              style={{
+                padding: '8px 32px', // Adjust the padding here
+                backgroundColor: '#E99B00',
+                color: '#ffffff',
+              }}
             >
               Create Patient Profile
             </Button>
-            <p style={{ fontSize: '20px', marginTop: '2vh' }}>
-              Couldn't find the user? Create a New patient Record.
-            </p>
-          </center>
+          </div>
         </div>
         {selectedRowPatient && (
-          <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
-            <p className='SearchPara'>Look, What we found?</p>
+          <div className="searchRow" id="patientSearch" ref={patientSearchRef}>
+            <p className="SearchPara">Look, What we found?</p>
             <RowPatient
               key={selectedRowPatient.armyNumber}
               armyNumber={selectedRowPatient.armyNumber}
               patientName={selectedRowPatient.patientName}
-              button1='View Patient History'
-              href='/patient-history'
+              button1="View Patient History"
+              href="/patient-history"
             />
           </div>
         )}
 
-        <BootstrapDialog
+        <Dialog
           onClose={handleClose}
-          aria-labelledby='customized-dialog-title'
+          aria-labelledby="customized-dialog-title"
           open={open}
           sx={{
             '& .MuiPaper-root': {
@@ -135,31 +130,15 @@ function patientSearchPage () {
             },
           }}
         >
-          {/* <DialogTitle
-            sx={{ m: 0, p: 2 }}
-            style={{
-              fontSize: '30px',
-              fontFamily: 'Manrope',
-              fontWeight: 'bolder',
-              fontStyle: 'normal',
-              marginTop: '20px',
-              width: '80%',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              textAlign: 'center',
-            }}
-            id='customized-dialog-title'
-          >
-            Create a Patient Profile
-          </DialogTitle> */}
+
           <IconButton
-            aria-label='close'
+            aria-label="close"
             onClick={handleClose}
             sx={{
               position: 'absolute',
               right: 8,
               top: 8,
-              color: theme => theme.palette.grey[500],
+              color: (theme) => theme.palette.grey[500],
             }}
           >
             <CloseIcon />
@@ -173,30 +152,30 @@ function patientSearchPage () {
               marginTop: '20px',
             }}
           >
-            <form className='patientProfileForm'>
-            <h1>Create a Patient Profile</h1>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Name of the Doctor</label>
-                <input className='patientProfileInput' placeholder='Name..'></input>
+            <form className="patientProfileForm">
+              <h1>Create a Patient Profile</h1>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Name of the Doctor</label>
+                <input className="patientProfileInput" placeholder="Name.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>ARMY NUMBER</label>
-                <input className='patientProfileInput' placeholder='Army Number..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">ARMY NUMBER</label>
+                <input className="patientProfileInput" placeholder="Army Number.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Age/Service</label>
-                <input className='patientProfileInput' placeholder='Service..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Age/Service</label>
+                <input className="patientProfileInput" placeholder="Service.."></input>
               </div>
-              <div className='formGroup'>
-                <label className='patientProfileLabel'>Units/Service/Arms</label>
-                <input className='patientProfileInput' placeholder='Units..'></input>
+              <div className="formGroup">
+                <label className="patientProfileLabel">Units/Service/Arms</label>
+                <input className="patientProfileInput" placeholder="Units.."></input>
               </div>
             </form>
           </DialogContent>
           <DialogActions>
             <Button
-              variant='outlined'
-              className='modalButton'
+              variant="outlined"
+              className="modalButton"
               autoFocus
               style={{
                 fontSize: '16px',
@@ -212,7 +191,7 @@ function patientSearchPage () {
               Create
             </Button>
           </DialogActions>
-        </BootstrapDialog>
+        </Dialog>
       </React.Fragment>
     </div>
   );

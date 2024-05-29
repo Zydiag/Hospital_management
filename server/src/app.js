@@ -15,7 +15,8 @@ app.use(cookieParser());
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientroutes);
 app.use('/api/admin', adminRoutes);
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors({ origin: true, credentials: true }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

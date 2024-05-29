@@ -46,8 +46,8 @@
 }
 
 .historyIntro .add {
-  height: 7vh;
-  width: 13vw;
+  height: 3vw;
+  width: 14vw;
   font-size: 1vw;
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
@@ -93,7 +93,7 @@
 
 .patientCalendar {
   margin: 10vh 5vh 0 0;
-  padding: 0 3vw 5vh;
+  padding: 0 2vw;
   background-color: #dee1e6;
   height: 100%;
   border-radius: 12px;
@@ -128,7 +128,7 @@
 }
 
 .errorDate {
-  text-align: right;
+  text-align: left;
   font-size: 1.2vw;
   width: 70vw;
   margin: 2vh 5vh 0 10vh;

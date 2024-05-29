@@ -130,23 +130,7 @@ function patientSearchPage() {
             },
           }}
         >
-          {/* <DialogTitle
-            sx={{ m: 0, p: 2 }}
-            style={{
-              fontSize: '30px',
-              fontFamily: 'Manrope',
-              fontWeight: 'bolder',
-              fontStyle: 'normal',
-              marginTop: '20px',
-              width: '80%',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              textAlign: 'center',
-            }}
-            id='customized-dialog-title'
-          >
-            Create a Patient Profile
-          </DialogTitle> */}
+
           <IconButton
             aria-label="close"
             onClick={handleClose}

@@ -21,23 +21,13 @@
   text-decoration-skip-ink: 50px;
 }
 
-.logout .navbarButton {
-  background-color: white;
-  font-size: 23px;
-  font-family: 'Manrope', sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-  cursor: pointer;
-  padding: 0.5vh 1vw 1.5vh;
-  border-radius: 4px;
-}
 
 .navbarButton:hover{
-   box-shadow: 2px 2px 5px #9095A1;
+  font-size: 22px;
 }
 
 .logout .logoutIcon {
+  text-align: center;
   font-size: 20px;
   margin-right: 20px;
   color: #d39311;

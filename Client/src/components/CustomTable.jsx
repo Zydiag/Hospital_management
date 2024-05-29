@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper';
 
 function CustomTable({ headings, rows }) {
   function createData() {
-    return { name, calories, fat, carbs, protein };
+    return { headings, rows};
   }
 
   return (

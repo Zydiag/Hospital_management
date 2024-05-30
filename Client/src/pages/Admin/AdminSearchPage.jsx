@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
+import { usePendingDoctorRequests } from '../../api/admin.api';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,7 +26,17 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-function AdminSearchPage () {
+function AdminSearchPage() {
+  const { data, error, isLoading, isError } = usePendingDoctorRequests();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
+  console.log(data);
   const rows = [
     { armyNumber: 'ARMY001', doctorName: 'Dr. Alice' },
     { armyNumber: 'ARMY002', doctorName: 'Dr. Bob' },
@@ -85,7 +96,7 @@ function AdminSearchPage () {
     setOpen(false);
   };
 
-  const handleRowClick = armyNumber => {
+  const handleRowClick = (armyNumber) => {
     setArmyNumber(armyNumber);
     handleClickOpen();
   };
@@ -95,7 +106,7 @@ function AdminSearchPage () {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const handleSearchChange = event => {
+  const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
   };
 
@@ -105,7 +116,7 @@ function AdminSearchPage () {
       setErrorMessage('Search Input is empty.');
       console.log('Error: Input is empty'); // Add this line to debug
     } else {
-      const foundRow = rows.find(row => row.armyNumber === searchValue);
+      const foundRow = rows.find((row) => row.armyNumber === searchValue);
       if (foundRow) {
         setSelectedRow(foundRow);
         setErrorMessage('');
@@ -124,9 +135,9 @@ function AdminSearchPage () {
   // Declare arrayNumber state variable
   const [arrayNumber, setArrayNumber] = useState(0);
 
-  const handleDropdownChange = event => {
+  const handleDropdownChange = (event) => {
     setSelectedStatus(event.target.value);
-    const statusIndex = status.findIndex(s => s.value === event.target.value);
+    const statusIndex = status.findIndex((s) => s.value === event.target.value);
     setArrayNumber(statusIndex);
   };
 
@@ -136,7 +147,7 @@ function AdminSearchPage () {
   const totalRows = rows.length;
   const totalPages = Math.ceil(totalRows / rowPerPage);
 
-  const handlePageChange = newpage => {
+  const handlePageChange = (newpage) => {
     setCurrentPage(newpage);
   };
 
@@ -149,19 +160,19 @@ function AdminSearchPage () {
     <>
       <React.Fragment>
         <Navbar />
-        <div className='adminSearchBar'>
+        <div className="adminSearchBar">
           <h1>Doctor Search</h1>
           <SearchBar
             handleSearch={handleSearch}
             onChange={handleSearchChange}
             value={searchValue}
-            placeholder='Search the doctor by Army Number'
+            placeholder="Search the doctor by Army Number"
           />
-          {errorMessage && <p className='searchError'>{errorMessage}</p>}
+          {errorMessage && <p className="searchError">{errorMessage}</p>}
         </div>
         {selectedRow && (
-          <div className='searchRow'>
-            <p className='SearchPara'>Look, What we found?</p>
+          <div className="searchRow">
+            <p className="SearchPara">Look, What we found?</p>
             <Row
               key={selectedRow.armyNumber}
               armyNumber={selectedRow.armyNumber}
@@ -174,20 +185,20 @@ function AdminSearchPage () {
             />
           </div>
         )}
-        <div className='doctorStatus'>
-          <div className='adminDropdown'>
+        <div className="doctorStatus">
+          <div className="adminDropdown">
             <Dropdown
               style={{ width: ' 80%' }}
               onChange={handleDropdownChange}
               obj={status}
               value={selectedStatus}
               defaultValue={status[0].value}
-              label='Status'
-              helperText='Select the option'
+              label="Status"
+              helperText="Select the option"
             />
           </div>
 
-          {currentRows.map(row => (
+          {currentRows.map((row) => (
             <Row
               key={row.armyNumber}
               armyNumber={row.armyNumber}
@@ -200,14 +211,14 @@ function AdminSearchPage () {
             />
           ))}
 
-          <div className='adminPagination'>
+          <div className="adminPagination">
             <Pagination total={totalPages} onPageChange={handlePageChange} />
           </div>
         </div>
 
         <BootstrapDialog
           onClose={handleClose}
-          aria-labelledby='customized-dialog-title'
+          aria-labelledby="customized-dialog-title"
           open={open}
           sx={{
             '& .MuiPaper-root': {
@@ -226,18 +237,18 @@ function AdminSearchPage () {
               fontWeight: 'bold',
               marginTop: '20px',
             }}
-            id='customized-dialog-title'
+            id="customized-dialog-title"
           >
             Doctor Profile
           </DialogTitle>
           <IconButton
-            aria-label='close'
+            aria-label="close"
             onClick={handleClose}
             sx={{
               position: 'absolute',
               right: 8,
               top: 8,
-              color: theme => theme.palette.grey[500],
+              color: (theme) => theme.palette.grey[500],
             }}
           >
             <CloseIcon />
@@ -252,11 +263,11 @@ function AdminSearchPage () {
             }}
           >
             <TextField
-              id='outlined-basic'
-              label='Name of the Doctor'
-              variant='outlined'
+              id="outlined-basic"
+              label="Name of the Doctor"
+              variant="outlined"
               value={doctorName}
-              className='doctorProfileInput'
+              className="doctorProfileInput"
               sx={{
                 width: '60%',
                 marginLeft: 'auto',
@@ -268,22 +279,22 @@ function AdminSearchPage () {
               }}
             />
             <TextField
-              id='outlined-basic'
-              label='ARMY NUMBER'
-              variant='outlined'
+              id="outlined-basic"
+              label="ARMY NUMBER"
+              variant="outlined"
               value={armyNumber}
-              className='doctorProfileInput'
+              className="doctorProfileInput"
               sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
               InputProps={{
                 readOnly: true,
               }}
             />
             <TextField
-              id='outlined-basic'
-              label='Age/Service'
-              variant='outlined'
+              id="outlined-basic"
+              label="Age/Service"
+              variant="outlined"
               value={ageService}
-              className='doctorProfileInput'
+              className="doctorProfileInput"
               sx={{
                 width: '60%',
                 marginLeft: 'auto',
@@ -294,22 +305,22 @@ function AdminSearchPage () {
               }}
             />
             <TextField
-              id='outlined-basic'
-              label='Units/Service/Arms'
-              variant='outlined'
+              id="outlined-basic"
+              label="Units/Service/Arms"
+              variant="outlined"
               value={unitsArms}
-              className='doctorProfileInput'
+              className="doctorProfileInput"
               sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
               InputProps={{
                 readOnly: true,
               }}
             />
             <TextField
-              id='outlined-basic'
-              label='status'
-              variant='outlined'
+              id="outlined-basic"
+              label="status"
+              variant="outlined"
               value={selectedStatus}
-              className='doctorProfileStatus'
+              className="doctorProfileStatus"
               sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto', marginBottom: '30px' }}
               InputProps={{
                 readOnly: true,
@@ -319,8 +330,8 @@ function AdminSearchPage () {
           <DialogActions>
             {selectedStatus == 'Requested' ? (
               <Button
-                variant='outlined'
-                className='modalButton'
+                variant="outlined"
+                className="modalButton"
                 autoFocus
                 style={{
                   fontSize: '16px',
@@ -331,8 +342,8 @@ function AdminSearchPage () {
               </Button>
             ) : (
               <Button
-                variant='outlined'
-                className='modalButton'
+                variant="outlined"
+                className="modalButton"
                 autoFocus
                 style={{
                   fontSize: '16px',
@@ -344,10 +355,10 @@ function AdminSearchPage () {
             )}
             {selectedStatus === 'Requested' && (
               <Button
-                className='modalButton'
+                className="modalButton"
                 autoFocus
-                variant='outlined'
-                color='error'
+                variant="outlined"
+                color="error"
                 style={{
                   fontSize: '16px',
                   padding: '7px',

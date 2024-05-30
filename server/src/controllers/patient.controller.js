@@ -27,6 +27,7 @@ const router = Router();
 //patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
+<<<<<<< HEAD
 
   const { armyNo, dob, firstName, password } = req.body;
 console.log('step1')
@@ -95,10 +96,40 @@ console.log('step1')
 export const loginpatient = asyncHandler(async (req, res) => {
   const { armyNo, password } = req.body;
 
+=======
+  console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
+  const { armyNo, dob, firstName, password } = req.body;
+  if (!armyNo || !password || !dob || !firstName) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'all feilds are required');
+  }
+  const user = await prisma.User.findFirst({ where: { armyNo, role: 'PATIENT' } });
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Access Denied');
+  }
+  if (user.password != null) {
+    res.json(new ApiResponse(HttpStatusCode.OK, user, 'user has signed up already'));
+  }
+  console.log(user);
+  if (user.password == null) {
+    await prisma.User.update({
+      data: {
+        armyNo: armyNo,
+        dob: dob,
+        firstName: firstName,
+        password: password,
+      },
+    });
+  }
+});
+
+export const loginpatient = asyncHandler(async (req, res) => {
+  const { armyNo, password } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
       role: 'PATIENT',
+<<<<<<< HEAD
     },
   });
 
@@ -190,22 +221,93 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
   }
 
   res.json(new ApiResponse(200, user, 'user personal info:'));
+=======
+      password: password,
+    },
+  });
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'User not found');
+  }
+  res.json(new ApiResponse(HttpStatusCode.ok, user, 'User Login Successful'));
 });
+//perosnal-info-section1-patient
+export const getpersonalinfo = asyncHandler(async (req, res) => {
+  console.log('we are inside getpersonalinfo route');
+  const { armyNo } = req.body;
 
-//read-health-record
-export const getHealthRecord = asyncHandler(async (req, res) => {
-  console.log('You are inside getHealthRecord Route');
-
-  const armyNo=req.user.armyNo;
-  const { date } = req.body;
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
       role: 'PATIENT',
     },
+    select: {
+      armyNo: true,
+      firstName: true,
+      lastName: true,
+      middleName: true,
+      unit: true,
+      dob: true,
+    },
+  });
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
+  }
+
+  res.json(new ApiResponse(HttpStatusCode.OK, user, 'user personal info:'));
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+});
+
+//read-health-record
+export const getHealthRecord = asyncHandler(async (req, res) => {
+  console.log('You are inside getHealthRecord Route');
+<<<<<<< HEAD
+
+  const armyNo=req.user.armyNo;
+  const { date } = req.body;
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+  const user = await prisma.User.findFirst({
+    where: {
+      armyNo: armyNo,
+      role: 'PATIENT',
+<<<<<<< HEAD
+    },
   });
   if (!user) {
     throw new apiError(404, 'user not found');
+=======
+    },
+  });
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
+  }
+  const healthId = user.id;
+  const patient = await prisma.Patient.findFirst({
+    where: {
+      userId: healthId,
+    },
+  });
+  if (!patient) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
+  const health = await prisma.Medical.findFirst({
+    where: {
+      patientId: patient.id,
+      updatedAt: new Date(date),
+    },
+    select: {
+      heightCm: true,
+      weightKg: true,
+      BMI: true,
+      chest: true,
+      waist: true,
+      bloodPressure: true,
+    },
+  });
+  if (!health) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date does not exist in record');
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
   const healthId = user.id;
   const patient = await prisma.Patient.findFirst({
@@ -240,18 +342,55 @@ export const getHealthRecord = asyncHandler(async (req, res) => {
 //Read personal medical history
 export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
   console.log('you are inside Personal Medical History Route');
+<<<<<<< HEAD
   const { date } = req.body;
   const armyNo=req.user.armyNo;
 
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
       role: 'PATIENT',
+<<<<<<< HEAD
     },
   });
 
   if (!user) {
     throw new apiError(404, 'user not found');
+=======
+    },
+  });
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
+  }
+  const userId = user.id;
+  const patient = await prisma.Patient.findFirst({
+    where: {
+      userId: userId,
+    },
+  });
+  if (!patient) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
+  const patientId = patient.id;
+  const treat = await prisma.treatment.findFirst({
+    where: {
+      patientId: patientId,
+      createdAt: new Date(date),
+    },
+    select: {
+      diagnosis: true,
+      note: true,
+      medicationName: true,
+      miscellaneous: true,
+      knownAllergies: true,
+    },
+  });
+  if (!treat) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date is not present in record');
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
 
   const userId = user.id;
@@ -289,19 +428,29 @@ export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
 //Read Family History
 export const getFamilyHistory = asyncHandler(async (req, res) => {
   console.log('you are inside familyhistory route');
+<<<<<<< HEAD
   const {date } = req.body;
    const armyNo=req.user.armyNo;
 
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
     },
   });
+<<<<<<< HEAD
 
   if (!user) {
     throw new apiError(404, 'user not found');
   }
 
+=======
+  if (!user) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'user not found');
+  }
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const userId = user.id;
   console.log(userId);
   const patient = await prisma.Patient.findFirst({
@@ -310,9 +459,14 @@ export const getFamilyHistory = asyncHandler(async (req, res) => {
     },
   });
   if (!patient) {
+<<<<<<< HEAD
     throw new apiError(404, 'Patient not found');
   }
 
+=======
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
+  }
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const family = await prisma.familyHistory.findFirst({
     where: {
       patientId: patient.id,
@@ -325,17 +479,28 @@ export const getFamilyHistory = asyncHandler(async (req, res) => {
       otherSignificantHistory: true,
     },
   });
+<<<<<<< HEAD
 
   if (!family) {
     throw new apiError(404, 'Date does not exist');
   }
   res.json(new ApiResponse(200, family, 'FamilyHistory:'));
+=======
+  if (!family) {
+    throw new apiError(HttpStatusCode.NOT_FOUND, 'Date does not exist');
+  }
+  res.json(new ApiResponse(HttpStatusCode.OK, family, 'FamilyHistory:'));
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 
 // AME Report
 export const getAmeReports = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
   const {date } = req.body;
    const armyNo=req.user.armyNo;
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -352,7 +517,10 @@ export const getAmeReports = asyncHandler(async (req, res) => {
       userId: user.id,
     },
   });
+<<<<<<< HEAD
 
+=======
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   // Find all AME, AME2, and PME test reports associated with the user
   const ameReports = await prisma.AME.findMany({
     where: { patientId: patient.id, createdAt: new Date(date) },
@@ -366,14 +534,22 @@ export const getAmeReports = asyncHandler(async (req, res) => {
 
   // Return all the test reports
   res.json(
+<<<<<<< HEAD
     new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully')
+=======
+    new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame test reports retrieved successfully')
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   );
 });
 
 // AME1 Report
 export const getAme1Reports = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
   const {date } = req.body;
    const armyNo=req.user.armyNo;
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -403,13 +579,21 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
 
   // Return all the test reports
   res.json(
+<<<<<<< HEAD
     new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully')
+=======
+    new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame1 test reports retrieved successfully')
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   );
 });
 
 export const getPmeReports = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
   const {date } = req.body;
    const armyNo=req.user.armyNo;
+=======
+  const { armyNo, date } = req.body;
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -440,7 +624,11 @@ export const getPmeReports = asyncHandler(async (req, res) => {
 
   // Return all the test reports
   res.json(
+<<<<<<< HEAD
     new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully')
+=======
+    new ApiResponse(HttpStatusCode.OK, ameReports, 'Pme test reports retrieved successfully')
+>>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   );
 });
 // Error handling middleware

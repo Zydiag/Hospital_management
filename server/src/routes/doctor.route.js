@@ -14,7 +14,9 @@ import {
   updateFamilyHistory,
   createDoctorProfile,
   addTestReport,
-  getAmeReports,getAme1Reports,getPmeReports,
+  getAmeReports,
+  getAme1Reports,
+  getPmeReports,
   updateAME1,
   updateAME2,
   updatePME,
@@ -30,19 +32,18 @@ router.get('/test', (req, res) => {
   res.send('Test endpoint working');
 });
 
-router.get('/personal-info',verifyJwt,authorizeDoctor, asyncHandler(getPersonalInfo));
-router.get('/health-record',verifyJwt,authorizeDoctor, asyncHandler(getHealthRecord));
-router.get('/treatment-record',verifyJwt,authorizeDoctor, asyncHandler(getTreatmentRecord));
-router.get('/family-history',verifyJwt,authorizeDoctor, asyncHandler(getFamilyHistory));
-router.get('/ametestreports', verifyJwt,authorizeDoctor,asyncHandler(getAmeReports));
-router.get('/ame1testreports',verifyJwt,authorizeDoctor, asyncHandler(getAme1Reports));
-router.get('/pmetestreports',verifyJwt,authorizeDoctor, asyncHandler(getPmeReports));
+router.get('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(getPersonalInfo));
+router.get('/health-record', verifyJwt, authorizeDoctor, asyncHandler(getHealthRecord));
+router.get('/treatment-record', verifyJwt, authorizeDoctor, asyncHandler(getTreatmentRecord));
+router.get('/family-history', verifyJwt, authorizeDoctor, asyncHandler(getFamilyHistory));
+router.get('/ametestreports', verifyJwt, authorizeDoctor, asyncHandler(getAmeReports));
+router.get('/ame1testreports', verifyJwt, authorizeDoctor, asyncHandler(getAme1Reports));
+router.get('/pmetestreports', verifyJwt, authorizeDoctor, asyncHandler(getPmeReports));
 
-
-router.post('/doctor-profile',asyncHandler( createDoctorProfile));
-router.post('/doctor-login',asyncHandler( loginDoctor));
-router.post('/doctor-logout',verifyJwt, authorizeDoctor,asyncHandler( logoutDoctor));
-router.post('/personal-info',verifyJwt,authorizeDoctor,asyncHandler(updatePersonalInfo));
+router.post('/doctor-profile', asyncHandler(createDoctorProfile));
+router.post('/doctor-login', asyncHandler(loginDoctor));
+router.post('/doctor-logout', verifyJwt, authorizeDoctor, asyncHandler(logoutDoctor));
+router.post('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(updatePersonalInfo));
 router.post('/health-record', verifyJwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked
 router.post('/treatment-record', verifyJwt, authorizeDoctor, asyncHandler(updateTreatmentRecord)); //checked
 router.post('/family-history', verifyJwt, authorizeDoctor, asyncHandler(updateFamilyHistory));

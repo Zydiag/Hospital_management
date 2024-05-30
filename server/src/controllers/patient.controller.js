@@ -13,7 +13,6 @@ const { Client } = pkg;
 const prisma = new PrismaClient();
 const router = Router();
 
-
 // // Function to generate a refresh token
 // const generateRefreshToken = (user) => {
 //   return jwt.sign(
@@ -23,22 +22,21 @@ const router = Router();
 //   );
 // };
 
-
 //patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
 
   const { armyNo, dob, firstName, password } = req.body;
-console.log('step1')
+  console.log('step1');
   if (!armyNo || !password || !dob || !firstName) {
     throw new apiError(501, 'all feilds are required');
   }
-  console.log('step2')
+  console.log('step2');
   const user = await prisma.User.findFirst({ where: { armyNo, role: 'PATIENT' } });
   if (!user) {
     throw new apiError(404, 'Access Denied/User is not registered by doctor');
   }
-  console.log('step3')
+  console.log('step3');
   if (user.password != null) {
     res.json(new ApiResponse(200, user, 'user has signed up already'));
   }
@@ -48,7 +46,7 @@ console.log('step1')
     const hashedPassword = await hashPassword(password);
     const parsedDob = new Date(dob);
     //save in database
-    const newUser =await prisma.User.update({
+    const newUser = await prisma.User.update({
       where: {
         armyNo,
       },
@@ -59,14 +57,14 @@ console.log('step1')
       },
     });
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser);
-    
+
     await prisma.User.update({
       where: {
         armyNo,
       },
       data: { refreshToken },
     });
-  
+
     //cookies ke liya hai , options for which cookie to be sent
     const options = {
       httpOnly: true,
@@ -88,7 +86,6 @@ console.log('step1')
         )
       );
   }
-
 });
 
 //patient login
@@ -110,14 +107,14 @@ export const loginpatient = asyncHandler(async (req, res) => {
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user);
-  
+
   await prisma.User.update({
     where: {
       armyNo,
     },
     data: { refreshToken },
   });
-  console.log('step 4')
+  console.log('step 4');
   //cookies ke liya hai , options for which cookie to be sent
   const options = {
     httpOnly: true,
@@ -139,7 +136,6 @@ export const loginpatient = asyncHandler(async (req, res) => {
         'User logged in successfully'
       )
     );
-  
 });
 
 // User Logout
@@ -168,7 +164,7 @@ export const logoutPatient = asyncHandler(async (req, res) => {
 //perosnal-info-section1-patient
 export const getpersonalinfo = asyncHandler(async (req, res) => {
   console.log('we are inside getpersonalinfo route');
-  const armyNo=req.user.armyNo;
+  const armyNo = req.user.armyNo;
 
   const user = await prisma.User.findFirst({
     where: {
@@ -195,7 +191,7 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
 export const getHealthRecord = asyncHandler(async (req, res) => {
   console.log('You are inside getHealthRecord Route');
 
-  const armyNo=req.user.armyNo;
+  const armyNo = req.user.armyNo;
   const { date } = req.body;
   const user = await prisma.User.findFirst({
     where: {
@@ -235,12 +231,11 @@ export const getHealthRecord = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, health, 'Health record:-'));
 });
 
-
 //Read personal medical history
 export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
   console.log('you are inside Personal Medical History Route');
   const { date } = req.body;
-  const armyNo=req.user.armyNo;
+  const armyNo = req.user.armyNo;
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -287,8 +282,8 @@ export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
 //Read Family History
 export const getFamilyHistory = asyncHandler(async (req, res) => {
   console.log('you are inside familyhistory route');
-  const {date } = req.body;
-   const armyNo=req.user.armyNo;
+  const { date } = req.body;
+  const armyNo = req.user.armyNo;
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -331,8 +326,8 @@ export const getFamilyHistory = asyncHandler(async (req, res) => {
 
 // AME Report
 export const getAmeReports = asyncHandler(async (req, res) => {
-  const {date } = req.body;
-   const armyNo=req.user.armyNo;
+  const { date } = req.body;
+  const armyNo = req.user.armyNo;
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -362,15 +357,13 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-  res.json(
-    new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully')
-  );
+  res.json(new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully'));
 });
 
 // AME1 Report
 export const getAme1Reports = asyncHandler(async (req, res) => {
-  const {date } = req.body;
-   const armyNo=req.user.armyNo;
+  const { date } = req.body;
+  const armyNo = req.user.armyNo;
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -399,14 +392,12 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-  res.json(
-    new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully')
-  );
+  res.json(new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully'));
 });
 
 export const getPmeReports = asyncHandler(async (req, res) => {
-  const {date } = req.body;
-   const armyNo=req.user.armyNo;
+  const { date } = req.body;
+  const armyNo = req.user.armyNo;
 
   // Find the user by army number
   const user = await prisma.User.findFirst({
@@ -436,9 +427,7 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-  res.json(
-    new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully')
-  );
+  res.json(new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully'));
 });
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {

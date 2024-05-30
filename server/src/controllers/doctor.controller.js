@@ -231,19 +231,14 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
         armyNo: armyNo,
       },
     });
-    console.log('step 1 ')
+    console.log('step 1 ');
     if (!existingUser) {
-      console.log('step 2 ')
+      console.log('step 2 ');
       await prisma.User.create({
-        data: {armyNo: armyNo,
-        unit: unit,
-        firstName: firstName,
-        dob: parsedDob,
-        role: 'PATIENT',}
-
+        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
       });
     }
-    console.log('step 3 ')
+    console.log('step 3 ');
     // Update the user data
     const updatedUser = await prisma.User.update({
       where: {
@@ -320,7 +315,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       date,
       armyNo,
     } = req.body;
-    const doctr_ArmyNo=req.user.armyNo;
+    const doctr_ArmyNo = req.user.armyNo;
     //const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
     // Find the patient by army number
     const patient = await prisma.Patient.findFirst({
@@ -335,16 +330,16 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       },
     });
 
-    const doctor=await prisma.Doctor.findFirst({
-      where:{
-        status:"APPROVED",
-        user:{
-          armyNo:doctr_ArmyNo,
-          role:"DOCTOR",
-        }
-      }
-    })
-    if(!doctor){
+    const doctor = await prisma.Doctor.findFirst({
+      where: {
+        status: 'APPROVED',
+        user: {
+          armyNo: doctr_ArmyNo,
+          role: 'DOCTOR',
+        },
+      },
+    });
+    if (!doctor) {
       throw new apiError(404, 'Doctor not found with the provided army number');
     }
 
@@ -438,7 +433,7 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
   try {
     const { diagnosis, note, medicationName, date, knownAllergies, miscellaneous, armyNo } =
       req.body;
-      const doctr_ArmyNo=req.user.armyNo;
+    const doctr_ArmyNo = req.user.armyNo;
     // Find the patient by army number
 
     // console.log(`date:${date}, armyNo:${armyNo}`);
@@ -456,15 +451,15 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
       },
     });
 
-    const doctor=await prisma.Doctor.findFirst({
-      where:{
-        status:"APPROVED",
-        user:{
-          armyNo:doctr_ArmyNo,
-          role:"DOCTOR",
-        }
-      }
-    })
+    const doctor = await prisma.Doctor.findFirst({
+      where: {
+        status: 'APPROVED',
+        user: {
+          armyNo: doctr_ArmyNo,
+          role: 'DOCTOR',
+        },
+      },
+    });
 
     if (!doctor) {
       throw new apiError(404, 'Doctor not found');
@@ -785,10 +780,10 @@ export const getTestType = (age) => {
 //Function to update AME1
 export const updateAME1 = asyncHandler(async (req, res) => {
   // Extract required parameters from request body
-  
-  const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity} = req.body;
-  const doctr_ArmyNo=req.user.armyNo;
-  
+
+  const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity } = req.body;
+  const doctr_ArmyNo = req.user.armyNo;
+
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -864,7 +859,7 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     bloodSugarPP,
     restingECG,
   } = req.body;
-  const doctr_ArmyNo=req.user.armyNo;
+  const doctr_ArmyNo = req.user.armyNo;
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -943,8 +938,8 @@ export const updatePME = asyncHandler(async (req, res) => {
     cholesterol,
     lipidProfile,
     xrayChestPA,
-  } = req.body
-  const doctr_ArmyNo=req.user.armyNo;
+  } = req.body;
+  const doctr_ArmyNo = req.user.armyNo;
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,

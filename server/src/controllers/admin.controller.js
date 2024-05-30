@@ -10,24 +10,6 @@ dotenv.config();
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-<<<<<<< HEAD
-=======
-//
-const generateAccessAndRefreshToken = asyncHandler(async (user) => {
-  try {
-    const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '15m',
-    });
-    const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '8h',
-    });
-    return { accessToken, refreshToken };
-  } catch (error) {
-    console.log('error: ', error);
-    throw new apiError(500, 'Something went wrong while generating access and refresh token');
-  }
-});
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
 // create admin profile
 
@@ -224,16 +206,11 @@ export const pendingRequests = asyncHandler(async (req, res) => {
       },
     });
 
-<<<<<<< HEAD
+
     const formattedRequests = requests.map(request => ({
       doctorId: request.doctor.id,
       fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
-=======
-    const formattedRequests = requests.map((request) => ({
-      userId: request.doctor.id,
-      fullName:
-        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -249,12 +226,10 @@ export const pendingRequests = asyncHandler(async (req, res) => {
 });
 
 // fetch  doctor requests which is approved(Accepted)
-<<<<<<< HEAD
+
 export const approvedRequests = asyncHandler( async (req, res) => {
   
-=======
-export const approvedRequests = asyncHandler(async (req, res) => {
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+
   try {
     const requests = await prisma.Request.findMany({
       where: {
@@ -276,18 +251,11 @@ export const approvedRequests = asyncHandler(async (req, res) => {
         },
       },
     });
-<<<<<<< HEAD
     
     const formattedRequests = requests.map(request => ({
       doctorId: request.doctor.id,
       fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
-=======
 
-    const formattedRequests = requests.map((request) => ({
-      userId: request.doctor.id,
-      fullName:
-        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -303,14 +271,11 @@ export const approvedRequests = asyncHandler(async (req, res) => {
 });
 
 // approve request
-<<<<<<< HEAD
+
 export const approveRequest = asyncHandler(async (req, res)=> {
   const { doctorId } = req.query;
   console.log(`doctorId:${doctorId}`);
-=======
-export const approveRequest = asyncHandler(async (req, res) => {
-  const { doctorId } = req.body;
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+
   const request = await prisma.Request.findUnique({ where: { doctorId } });
 
   if (!request) {
@@ -331,13 +296,10 @@ export const approveRequest = asyncHandler(async (req, res) => {
 
 // reject request
 export const rejectRequest = asyncHandler(async (req, res) => {
-<<<<<<< HEAD
+
   const { doctorId } = req.query;
   const request = await prisma.Request.findUnique({ where: {id: doctorId } });
-=======
-  const { doctorId } = req.body;
-  const request = await prisma.Request.findUnique({ where: { id: doctorId } });
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+
   if (!request) {
     throw new apiError(404, 'Request not found');
   }

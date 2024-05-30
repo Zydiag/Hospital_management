@@ -194,13 +194,8 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
 
   const { armyNo } = req.body;
-<<<<<<< HEAD
   // console.log(`req.user.id: ${req.user.id}`)
   // console.log(`armyNo: ${armyNo}`);
-=======
-
-  console.log(armyNo);
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
   if (!armyNo) {
     throw new apiError(401, 'Army number is required');
@@ -222,11 +217,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
     unit: user.unit,
   };
 
-<<<<<<< HEAD
   res.json(new ApiResponse(200, info, 'Personal Record:-'));
-=======
-  res.json(new ApiResponse(HttpStatusCode.OK, info, 'Personal Record:-'));
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 
 // Update Personal Info
@@ -244,19 +235,12 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     if (!existingUser) {
       console.log('step 2 ')
       await prisma.User.create({
-<<<<<<< HEAD
         data: {armyNo: armyNo,
         unit: unit,
         firstName: firstName,
         dob: parsedDob,
         role: 'PATIENT',}
-=======
-        armyNo: armyNo,
-        unit: unit,
-        firstName: firstName,
-        dob: dob,
-        role: 'PATIENT',
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
+
       });
     }
     console.log('step 3 ')
@@ -268,11 +252,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
       data: {
         unit: unit,
         firstName: firstName,
-<<<<<<< HEAD
         dob: parsedDob,
-=======
-        dob: dob,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
         // Assuming refreshToken is part of the User model
       },
     });
@@ -319,13 +299,7 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
     // Extract medical records from the patient
     //const medicalRecords = patient.Medical;
 
-<<<<<<< HEAD
     res.json(new ApiResponse(200, medicalRecord, 'Health records retrieved successfully'));
-=======
-    res.json(
-      new ApiResponse(HttpStatusCode.OK, medicalRecord, 'Health records retrieved successfully')
-    );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   } catch (error) {
     next(error);
   }
@@ -345,13 +319,8 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       bloodGroup,
       date,
       armyNo,
-<<<<<<< HEAD
     } = req.body;
     const doctr_ArmyNo=req.user.armyNo;
-=======
-      armyNo1,
-    } = req.body;
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     //const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
     // Find the patient by army number
     const patient = await prisma.Patient.findFirst({
@@ -365,7 +334,6 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
         id: true, // Select only the id field
       },
     });
-<<<<<<< HEAD
 
     const doctor=await prisma.Doctor.findFirst({
       where:{
@@ -378,34 +346,11 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     })
     if(!doctor){
       throw new apiError(404, 'Doctor not found with the provided army number');
-=======
-    const doctor = await prisma.Doctor.findFirst({
-      where: {
-        status: 'APPROVED',
-        user: {
-          armyNo: armyNo1,
-          role: 'DOCTOR',
-        },
-      },
-    });
-    if (!doctor) {
-      throw new apiError(
-        HttpStatusCode.NOT_FOUND,
-        'Doctor not found with the provided army number'
-      );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
 
     // If patient is not found, handle the error
     if (!patient) {
-<<<<<<< HEAD
       throw new apiError(404, 'Patient not found with the provided army number');
-=======
-      throw new apiError(
-        HttpStatusCode.NOT_FOUND,
-        'Patient not found with the provided army number'
-      );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
 
     const patientId = patient.id;
@@ -429,13 +374,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     });
 
     // Send a JSON response in Postman
-<<<<<<< HEAD
     res.json(new ApiResponse(202, newMedicalRecord, 'Medical record created successfully'));
-=======
-    res.json(
-      new ApiResponse(HttpStatusCode.OK, newMedicalRecord, 'Medical record created successfully')
-    );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   } catch (error) {
     next(error);
   }
@@ -484,11 +423,7 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
 
     res.json(
       new ApiResponse(
-<<<<<<< HEAD
         200,
-=======
-        HttpStatusCode.OK,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
         { treatmentRecords, descriptions },
         'Treatment records retrieved successfully'
       )
@@ -501,23 +436,9 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
 // Update Treatment Records
 export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
   try {
-<<<<<<< HEAD
     const { diagnosis, note, medicationName, date, knownAllergies, miscellaneous, armyNo } =
       req.body;
       const doctr_ArmyNo=req.user.armyNo;
-=======
-    const {
-      diagnosis,
-      note,
-      medicationName,
-      date,
-      knownAllergies,
-      miscellaneous,
-      armyNo,
-      armyNo1,
-    } = req.body;
-
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     // Find the patient by army number
 
     // console.log(`date:${date}, armyNo:${armyNo}`);
@@ -534,7 +455,6 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
         id: true, // Select only the id field
       },
     });
-<<<<<<< HEAD
 
     const doctor=await prisma.Doctor.findFirst({
       where:{
@@ -552,22 +472,6 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
 
     if (!patient) {
       throw new apiError(404, 'Patient not found');
-=======
-    const doctor = await prisma.Doctor.findFirst({
-      where: {
-        status: 'APPROVED',
-        user: {
-          armyNo: armyNo1,
-          role: 'DOCTOR',
-        },
-      },
-    });
-    if (!doctor) {
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'Doctor not found');
-    }
-    if (!patient) {
-      throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
     const patientId = patient.id;
 
@@ -593,13 +497,7 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
     });
 
     // Accessing related data directly from newMedicalRecord
-<<<<<<< HEAD
     res.json(new ApiResponse(200, newTreatment, 'Treatment record created successfully'));
-=======
-    res.json(
-      new ApiResponse(HttpStatusCode.OK, newTreatment, 'Treatment record created successfully')
-    );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   } catch (error) {
     next(error);
   }
@@ -618,11 +516,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
     });
     const userId = user.id;
     if (!user) {
-<<<<<<< HEAD
       throw new apiError(404, 'User not found');
-=======
-      throw new apiError(HttpStatusCode.BAD_REQUEST, 'User not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
 
     const patient = await prisma.Patient.findFirst({
@@ -647,15 +541,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
     });
 
     res.json(
-<<<<<<< HEAD
       new ApiResponse(200, familyHistories, 'Family history records retrieved successfully')
-=======
-      new ApiResponse(
-        HttpStatusCode.OK,
-        familyHistories,
-        'Family history records retrieved successfully'
-      )
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     );
   } catch (error) {
     console.error('Failed to retrieve family history:', error);
@@ -666,10 +552,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
 
 // Update Family History
 export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
-<<<<<<< HEAD
   const doctor_ArmyNo = req.user.armyNo;
-=======
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const {
     hypertension,
     diabetesMellitus,
@@ -677,15 +560,10 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
     otherSignificantHistory,
     date,
     armyNo,
-<<<<<<< HEAD
   } = req.body;
 
   // console.log(`date:${date}, armyNo:${armyNo}`);
   // console.log(`doctor_Armyno:${doctor_Armyno}`);
-=======
-    armyNo1,
-  } = req.body;
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 
   try {
     console.log('updatefamilyhistoryroute');
@@ -705,11 +583,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
       where: {
         status: 'APPROVED',
         user: {
-<<<<<<< HEAD
           armyNo: doctor_ArmyNo,
-=======
-          armyNo: armyNo1,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
           role: 'DOCTOR',
         },
       },
@@ -718,11 +592,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
       },
     });
     if (!doctor) {
-<<<<<<< HEAD
       throw new apiError(404, 'Doctor not found');
-=======
-      throw new apiError(HttpStatusCode.BAD_REQUEST, 'Doctor not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
 
     if (!patient) {
@@ -749,11 +619,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
           createdAt: new Date(date),
         },
       });
-<<<<<<< HEAD
       res.json(new ApiResponse(200, exfamily, 'Family history updated successfully'));
-=======
-      res.json(new ApiResponse(HttpStatusCode.OK, exfamily, 'Family history updated successfully'));
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
     }
     const family = await prisma.familyHistory.create({
       data: {
@@ -767,11 +633,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
       },
     });
 
-<<<<<<< HEAD
     res.json(new ApiResponse(200, family, 'Family history created successfully'));
-=======
-    res.json(new ApiResponse(HttpStatusCode.OK, family, 'Family history created successfully'));
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   } catch (error) {
     next(error);
   }
@@ -807,13 +669,7 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-<<<<<<< HEAD
   res.json(new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully'));
-=======
-  res.json(
-    new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame test reports retrieved successfully')
-  );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 
 export const getAme1Reports = asyncHandler(async (req, res) => {
@@ -846,13 +702,7 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-<<<<<<< HEAD
   res.json(new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully'));
-=======
-  res.json(
-    new ApiResponse(HttpStatusCode.OK, ameReports, 'Ame1 test reports retrieved successfully')
-  );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 export const getPmeReports = asyncHandler(async (req, res) => {
   const { armyNo, date } = req.body;
@@ -884,13 +734,7 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   }
 
   // Return all the test reports
-<<<<<<< HEAD
   res.json(new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully'));
-=======
-  res.json(
-    new ApiResponse(HttpStatusCode.OK, ameReports, 'Pme test reports retrieved successfully')
-  );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 
 // Function to calculate age based on date of birth
@@ -941,16 +785,10 @@ export const getTestType = (age) => {
 //Function to update AME1
 export const updateAME1 = asyncHandler(async (req, res) => {
   // Extract required parameters from request body
-<<<<<<< HEAD
   
   const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity} = req.body;
   const doctr_ArmyNo=req.user.armyNo;
   
-=======
-  console.log('you are inside ame1');
-  const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity, armyNo1 } = req.body;
-  console.log(armyNo);
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -962,24 +800,15 @@ export const updateAME1 = asyncHandler(async (req, res) => {
       userId: user.id,
     },
   });
-<<<<<<< HEAD
 
   if (!patient) {
     throw new apiError(404, 'Patient not found');
-=======
-  if (!patient) {
-    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
       status: 'APPROVED',
       user: {
-<<<<<<< HEAD
         armyNo: doctr_ArmyNo,
-=======
-        armyNo: armyNo1,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
         role: 'DOCTOR',
       },
     },
@@ -1016,13 +845,7 @@ export const updateAME1 = asyncHandler(async (req, res) => {
   });
 
   // Send response with updated AME1 record
-<<<<<<< HEAD
   res.json(new ApiResponse(200, updatedAME1, 'AME1 test report updated successfully'));
-=======
-  res.json(
-    new ApiResponse(HttpStatusCode.OK, updatedAME1, 'AME1 test report updated successfully')
-  );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
 
 //Function to update AME2
@@ -1041,10 +864,7 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     bloodSugarPP,
     restingECG,
   } = req.body;
-<<<<<<< HEAD
   const doctr_ArmyNo=req.user.armyNo;
-=======
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -1056,21 +876,13 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     },
   });
   if (!patient) {
-<<<<<<< HEAD
     throw new apiError(404, 'Patient not found');
-=======
-    throw new apiError(HttpStatusCode.NOT_FOUND, 'Patient not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
       status: 'APPROVED',
       user: {
-<<<<<<< HEAD
         armyNo: doctr_ArmyNo,
-=======
-        armyNo: armyNo1,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
         role: 'DOCTOR',
       },
     },
@@ -1109,15 +921,8 @@ export const updateAME2 = asyncHandler(async (req, res) => {
   });
 
   // Send response with updated AME2 record
-<<<<<<< HEAD
   res.json(new ApiResponse(200, updatedAME2, 'AME2 test report updated successfully'));
-=======
-  res.json(
-    new ApiResponse(HttpStatusCode.OK, updatedAME2, 'AME2 test report updated successfully')
-  );
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
 });
-
 //Function to update PME
 export const updatePME = asyncHandler(async (req, res) => {
   // Extract required parameters from request body
@@ -1138,12 +943,8 @@ export const updatePME = asyncHandler(async (req, res) => {
     cholesterol,
     lipidProfile,
     xrayChestPA,
-  } = req.body;
-<<<<<<< HEAD
+  } = req.body
   const doctr_ArmyNo=req.user.armyNo;
-=======
-
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   const user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -1155,21 +956,13 @@ export const updatePME = asyncHandler(async (req, res) => {
     },
   });
   if (!patient) {
-<<<<<<< HEAD
     throw new apiError(404, 'patient not found');
-=======
-    throw new apiError(HttpStatusCode.NOT_FOUND, 'patient not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
   const doctor = await prisma.Doctor.findFirst({
     where: {
       status: 'APPROVED',
       user: {
-<<<<<<< HEAD
         armyNo: doctr_ArmyNo,
-=======
-        armyNo: armyNo1,
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
         role: 'DOCTOR',
       },
     },
@@ -1184,11 +977,7 @@ export const updatePME = asyncHandler(async (req, res) => {
 
   // If PME record not found, throw an error
   if (!pme) {
-<<<<<<< HEAD
     throw new apiError(404, 'PME record not found');
-=======
-    throw new apiError(HttpStatusCode.NOT_FOUND, 'PME record not found');
->>>>>>> c24a89bb5207567a1503d06122631f317bc822f8
   }
   const description = JSON.stringify({
     bloodHb,

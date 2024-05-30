@@ -23,6 +23,9 @@ export const signup = async (data, navigate) => {
     const { url, navigate: navigatePath } = rolePaths[profession];
     const response = await axios.post(`${api}${url}`, formData, { withCredentials: true });
     if (response.status === 200 || response.status === 201) {
+      const { accessToken, refreshToken } = response.data.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       navigate(navigatePath);
     }
   } catch (error) {

@@ -1,16 +1,12 @@
-import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import useAuth from '../stores/authStore';
 
 const API_URL = 'http://localhost:3000/api/admin';
 
-const fetchPendingDoctorRequests = async () => {
-  const response = await axios.get(`${API_URL}/all-pending-doctor-requests`);
-  return response.data;
-};
-
 export const usePendingDoctorRequests = () => {
+  const { makeAuthRequest } = useAuth();
   return useQuery({
     queryKey: ['pendingDoctorRequests'],
-    queryFn: fetchPendingDoctorRequests,
+    queryFn: () => makeAuthRequest('GET', `${API_URL}/all-pending-doctor-requests`),
   });
 };

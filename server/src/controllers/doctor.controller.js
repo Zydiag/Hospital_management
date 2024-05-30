@@ -93,7 +93,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
     throw new apiError(401, 'Something went wrong while creating doctor');
   }
 
-  let doctor_user = await prisma.user.findFirst({
+  let createdDoctor = await prisma.user.findFirst({
     where: { armyNo },
   });
 

@@ -5,11 +5,13 @@ import Jwt from 'jsonwebtoken';
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
+    console.log(req.header('Authorization'));
     const token = req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
       throw new apiError(400, 'Unauthorized request');
     }
-    const decodedToken = Jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log('decodedToken:', decodedToken);
 
     const user = await db.user.findUnique({
       where: {

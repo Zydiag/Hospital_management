@@ -2,7 +2,7 @@ import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
-import jwt from 'jsonwebtoken';
+import { generateAccessAndRefreshToken } from '../utils/tokenGenerate.js';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -10,21 +10,6 @@ dotenv.config();
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-//
-const generateAccessAndRefreshToken = asyncHandler(async (user) => {
-  try {
-    const accessToken = jwt.sign({ id: user.id}, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '15m',
-    });
-    const refreshToken = jwt.sign({ id:user.id}, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '8h',
-    });
-    return { accessToken, refreshToken };
-  } catch (error) {
-    console.log('error: ', error);
-    throw new apiError(500, 'Something went wrong while generating access and refresh token');
-  }
-});
 
 // create admin profile
 
@@ -61,7 +46,39 @@ export const createAdmin = asyncHandler(async (req, res) => {
         password: hashedPassword,
       },
     });
-    res.status(201).json(newAdmin);
+  
+    if(!newAdmin){
+      throw new apiError(400, 'Admin not created');
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(finduser);
+    
+  await prisma.User.update({
+    where: {
+      armyNo,
+    },
+    data: { refreshToken },
+  });
+
+  //cookies ke liya hai , options for which cookie to be sent
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  console.log(`accessToken, refreshToken`);
+  return res
+    .status(200)
+    .cookie('refreshToken', refreshToken, options)
+    .cookie('accessToken', accessToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+        },
+        'User singup in successfully'
+      )
+    );
   } catch (error) {
     throw new apiError(401, error?.message || 'Something went wrong while creating doctor request');
   }
@@ -110,7 +127,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
  const adminId=armyNo;
   // check if all fields are filled
   if (!adminId) {
-    throw new apiError(400, 'id  required');
+    throw new apiError(400, 'adminId  required');
   }
   if (!password) {
     throw new apiError(400, 'password  required');
@@ -126,7 +143,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   if (!Admin) {
     throw new apiError(404, 'User not found');
   }
-
+ 
   // check if password is correct
   const isCorrect = await bcrypt.compare(password, Admin.password);
   if (!isCorrect) {
@@ -191,8 +208,8 @@ export const pendingRequests = asyncHandler(async (req, res)=> {
     });
 
     const formattedRequests = requests.map(request => ({
-      userId: request.doctor.id,
-      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
+      doctorId: request.doctor.id,
+      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -209,10 +226,11 @@ export const pendingRequests = asyncHandler(async (req, res)=> {
 
 // fetch  doctor requests which is approved(Accepted)
 export const approvedRequests = asyncHandler( async (req, res) => {
+  
   try {
     const requests = await prisma.Request.findMany({
       where: {
-        status: 'ACCEPTED',
+        status: 'APPROVED',
       },
       include: {
         doctor: {
@@ -230,10 +248,10 @@ export const approvedRequests = asyncHandler( async (req, res) => {
         },
       },
     });
-
+    
     const formattedRequests = requests.map(request => ({
-      userId: request.doctor.id,
-      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
+      doctorId: request.doctor.id,
+      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -251,8 +269,10 @@ export const approvedRequests = asyncHandler( async (req, res) => {
 
 // approve request
 export const approveRequest = asyncHandler(async (req, res)=> {
-  const { doctorId } = req.body;
+  const { doctorId } = req.query;
+  console.log(`doctorId:${doctorId}`);
   const request = await prisma.Request.findUnique({ where: { doctorId } });
+
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
@@ -261,11 +281,17 @@ export const approveRequest = asyncHandler(async (req, res)=> {
     where: {id: doctorId },
     data: { status: 'APPROVED' },
   });
+  await prisma.request.update({
+    where: { doctorId },
+    data: { status: 'APPROVED' },
+  })
   console.log(updatedRequest);
+  res.status(200).json({updatedRequest });
 });
+
 // reject request
 export const rejectRequest = asyncHandler(async (req, res) => {
-  const { doctorId } = req.body;
+  const { doctorId } = req.query;
   const request = await prisma.Request.findUnique({ where: {id: doctorId } });
   if (!request) {
     throw new apiError(404, 'Request not found');
@@ -274,9 +300,13 @@ export const rejectRequest = asyncHandler(async (req, res) => {
     where: { doctorId },
     data: { status: 'REJECTED' },
   });
+  await prisma.request.update({
+    where: { doctorId },
+    data: { status: 'REJECTED' },
+  })
   // clear the request after rejection
   await prisma.Request.delete({ where: { doctorId } });
-  res.json(updatedRequest);
+  res.status(200).json({updatedRequest });
 });
 
 
@@ -318,6 +348,7 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
     .clearCookie('accessToken', options)
     .json(new ApiResponse(200, {}, 'Admin logout successfully'));
 });
+
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
   console.log(`req.user.id: ${req.user.id}`);

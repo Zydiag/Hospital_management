@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Pagination from '../../components/Pagination';
 import Navbar from '../../components/Navbar';
 import SearchBar from '../../components/SearchBar';
@@ -14,7 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import TextField from '@mui/material/TextField';
+import '../../styles/StylesC/Row.css';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -72,7 +72,7 @@ function AdminSearchPage () {
 
   //for Modal page---> Profile Page of Doctor
   const [open, setOpen] = React.useState(false);
-  const [doctorName, setDoctorName] = React.useState('');
+  const [doctorName, setDoctorName] = React.useState('Mrs Samsher Singh');
   const [armyNumber, setArmyNumber] = React.useState(0);
   const [ageService, setAgeService] = React.useState('15 YEARS');
   const [unitsArms, setUnitsArms] = React.useState('NSDFJ');
@@ -100,29 +100,40 @@ function AdminSearchPage () {
   };
 
   const handleSearch = () => {
-    console.log('Search button clicked'); // Add this line to debug
+    console.log('Search button clicked'); // Debug: Add this line to debug
     if (!searchValue) {
       setErrorMessage('Search Input is empty.');
-      console.log('Error: Input is empty'); // Add this line to debug
+      setSelectedRow(null); // Clear the selected row if input is empty
+      console.log('Error: Input is empty'); // Debug: Add this line to debug
     } else {
       const foundRow = rows.find(row => row.armyNumber === searchValue);
       if (foundRow) {
         setSelectedRow(foundRow);
         setErrorMessage('');
-        console.log('Found row:', foundRow); // Add this line to debug
+        console.log('Found row:', foundRow); // Debug: Add this line to debug
       } else {
-        setSelectedRow(null);
+        setSelectedRow(null); // Clear the selected row if not found
         setErrorMessage('User not found');
-        console.log('Error: User not found'); // Add this line to debug
+        console.log('Error: User not found'); // Debug: Add this line to debug
       }
     }
   };
 
+  const doctorSearchRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedRow) {
+      doctorSearchRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Add the show class after scrolling into view
+      setTimeout(() => {
+        doctorSearchRef.current.classList.add('show');
+      }, 200); // Adjust timeout as needed
+    }
+  }, [selectedRow]);
+
   //for status of the DropdownMenu
   const [selectedStatus, setSelectedStatus] = useState('Requested');
-
-  // Declare arrayNumber state variable
-  const [arrayNumber, setArrayNumber] = useState(0);
+  const [arrayNumber, setArrayNumber] = useState(0); // Declare arrayNumber state variable
 
   const handleDropdownChange = event => {
     setSelectedStatus(event.target.value);
@@ -149,19 +160,65 @@ function AdminSearchPage () {
     <>
       <React.Fragment>
         <Navbar />
-        <div className='adminSearchBar'>
-          <h1>Doctor Search</h1>
+        <div
+          className='bg-amber-400 '
+          style={{
+            marginTop: '5vh',
+            marginBottom: '5vh',
+            height: '50vh',
+            paddingTop: '15vh',
+          }}
+        >
+          <h1
+            className='text-3xl text-left font-medium '
+            style={{
+              width: '70%',
+              fontFamily: 'Manrope',
+              marginLeft: '17vh',
+              paddingBottom: '4vh',
+            }}
+          >
+            Doctor Search
+          </h1>
+
           <SearchBar
             handleSearch={handleSearch}
             onChange={handleSearchChange}
             value={searchValue}
             placeholder='Search the doctor by Army Number'
+            className='align-bottom'
           />
-          {errorMessage && <p className='searchError'>{errorMessage}</p>}
+          {errorMessage && (
+            <p
+              className='text-right text-1xl font-medium'
+              style={{
+                width: '83%',
+                paddingTop: '1vh',
+              }}
+            >
+              {errorMessage}
+            </p>
+          )}
         </div>
-        {selectedRow && (
-          <div className='searchRow'>
-            <p className='SearchPara'>Look, What we found?</p>
+        {selectedRow && !errorMessage && (
+          <div
+            className='searchRow'
+            ref={doctorSearchRef}
+            style={{
+              paddingTop: '12vh',
+              paddingBottom: '12vh',
+            }}
+          >
+            <p
+              className='text-left text-3xl font-semibold searchPara'
+              style={{
+                width: '85%',
+                marginLeft: '8vw',
+                paddingBottom: '3vh',
+              }}
+            >
+              Look, What we found?
+            </p>
             <Row
               key={selectedRow.armyNumber}
               armyNumber={selectedRow.armyNumber}
@@ -174,6 +231,7 @@ function AdminSearchPage () {
             />
           </div>
         )}
+
         <div className='doctorStatus'>
           <div className='adminDropdown'>
             <Dropdown
@@ -212,24 +270,12 @@ function AdminSearchPage () {
           sx={{
             '& .MuiPaper-root': {
               maxWidth: '90%', // Maximum width of the dialog paper element
-              maxHeight: '80vh', // Maximum height of the dialog paper element
-              width: '40vw', // Adjust width as necessary
-              height: '70vh', // Adjust height as necessary
+              maxHeight: '100vh', // Maximum height of the dialog paper element
+              width: '100vh', // Adjust width as necessary
+              height: '90vh', // Adjust height as necessary
             },
           }}
         >
-          <DialogTitle
-            sx={{ m: 0, p: 2 }}
-            style={{
-              fontSize: '30px',
-              fontFamily: 'Manrope',
-              fontWeight: 'bold',
-              marginTop: '20px',
-            }}
-            id='customized-dialog-title'
-          >
-            Doctor Profile
-          </DialogTitle>
           <IconButton
             aria-label='close'
             onClick={handleClose}
@@ -251,80 +297,117 @@ function AdminSearchPage () {
               marginTop: '20px',
             }}
           >
-            <TextField
-              id='outlined-basic'
-              label='Name of the Doctor'
-              variant='outlined'
-              value={doctorName}
-              className='doctorProfileInput'
-              sx={{
-                width: '60%',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                marginTop: '30px',
-              }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-            <TextField
-              id='outlined-basic'
-              label='ARMY NUMBER'
-              variant='outlined'
-              value={armyNumber}
-              className='doctorProfileInput'
-              sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-            <TextField
-              id='outlined-basic'
-              label='Age/Service'
-              variant='outlined'
-              value={ageService}
-              className='doctorProfileInput'
-              sx={{
-                width: '60%',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-            <TextField
-              id='outlined-basic'
-              label='Units/Service/Arms'
-              variant='outlined'
-              value={unitsArms}
-              className='doctorProfileInput'
-              sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-            <TextField
-              id='outlined-basic'
-              label='status'
-              variant='outlined'
-              value={selectedStatus}
-              className='doctorProfileStatus'
-              sx={{ width: '60%', marginLeft: 'auto', marginRight: 'auto', marginBottom: '30px' }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
+            <form className='doctorForm'>
+              <h1
+                className='text-3xl font-bold text-center'
+                style={{
+                  paddingBottom: '5vh',
+                  paddingTop: '5vh',
+                }}
+              >
+                Doctor Profile
+              </h1>
+              <div className='formGroup w-4/5 mx-auto '>
+                <label
+                  className='text-left font-semibold text-1xl w-full '
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.5vh' }}
+                >
+                  Name of the Doctor
+                </label>
+                <input
+                  className='patientProfileInput text-left font-medium text-sm w-full '
+                  placeholder='Name..'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.8vh' }}
+                  value={doctorName}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                ></input>
+              </div>
+              <div className='formGroup w-4/5 mx-auto '>
+                <label
+                  className='text-left font-semibold text-1xl w-full'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.5vh' }}
+                >
+                  ARMY NUMBER
+                </label>
+                <input
+                  className='patientProfileInput text-left font-medium text-sm w-full'
+                  placeholder='Army Number..'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.8vh' }}
+                  value={armyNumber}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                ></input>
+              </div>
+              <div className='formGroup w-4/5 mx-auto '>
+                <label
+                  className='text-left font-semibold text-1xl w-full'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.5vh' }}
+                >
+                  Age/Service
+                </label>
+                <input
+                  className='patientProfileInput text-left font-medium text-sm w-full'
+                  placeholder='Service..'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.8vh' }}
+                  value={ageService}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                ></input>
+              </div>
+              <div className='formGroup w-4/5 mx-auto '>
+                <label
+                  className='text-left font-semibold text-1xl w-full'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.5vh' }}
+                >
+                  Units/Service/Arms
+                </label>
+                <input
+                  className='patientProfileInput text-left font-medium text-sm w-full'
+                  placeholder='Units..'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.8vh' }}
+                  value={unitsArms}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                ></input>
+              </div>
+              <div className='formGroup w-4/5 mx-auto '>
+                <label
+                  className='text-left font-semibold text-1xl w-full'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.5vh' }}
+                >
+                  status
+                </label>
+                <input
+                  className='patientProfileInput text-left font-medium text-sm w-full'
+                  placeholder='Units..'
+                  style={{ fontFamily: 'Manrope', marginBottom: '0.8vh' }}
+                  value={selectedStatus}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                ></input>
+              </div>
+            </form>
           </DialogContent>
           <DialogActions>
             {selectedStatus == 'Requested' ? (
               <Button
-                variant='outlined'
-                className='modalButton'
+                variant='contained'
+                lassName='modalButton'
                 autoFocus
                 style={{
-                  fontSize: '16px',
-                  padding: '7px',
+                  padding: '5px',
+                  width: '15%',
+                  backgroundColor: '#fff',
+                  color: '#efb034',
+                  border: 'solid',
+                  borderWidth:'2px',
+                  borderColor: '#efb034'
                 }}
               >
                 Accept
@@ -335,8 +418,13 @@ function AdminSearchPage () {
                 className='modalButton'
                 autoFocus
                 style={{
-                  fontSize: '16px',
-                  padding: '7px',
+                  padding: '5px',
+                  width: '15%',
+                  backgroundColor: '#fff',
+                  color: '#efb034',
+                  border: 'solid',
+                  borderWidth:'2px',
+                  borderColor: '#efb034'
                 }}
               >
                 Remove
@@ -344,13 +432,14 @@ function AdminSearchPage () {
             )}
             {selectedStatus === 'Requested' && (
               <Button
-                className='modalButton'
+                className='modalButton text-lg'
                 autoFocus
-                variant='outlined'
-                color='error'
                 style={{
-                  fontSize: '16px',
-                  padding: '7px',
+                  padding: '5px',
+                  width: '15%',
+                  backgroundColor: '#efb034',
+                  color: 'white',
+                  border: 'none'
                 }}
               >
                 Decline

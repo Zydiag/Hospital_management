@@ -2,10 +2,9 @@ import React from 'react';
 import CustomTable from '../../components/CustomTable'; // Adjust the import path as necessary
 import '../../styles/StylesP/HistoryData.css';
 import { Button } from '@mui/material';
-import Navbar from '../../components/Navbar';
 import '../../styles/StylesP/Ame.css'
 
-function PME () {
+function PMERecord () {
   const PMEHeading = ['PME', 'Data'];
 
   const PMERows = [
@@ -35,7 +34,7 @@ function PME () {
 
   return (
     <div className='ameInfo'>
-
+  
       <h1>PME</h1>
       <div className='ameTable'>
         <CustomTable headings={PMEHeading} rows={PMERows} />
@@ -49,4 +48,4 @@ function PME () {
   );
 }
 
-export default PME;
+export default PMERecord;

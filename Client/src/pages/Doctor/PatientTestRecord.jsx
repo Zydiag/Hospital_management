@@ -4,10 +4,9 @@ import RowPatient from '../../components/RowPatient';
 import Button from '@mui/material/Button';
 import '../../styles/StylesP/PatientMedicalHistory.css';
 import man from '../../assets/Person with a cold-pana.svg';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import styled from 'styled-components';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 function PatientTestRecord () {
   const testRecord = [
@@ -29,110 +28,87 @@ function PatientTestRecord () {
   ];
 
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedRowDate, setSelectedRowDate] = useState(null);
+  const [filteredRecords, setFilteredRecords] = useState([]);
   const patientSearchRef = useRef(null);
 
   const handleDateChange = date => {
     setSelectedDate(date);
     const formattedDate = date.format('YYYY-MM-DD');
-    const foundData = testRecord.find(patient => patient.date === formattedDate);
-    setSelectedRowDate(foundData || null);
+    const foundRecords = testRecord.filter(patient => patient.date === formattedDate);
+    setFilteredRecords(foundRecords);
   };
 
   useEffect(() => {
-    if (selectedRowDate && patientSearchRef.current) {
+    if (filteredRecords.length > 0 && patientSearchRef.current) {
       patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
       setTimeout(() => {
         patientSearchRef.current.classList.add('show');
       }, 200);
     }
-  }, [selectedRowDate]);
-
-  const routes = [
-    {
-      buttonName: 'AME',
-      href: '/ame-data',
-    },
-    {
-      buttonName: 'PME',
-      href: '/pme-data',
-    },
-    {
-      buttonName: 'AME1',
-      href: '/ame1-data',
-    },
-  ];
+  }, [filteredRecords]);
 
   const getHref = test => {
-    if (test === 'AME') {
-      return '/ame-data';
-    } else if (test === 'PME') {
-      return '/pme-data';
-    } else if (test === 'AME1') {
-      return '/ame1-data';
+    switch(test) {
+      case 'AME':
+        return '/doctor/ame-data';
+      case 'PME':
+        return '/doctor/pme-data';
+      case 'AME1':
+        return '/doctor/ame1-data';
+      default:
+        return '#';
     }
-    // Return default value or handle other tests
-    return '#';
   };
 
   return (
     <div>
       <Navbar />
-      <div className='patientInfo'>
-        <div className='historyIntro'>
-          <div>
-            <h1>Patients Medical History</h1>
-            <p>Create new patient data enteries and view AME/PME status of the patient.</p>
-            <div className='dataButton'>
-              <Button className='add' variant='contained' href='/create-test-data'>
-                Add Record Test
-              </Button>
-            </div>
+      <div className='historyIntro h-full flex md:flex-row w-full justify-center bg-neutral-200 flex-col md:pt-0 pt-20' style={{ marginTop: '10vh', marginBottom: '10vh', height: '65vh' }}>
+        <div className='flex flex-col md:gap-0 m-0 md:p-0 md:ml-12 pt-12'>
+          <h1 className='text-3xl font-semibold md:ml-12 md:text-left w-full text-center m-0 p-0' style={{ paddingTop: '13vh', fontFamily: 'Manrope' }}>Patients Test Record</h1>
+          <p className='text-lg font-medium md:ml-12 md:text-left text-center w-3/4 mx-auto' style={{ paddingTop: '3vh', paddingBottom: '10vh', fontFamily: 'Manrope' }}>Create new test records based on the test required.</p>
+          <div className='dataButton md:w-full md:ml-12 h-12 w-3/4 mx-auto md:text-left text-center'>
+            <Button className='add lg:h-11 lg:w-1/2 lg:text-lg text-6xl w-fit h-3/4' variant='contained' href='/doctor/create-test-data'>Add test record</Button>
           </div>
-
-          <img src={man} alt='man'></img>
         </div>
-        <div className='patientCalendar'>
-          <h1>Choose the date</h1>
-          <p>Choose the date to get test record.</p>
+        <img src={man} alt='man' className='w-2/5 mx-auto md:ml-0 md:mr-0 md:mb-0 mb-12' />
+      </div>
+      <div className='patientCalendar'>
+        <p className='md:text-left md:pt-10 pt-44 text-center pb-7 md:text-2xl text-xl text-zinc-500'>Select the specific date for the patient test record.</p>
+        <div className="md:w-7/12 w-2/5 md:mx-0 mx-auto">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar
+            <DatePicker
+              label='Choose the date'
               value={selectedDate}
               onChange={handleDateChange}
               sx={{
-                '& .MuiTypography-root': {
-                  fontSize: '1rem', // Adjust the font size as needed
-                },
-                '& .Mui-selected': {
-                  backgroundColor: '#E99A01 !important',
-                  color: '#fff !important', // Optionally change text color
-                },
+                '& .MuiTypography-root': { fontSize: '1rem' },
+                '& .Mui-selected': { backgroundColor: '#E99A01 !important', color: '#fff !important' },
               }}
             />
           </LocalizationProvider>
         </div>
+        {filteredRecords.length > 0 ? (
+          <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
+            <p className='md:text-left md:pt-10 pt-44 text-center pb-7 md:text-2xl text-xl font-semibold para' style={{ color: 'Black', fontFamily: 'Manrope', paddingTop: '6vh', paddingBottom: '6vh' }}>Search Result by Date</p>
+            {filteredRecords.map(record => (
+              <RowPatient
+                key={record.armyNumber + record.test}
+                armyNumber={record.armyNumber}
+                date={record.date}
+                patientName={record.patientName}
+                test={record.test}
+                button1='View test record'
+                href={getHref(record.test)}
+              />
+            ))}
+          </div>
+        ) : (
+          selectedDate && (
+            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>No data found for the selected date.</p>
+          )
+        )}
       </div>
-      {selectedRowDate ? (
-        <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
-          <p className='SearchPara'>Search Result by Date</p>
-          {testRecord.map(
-            (row, index) =>
-              row.date === selectedDate.format('YYYY-MM-DD') && (
-                <RowPatient
-                  key={index}
-                  armyNumber={row.armyNumber}
-                  date={row.date}
-                  patientName={row.patientName}
-                  test={row.test}
-                  button1='View Test Record'
-                  href={getHref(row.test)}
-                />
-              )
-          )}
-        </div>
-      ) : (
-        selectedDate && <p className='errorDate'>Not found any data on the selected date.</p>
-      )}
     </div>
   );
 }

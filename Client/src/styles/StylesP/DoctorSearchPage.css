@@ -40,9 +40,7 @@
 }
 
 .searchRow {
-  transition:
-    opacity 1s ease-out,
-    transform 1s ease-out;
+  transition: opacity 1s ease-out, transform 1s ease-out;
   opacity: 0;
   transform: translateY(-20px);
 }
@@ -56,16 +54,12 @@
   display: flex;
   flex-direction: column;
   align-items: center; /* Center the form elements */
-  width: 70%; /* Set a fixed width for the form */
+  width: 80%; /* Set a fixed width for the form */
   margin: 4vh auto 0; /* Center the form horizontally */
 }
 
 .patientProfileForm h1 {
   font-family: 'Lexend', sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 700;
-  font-style: normal;
-  font-size: 2vw;
   margin-bottom: 5vh;
 }
 
@@ -74,26 +68,13 @@
   margin-bottom: 1vh; /* Add some space between each form group */
 }
 
-.patientProfileLabel {
-  text-align: left;
-  font-family: 'Manrope', sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 700;
-  font-style: normal;
-  font-size: 1vw;
-  width: 100%; /* Ensure label takes the full width of the form group */
-  margin-bottom: 0.5vh; /* Add some space below the label */
-}
+
 
 .patientProfileInput {
-  width: 100%; /* Ensure input takes the full width of the form group */
   height: 5vh;
   border: solid 2px #a8adb7;
   border-radius: 6px;
-  font-size: 1vw;
   background-color: #f3f4f6;
   padding: 0 18px;
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  margin-bottom: 0.8vh;
 }
-

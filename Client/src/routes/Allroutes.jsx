@@ -15,22 +15,36 @@ import AME1 from "../pages/Doctor/AME1";
 import PME from "../pages/Doctor/PME";
 import AddMedicalData from "../pages/Doctor/AddMedicalData";
 import AddTestData from "../pages/Doctor/AddTestData";
+import PatientMainPage from "../pages/Patient/PatientMainPage";
+import PatientTestRecodsPage from "../pages/Patient/PatientTestRecodsPage";
+import MedicalRecord from "../pages/Patient/MedicalRecord";
+import AMERecord from "../pages/Patient/AMERecord";
+import AME1Record from "../pages/Patient/AME1Record";
+import PMERecord from "../pages/Patient/PMERecord";
+
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/login" element={<Login />} />
-      <Route path="/admin-panel" element={<AdminSearchPage />} />
+      <Route path="/admin/admin-panel" element={<AdminSearchPage />} />
       <Route path="/" element={<SignUp />}></Route>
-      <Route path="/doctor-panel" element={<DoctorSearchPage />}></Route>
-      <Route path="/patient-history" element={<PatientMedicalHistory />}></Route>
-      <Route path="/history-data" element={<HistoryData />}></Route>
-      <Route path="/test-record" element={<PatientTestRecord />}></Route>
-      <Route path="/ame-data" element={<AME />}></Route>
-      <Route path="/ame1-data" element={<AME1 />}></Route>
-      <Route path="/pme-data" element={<PME />}></Route>
-      <Route path="/create-data" element={<AddMedicalData />}></Route>
-      <Route path="/create-test-data" element={<AddTestData />}></Route>
+      <Route path="/doctor/doctor-panel" element={<DoctorSearchPage />}></Route>
+      <Route path="/doctor/patient-record" element={<PatientMedicalHistory />}></Route>
+      <Route path="/doctor/medical-record" element={<HistoryData />}></Route>
+      <Route path="/doctor/test-record" element={<PatientTestRecord />}></Route>
+      <Route path="/doctor/ame-data" element={<AME />}></Route>
+      <Route path="/doctor/ame1-data" element={<AME1 />}></Route>
+      <Route path="/doctor/pme-data" element={<PME />}></Route>
+      <Route path="/doctor/create-data" element={<AddMedicalData />}></Route>
+      <Route path="/doctor/create-test-data" element={<AddTestData />}></Route>
+      <Route path="/patient/profile" element={<PatientMainPage />}></Route>
+      <Route path="/patient/test" element={<PatientTestRecodsPage />}></Route>
+      <Route path="/patient/medical-record" element={<MedicalRecord />}></Route>
+      <Route path="/patient/ame" element={<AMERecord />}></Route>
+      <Route path="/patient/pme" element={<PMERecord />}></Route>
+      <Route path="/patient/ame1" element={<AME1Record />}></Route>
+
     </>,
   ),
 );

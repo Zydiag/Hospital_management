@@ -24,7 +24,7 @@ const DropDown = ({
         autoComplete='off'
       >
         <TextField
-          className='dropdownField'
+          className="dropdownField text-lg"
           id='outlined-select-currency-native'
           select
           value={value}

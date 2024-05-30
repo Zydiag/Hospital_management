@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 
 import '../../styles/StylesP/Ame.css'
 
-function AME () {
+function AMERecord () {
   const ameHeading = ['AME', 'Data'];
 
   const ameRows = [
@@ -39,4 +39,4 @@ function AME () {
   );
 }
 
-export default AME;
+export default AMERecord;

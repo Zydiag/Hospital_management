@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,22 +12,71 @@ import ListItemText from '@mui/material/ListItemText';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import '../../styles/StylesP/AddTestData.css';
-
 import dayjs from 'dayjs';
+import '../../styles/StylesP/AddTestData.css';
 
 const drawerWidth = 350;
 
-function AddTestData () {
+export const calculateAge = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  const fractionOfYear = (monthDiff * 30 + dayDiff) / 365;
+  age += fractionOfYear;
+
+  return age;
+};
+
+export const getTestType = (age) => {
+  if ((age > 25 && age <= 26) || (age > 30 && age <= 31) || (age > 37 && age <= 38) ||
+      (age > 42 && age <= 43) || (age > 47 && age <= 48) || (age > 49 && age <= 50) ||
+      (age > 51 && age <= 53) || (age > 54 && age <= 57) || (age > 58 && age <= 59)) {
+    return 'AME2';
+  } else if ((age > 35 && age <= 36) || (age > 40 && age <= 41) || (age > 45 && age <= 46) ||
+             (age > 50 && age <= 51) || (age > 53 && age <= 54) || (age > 57 && age <= 58)) {
+    return 'PME';
+  } else {
+    return 'AME1';
+  }
+};
+
+function AddTestData() {
   const [date, setDate] = useState(dayjs());
+  const [dob , setDOB] = useState(dayjs());
   const [selectedSection, setSelectedSection] = useState('Choose the Test');
 
   const sections = [
     'Choose the Test',
     'AME - Annual Medical Exam',
     'AME1 - Annual Medical Exam 1',
-    'PME - Perodic medical Exam',
+    'PME - Perodic medical Exam'
+    
   ];
+
+  const handleDateChange = (newDate) => {
+    setDOB(newDate);
+    const age = calculateAge(newDate);
+    const testType = getTestType(age);
+    let section;
+    switch (testType) {
+      case 'AME2':
+        section = 'AME1 - Annual Medical Exam 1';
+        break;
+      case 'AME1':
+        section = 'AME - Annual Medical Exam';
+        break;
+      case 'PME':
+        section = 'PME - Perodic medical Exam';
+        break;
+      default:
+        section = 'Choose the Test';
+        break;
+    }
+    setSelectedSection(section);
+  };
 
   return (
     <div>
@@ -89,14 +138,17 @@ function AddTestData () {
         >
           {selectedSection === 'Choose the Test' && (
             <div className='selectedTest'>
-            <p>Choose the required test based on Date of Birth.</p>
+              <p>Choose the required test based on Date of Birth.</p>
               <div className='dob' style={{ marginBottom: '1vh', textAlign: 'right' }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker label='Date of Birth' />
+                  <DatePicker
+                    label='Date of Birth'
+                    value={dob}
+                   
+                  />
                 </LocalizationProvider>
-                <Button className="dobButton" variant='contained'>Add Test</Button>
+                <Button className="dobButton" variant='contained' onClick={handleDateChange}>Add Test</Button>
               </div>
-              
             </div>
           )}
           {selectedSection === 'AME - Annual Medical Exam' && (
@@ -105,7 +157,7 @@ function AddTestData () {
                 <h1>Annual Medical Exam</h1>
                 <div className='piFormGroup' style={{ marginBottom: '1vh', textAlign: 'right' }}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker label='Date' value={date} onChange={setDate} />
+                    <DatePicker label='Date' value={date} onChange={(newDate) => setDate(newDate)} />
                   </LocalizationProvider>
                 </div>
                 <div className='piFormGroup'>
@@ -146,7 +198,7 @@ function AddTestData () {
                 <h1>Annual Medical Exam 1</h1>
                 <div className='piFormGroup' style={{ marginBottom: '1vh', textAlign: 'right' }}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker label='Date' value={date} onChange={setDate} />
+                    <DatePicker label='Date' value={date} onChange={(newDate) => setDate(newDate)} />
                   </LocalizationProvider>
                 </div>
                 <div className='piFormGroup'>
@@ -171,14 +223,6 @@ function AddTestData () {
                 </div>
                 <div className='piFormGroup'>
                   <label className='piLabel'>BloodSugarFasting</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>BloodSugar PP</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>RestingECG</label>
                   <textarea className='piTextarea' />
                 </div>
                 <div>
@@ -193,13 +237,13 @@ function AddTestData () {
             </section>
           )}
 
-          {selectedSection == 'PME - Perodic medical Exam' && (
-            <section id='medical-history' className='medicalHistory'>
+          {selectedSection === 'PME - Perodic medical Exam' && (
+            <section id='pme' className='pme'>
               <form className='pi'>
-                <h1>Perodic medical Exam</h1>
+                <h1>Periodic Medical Exam</h1>
                 <div className='piFormGroup' style={{ marginBottom: '1vh', textAlign: 'right' }}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker label='Date' value={date} onChange={setDate} />
+                    <DatePicker label='Date' value={date} onChange={(newDate) => setDate(newDate)} />
                   </LocalizationProvider>
                 </div>
                 <div className='piFormGroup'>
@@ -227,38 +271,9 @@ function AddTestData () {
                   <textarea className='piTextarea' />
                 </div>
                 <div className='piFormGroup'>
-                  <label className='piLabel'>BloodSugar PP</label>
+                  <label className='piLabel'>BloodSugarPostPrandial</label>
                   <textarea className='piTextarea' />
                 </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>RestingECG</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>UricAcid</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>Urea</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>Creatinine</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>Cholesterol</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>LipidProfile</label>
-                  <textarea className='piTextarea' />
-                </div>
-                <div className='piFormGroup'>
-                  <label className='piLabel'>XrayChestPA</label>
-                  <textarea className='piTextarea' />
-                </div>
-
                 <div>
                   <Button className='editForm' variant='contained'>
                     Edit

@@ -87,7 +87,7 @@ function patientSearchPage() {
             placeholder="Search Patient by Army no."
           />
           {errorMessagePatient && <p className="searchError">{errorMessagePatient}</p>}
-          <div className="flex justify-center items-center gap-5">
+          <div className="flex flex-col-reverse justify-center items-center gap-5">
             <p>Couldn't find the user? Create a New patient Record.</p>
             <Button
               variant="contained"
@@ -106,7 +106,15 @@ function patientSearchPage() {
         </div>
         {selectedRowPatient && (
           <div className="searchRow" id="patientSearch" ref={patientSearchRef}>
-            <p className="SearchPara">Look, What we found?</p>
+            <p className="text-left text-3xl font-semibold searchPara" 
+            style={{
+              width: '85%',
+              marginLeft: '8vw',
+              paddingBottom: '3vh',
+              paddingTop: '8vh'
+
+            }}
+            >Look, What we found?</p>
             <RowPatient
               key={selectedRowPatient.armyNumber}
               armyNumber={selectedRowPatient.armyNumber}
@@ -125,8 +133,8 @@ function patientSearchPage() {
             '& .MuiPaper-root': {
               maxWidth: '90%', // Maximum width of the dialog paper element
               maxHeight: '80vh', // Maximum height of the dialog paper element
-              width: '40vw', // Adjust width as necessary
-              height: '80vh', // Adjust height as necessary
+              width: '100vh', // Adjust width as necessary
+              height: '80%', // Adjust height as necessary
             },
           }}
         >
@@ -153,32 +161,32 @@ function patientSearchPage() {
             }}
           >
             <form className="patientProfileForm">
-              <h1>Create a Patient Profile</h1>
+              <h1 className="text-3xl font-bold">Create a Patient Profile</h1>
               <div className="formGroup">
-                <label className="patientProfileLabel">Name of the Doctor</label>
-                <input className="patientProfileInput" placeholder="Name.."></input>
+                <label className="text-left font-medium text-1xl w-full " style={{fontFamily: 'Manrope' , marginBottom:'0.5vh'}} >Name of the Doctor</label>
+                <input className="patientProfileInput text-left font-medium text-sm w-full " placeholder="Name.." 
+                style={{fontFamily: 'Manrope' , marginBottom:'0.8vh'}}></input>
               </div>
               <div className="formGroup">
-                <label className="patientProfileLabel">ARMY NUMBER</label>
-                <input className="patientProfileInput" placeholder="Army Number.."></input>
+                <label className="text-left font-medium text-1xl w-full" style={{fontFamily: 'Manrope' , marginBottom:'0.5vh'}} >ARMY NUMBER</label>
+                <input className="patientProfileInput text-left font-medium text-sm w-full" placeholder="Army Number.." style={{fontFamily: 'Manrope' , marginBottom:'0.8vh'}}></input>
               </div>
               <div className="formGroup">
-                <label className="patientProfileLabel">Age/Service</label>
-                <input className="patientProfileInput" placeholder="Service.."></input>
+                <label className="text-left font-medium text-1xl w-full" style={{fontFamily: 'Manrope' , marginBottom:'0.5vh'}} >Age/Service</label>
+                <input className="patientProfileInput text-left font-medium text-sm w-full" placeholder="Service.." style={{fontFamily: 'Manrope' , marginBottom:'0.8vh'}}></input>
               </div>
               <div className="formGroup">
-                <label className="patientProfileLabel">Units/Service/Arms</label>
-                <input className="patientProfileInput" placeholder="Units.."></input>
+                <label className="text-left font-medium text-1xl w-full" style={{fontFamily: 'Manrope' , marginBottom:'0.5vh'}} >Units/Service/Arms</label>
+                <input className="patientProfileInput text-left font-medium text-sm w-full" placeholder="Units.." style={{fontFamily: 'Manrope' , marginBottom:'0.8vh'}}></input>
               </div>
             </form>
           </DialogContent>
           <DialogActions>
             <Button
               variant="outlined"
-              className="modalButton"
+              className="modalButton text-lg"
               autoFocus
               style={{
-                fontSize: '16px',
                 padding: '8px',
                 width: '20%',
                 backgroundColor: '#efb034',

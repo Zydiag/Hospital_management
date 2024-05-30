@@ -14,11 +14,11 @@ function CustomTable({ headings, rows }) {
 
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="custom table">
+      <Table sx={{ minWidth: 650 }} aria-label="custom table" className="w-full">
         <TableHead>
-          <TableRow>
+          <TableRow className="bg-amber-400 md:text-2xl text-xl">
             {headings.map((heading, index) => (
-              <TableCell key={index}>{heading[0]}</TableCell>
+              <TableCell className="" key={index}>{heading[0]}</TableCell>
             ))}
           </TableRow>
         </TableHead>
@@ -26,7 +26,7 @@ function CustomTable({ headings, rows }) {
           {rows.map((row, rowIndex) => (
             <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell>{Object.values(row)[0]}</TableCell>
-              <TableCell align="right">{Object.values(row)[1]}</TableCell>
+              <TableCell align="left">{Object.values(row)[1]}</TableCell>
             </TableRow>
           ))}
         </TableBody>

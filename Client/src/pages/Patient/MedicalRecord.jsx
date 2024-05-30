@@ -5,7 +5,7 @@ import '../../styles/StylesP/HistoryData.css';
 
 import { rows } from '../../constants';
 
-function HistoryData() {
+function MedicalRecord() {
   return (
     <div>
       <CustomTable headings={rows} rows={rows} />
@@ -13,5 +13,5 @@ function HistoryData() {
   );
 }
 
-export default HistoryData;
+export default MedicalRecord;
 

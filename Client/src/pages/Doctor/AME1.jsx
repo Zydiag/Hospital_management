@@ -28,7 +28,7 @@ function AME1 () {
 
   return (
     <div className='ameInfo'>
-      <Navbar />
+    
       <h1>AME1</h1>
       <div className='ameTable'>
         <CustomTable headings={ame1Heading} rows={ame1Rows} />

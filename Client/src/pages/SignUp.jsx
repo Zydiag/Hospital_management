@@ -18,32 +18,33 @@ import * as z from 'zod';
 import SignUpSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
 import useAuthStore from '../stores/authStore';
-
-// Zod schema form validation
-const signUpSchema = z
-  .object({
-    profession: z.enum([AccountType.Admin, AccountType.Doctor, AccountType.Patient], {
-      required_error: 'Account type is required',
-    }),
-    armyNo: z.string().min(1, 'Army No. is required'),
-    name: z
-      .string()
-      .min(1, 'Name is required')
-      .max(50, 'Name must be less than 50 characters')
-      .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
-    dob: z.string().min(1, 'Date of birth is required'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+import axios from 'axios';
+import { signup } from '../api/signUpService';
 
 export default function SignUp() {
+  // const signUpSchema = z
+  //   .object({
+  //     profession: z.enum([AccountType.Admin, AccountType.Doctor, AccountType.Patient], {
+  //       required_error: 'Account type is required',
+  //     }),
+  //     armyNo: z.string().min(1, 'Army No. is required'),
+  //     name: z
+  //       .string()
+  //       .min(1, 'Name is required')
+  //       .max(50, 'Name must be less than 50 characters')
+  //       .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
+  //     dob: z.string().min(1, 'Date of birth is required'),
+  //     password: z.string().min(6, 'Password must be at least 6 characters'),
+  //     confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
+  //   })
+  //   .refine((data) => data.password === data.confirmPassword, {
+  //     message: "Passwords don't match",
+  //     path: ['confirmPassword'],
+  //   });
+
   const [showPassword, setShowPassword] = useState(false);
-  const signup = useAuthStore((state) => state.signup);
-  const error = useAuthStore((state) => state.error);
+  // const signup = useAuthStore((state) => state.signup);
+  // const error = useAuthStore((state) => state.error);
   const navigate = useNavigate();
 
   const {
@@ -51,7 +52,7 @@ export default function SignUp() {
     control,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(signUpSchema),
+    // resolver: zodResolver(signUpSchema),
   });
 
   const watchProfession = useWatch({
@@ -64,16 +65,12 @@ export default function SignUp() {
     setShowPassword(!showPassword);
   };
 
-  const onSubmit = async (data) => {
-    const formData = {
-      ...data,
-      adminId: data.profession,
-      dob: new Date(data.dob).toISOString(), // Adjust date format if necessary
-    };
-    await signup(formData);
-    if (!error) {
-      navigate('/dashboard');
-    }
+  const onError = (error) => {
+    console.log(error);
+  };
+
+  const onSubmit = (data) => {
+    signup(data, navigate);
   };
 
   return (
@@ -107,7 +104,7 @@ export default function SignUp() {
           <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+            <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full">
               <FormControl fullWidth margin="normal">
                 <InputLabel id="account-type-label">Account Type</InputLabel>
                 <Controller
@@ -255,6 +252,7 @@ export default function SignUp() {
                 </FormControl>
               )}
               <Button
+                onClick={handleSubmit(onSubmit)}
                 type="submit"
                 variant="contained"
                 color="primary"
@@ -275,3 +273,18 @@ export default function SignUp() {
     </div>
   );
 }
+
+// import { useForm } from 'react-hook-form';
+// import { TextField, Button } from '@mui/material';
+
+// export default function SignUp() {
+//   const { register, handleSubmit } = useForm();
+//   const onSubmit = (data) => console.log(data);
+
+//   return (
+//     <form onSubmit={handleSubmit(onSubmit)}>
+//       <TextField name="firstName" label="First Name" />
+//       <Button type="submit">Submit</Button>
+//     </form>
+//   );
+// }

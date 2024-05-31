@@ -2,7 +2,7 @@ import { apiError } from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
-import jwt from 'jsonwebtoken';
+import { generateAccessAndRefreshToken } from '../utils/tokenGenerate.js';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -10,31 +10,17 @@ dotenv.config();
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-//
-const generateAccessAndRefreshToken = asyncHandler(async (user) => {
-  try {
-    const accessToken = jwt.sign({ id: user.id}, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '15m',
-    });
-    const refreshToken = jwt.sign({ id:user.id}, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '8h',
-    });
-    return { accessToken, refreshToken };
-  } catch (error) {
-    console.log('error: ', error);
-    throw new apiError(500, 'Something went wrong while generating access and refresh token');
-  }
-});
 
 // create admin profile
 
 export const createAdmin = asyncHandler(async (req, res) => {
-  const { adminId, firstName, lastName, email, dob, password } = req.body;
+  const { armyNo, firstName, dob, password } = req.body;
+
+  const adminId = armyNo;
   // Check if all fields are filled
   if (!adminId || !firstName || !dob || !password) {
     throw new apiError(400, 'All fields are required to create a new user');
   }
-  const armyNo= adminId;
   const parsedDob = new Date(dob);
   // Hash password
   const hashedPassword = await hashPassword(password);
@@ -43,18 +29,16 @@ export const createAdmin = asyncHandler(async (req, res) => {
       data: {
         armyNo,
         firstName,
-        lastName,
-        email,
         dob: parsedDob,
         role: 'ADMIN',
         password: hashedPassword,
       },
     });
-    const finduser= await prisma.User.findFirst({
+    const finduser = await prisma.User.findFirst({
       where: {
-        armyNo
-      }
-    })
+        armyNo,
+      },
+    });
     const newAdmin = await prisma.Admin.create({
       data: {
         userId: finduser.id,
@@ -62,7 +46,39 @@ export const createAdmin = asyncHandler(async (req, res) => {
         password: hashedPassword,
       },
     });
-    res.status(201).json(newAdmin);
+
+    if (!newAdmin) {
+      throw new apiError(400, 'Admin not created');
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(finduser);
+
+    await prisma.User.update({
+      where: {
+        armyNo,
+      },
+      data: { refreshToken },
+    });
+
+    //cookies ke liya hai , options for which cookie to be sent
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    console.log(`accessToken, refreshToken`);
+    return res
+      .status(200)
+      .cookie('refreshToken', refreshToken, options)
+      .cookie('accessToken', accessToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          {
+            accessToken,
+            refreshToken,
+          },
+          'User singup in successfully'
+        )
+      );
   } catch (error) {
     throw new apiError(401, error?.message || 'Something went wrong while creating doctor request');
   }
@@ -70,48 +86,47 @@ export const createAdmin = asyncHandler(async (req, res) => {
 
 //for fetching doctor's profile
 
-export const getDoctorProfile=asyncHandler(async(req,res)=>{
+export const getDoctorProfile = asyncHandler(async (req, res) => {
   //armyNo:-armyNo of doctor;
-  const {armyNo}=req.body;
-  const user =await prisma.User.findFirst({
-    where:{
-      armyNo:armyNo,
-      role:"DOCTOR",
+  const { armyNo } = req.body;
+  const user = await prisma.User.findFirst({
+    where: {
+      armyNo: armyNo,
+      role: 'DOCTOR',
     },
-    select:{
-      armyNo:true,
-      firstName:true,
-    }
-  })
-  const doctor=await prisma.Doctor.findFirst({
-    where:{
-      userId:user.id,
+    select: {
+      armyNo: true,
+      firstName: true,
     },
-    select:{
-      specialization:true,
-      status:true
-    }
-
-  })
-  if(!user){
+  });
+  const doctor = await prisma.Doctor.findFirst({
+    where: {
+      userId: user.id,
+    },
+    select: {
+      specialization: true,
+      status: true,
+    },
+  });
+  if (!user) {
     throw new apiError(400, 'Doctor not found');
   }
-  let ourDoctor={
-    armyNo:user.armyNo,
-    firstName:user.firstName,
-    specialization:doctor.specialization,
-    status:doctor.status
-  }
-  res.json(new ApiResponse(HttpStatusCode.OK, ourDoctor,"Doctor's Credentials:-"));
-})
+  let ourDoctor = {
+    armyNo: user.armyNo,
+    firstName: user.firstName,
+    specialization: doctor.specialization,
+    status: doctor.status,
+  };
+  res.json(new ApiResponse(HttpStatusCode.OK, ourDoctor, "Doctor's Credentials:-"));
+});
 
 //Admin login
 export const loginAdmin = asyncHandler(async (req, res) => {
-  const { adminId, password } = req.body;
-
+  const { armyNo, password } = req.body;
+  const adminId = armyNo;
   // check if all fields are filled
   if (!adminId) {
-    throw new apiError(400, 'id  required');
+    throw new apiError(400, 'adminId  required');
   }
   if (!password) {
     throw new apiError(400, 'password  required');
@@ -133,11 +148,11 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   if (!isCorrect) {
     throw new apiError(401, 'Incorrect password');
   }
-const user= await prisma.User.findUnique({
-  where: {
-    id: Admin.userId
-  }
-})
+  const user = await prisma.User.findUnique({
+    where: {
+      id: Admin.userId,
+    },
+  });
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user);
   await prisma.User.update({
     where: {
@@ -168,9 +183,9 @@ const user= await prisma.User.findUnique({
 });
 
 // fetch  doctor requests which is not approved(pending)
-export const pendingRequests = asyncHandler(async (req, res)=> {
+export const pendingRequests = asyncHandler(async (req, res) => {
   try {
-    const requests = await prisma.Request.findMany({
+    const requests = await prisma.request.findMany({
       where: {
         status: 'PENDING',
       },
@@ -191,9 +206,11 @@ export const pendingRequests = asyncHandler(async (req, res)=> {
       },
     });
 
-    const formattedRequests = requests.map(request => ({
-      userId: request.doctor.id,
-      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
+    const formattedRequests = requests.map((request) => ({
+      doctorId: request.doctor.id,
+      fullName:
+        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
+
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -204,16 +221,17 @@ export const pendingRequests = asyncHandler(async (req, res)=> {
 
     res.json(formattedRequests);
   } catch (error) {
-    res.status(500).json({ error: "An error occurred while fetching the requests." });
+    res.status(500).json({ error: 'An error occurred while fetching the requests.' });
   }
 });
 
 // fetch  doctor requests which is approved(Accepted)
-export const approvedRequests = asyncHandler( async (req, res) => {
+
+export const approvedRequests = asyncHandler(async (req, res) => {
   try {
     const requests = await prisma.Request.findMany({
       where: {
-        status: 'ACCEPTED',
+        status: 'APPROVED',
       },
       include: {
         doctor: {
@@ -232,9 +250,11 @@ export const approvedRequests = asyncHandler( async (req, res) => {
       },
     });
 
-    const formattedRequests = requests.map(request => ({
-      userId: request.doctor.id,
-      fullName: `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName}`.trim(),
+    const formattedRequests = requests.map((request) => ({
+      doctorId: request.doctor.id,
+      fullName:
+        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
+
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
       status: request.status,
@@ -245,29 +265,39 @@ export const approvedRequests = asyncHandler( async (req, res) => {
 
     res.json(formattedRequests);
   } catch (error) {
-    res.status(500).json({ error: "An error occurred while fetching the requests." });
+    res.status(500).json({ error: 'An error occurred while fetching the requests.' });
   }
 });
 
-
 // approve request
-export const approveRequest = asyncHandler(async (req, res)=> {
-  const { doctorId } = req.body;
+
+export const approveRequest = asyncHandler(async (req, res) => {
+  const { doctorId } = req.query;
+  console.log(`doctorId:${doctorId}`);
+
   const request = await prisma.Request.findUnique({ where: { doctorId } });
+
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
-  
+
   const updatedRequest = await prisma.Doctor.update({
-    where: {id: doctorId },
+    where: { id: doctorId },
+    data: { status: 'APPROVED' },
+  });
+  await prisma.request.update({
+    where: { doctorId },
     data: { status: 'APPROVED' },
   });
   console.log(updatedRequest);
+  res.status(200).json({ updatedRequest });
 });
+
 // reject request
 export const rejectRequest = asyncHandler(async (req, res) => {
-  const { doctorId } = req.body;
-  const request = await prisma.Request.findUnique({ where: {id: doctorId } });
+  const { doctorId } = req.query;
+  const request = await prisma.Request.findUnique({ where: { id: doctorId } });
+
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
@@ -275,11 +305,14 @@ export const rejectRequest = asyncHandler(async (req, res) => {
     where: { doctorId },
     data: { status: 'REJECTED' },
   });
+  await prisma.request.update({
+    where: { doctorId },
+    data: { status: 'REJECTED' },
+  });
   // clear the request after rejection
   await prisma.Request.delete({ where: { doctorId } });
-  res.json(updatedRequest);
+  res.status(200).json({ updatedRequest });
 });
-
 
 // reject(block) accepted Doctor
 export const blokingAcceptedDoctor = asyncHandler(async (req, res) => {
@@ -296,7 +329,6 @@ export const blokingAcceptedDoctor = asyncHandler(async (req, res) => {
   await prisma.Request.delete({ where: { doctorId } });
   res.json(updatedRequest);
 });
-
 
 // Admin Logout
 export const logoutAdmin = asyncHandler(async (req, res) => {
@@ -319,10 +351,11 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
     .clearCookie('accessToken', options)
     .json(new ApiResponse(200, {}, 'Admin logout successfully'));
 });
+
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
   console.log(`req.user.id: ${req.user.id}`);
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user.firstName, "User fetched successfully"));
+    .json(new ApiResponse(200, req.user.firstName, 'User fetched successfully'));
 });

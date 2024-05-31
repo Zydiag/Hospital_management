@@ -14,7 +14,7 @@ function CustomTable({ headings, rows }) {
 
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="custom table" className="w-full">
+      <Table sx={{ minWidth: 1000 }} aria-label="custom table" className="w-full">
         <TableHead>
           <TableRow className="bg-amber-400 md:text-2xl text-xl">
             {headings.map((heading, index) => (

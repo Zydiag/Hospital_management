@@ -15,6 +15,8 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import '../../styles/StylesC/Row.css';
+import TextField from '@mui/material/TextField';
+import { usePendingDoctorRequests } from '../../api/admin.api';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,50 +27,9 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-function AdminSearchPage () {
-  const rows = [
-    { armyNumber: 'ARMY001', doctorName: 'Dr. Alice' },
-    { armyNumber: 'ARMY002', doctorName: 'Dr. Bob' },
-    { armyNumber: 'ARMY003', doctorName: 'Dr. Charlie' },
-    { armyNumber: 'ARMY004', doctorName: 'Dr. Diana' },
-    { armyNumber: 'ARMY005', doctorName: 'Dr. Ethan' },
-    { armyNumber: 'ARMY006', doctorName: 'Dr. Fiona' },
-    { armyNumber: 'ARMY007', doctorName: 'Dr. George' },
-    { armyNumber: 'ARMY008', doctorName: 'Dr. Hannah' },
-    { armyNumber: 'ARMY009', doctorName: 'Dr. Ian' },
-    { armyNumber: 'ARMY010', doctorName: 'Dr. Julia' },
-    { armyNumber: 'ARMY011', doctorName: 'Dr. Kyle' },
-    { armyNumber: 'ARMY012', doctorName: 'Dr. Laura' },
-    { armyNumber: 'ARMY013', doctorName: 'Dr. Mike' },
-    { armyNumber: 'ARMY014', doctorName: 'Dr. Nancy' },
-    { armyNumber: 'ARMY015', doctorName: 'Dr. Oliver' },
-  ];
-
-  //for the dropdown box
-  const status = [
-    {
-      value: 'Requested',
-      label: 'Requested',
-    },
-    {
-      value: 'Accepted',
-      label: 'Accepted',
-    },
-  ];
-
-  const ButtonStatus = [
-    {
-      label: 'Requested',
-      Button1: 'View',
-      Button2: 'Accept',
-      Button3: 'Reject',
-    },
-    {
-      label: 'Accepted',
-      Button1: 'View',
-      Button2: 'Remove',
-    },
-  ];
+function AdminSearchPage() {
+  const { data, error, isLoading, isError } = usePendingDoctorRequests();
+  console.log(data);
 
   //for Modal page---> Profile Page of Doctor
   const [open, setOpen] = React.useState(false);
@@ -76,17 +37,15 @@ function AdminSearchPage () {
   const [armyNumber, setArmyNumber] = React.useState(0);
   const [ageService, setAgeService] = React.useState('15 YEARS');
   const [unitsArms, setUnitsArms] = React.useState('NSDFJ');
-
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
-
-  const handleRowClick = armyNumber => {
+  const handleRowClick = (doctorName, armyNumber) => {
     setArmyNumber(armyNumber);
+    setDoctorName(doctorName);
     handleClickOpen();
   };
 
@@ -94,11 +53,43 @@ function AdminSearchPage () {
   const [searchValue, setSearchValue] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
   const [selectedRow, setSelectedRow] = useState(null);
-
-  const handleSearchChange = event => {
+  const handleSearchChange = (event) => {
     setSearchValue(event.target.value);
   };
+  const [rows, setRows] = useState([]);
+  // const rows = [
+  //   { armyNumber: 'ARMY001', doctorName: 'Dr. Alice' },
+  //   { armyNumber: 'ARMY002', doctorName: 'Dr. Bob' },
+  //   { armyNumber: 'ARMY003', doctorName: 'Dr. Charlie' },
+  //   { armyNumber: 'ARMY004', doctorName: 'Dr. Diana' },
+  //   { armyNumber: 'ARMY005', doctorName: 'Dr. Ethan' },
+  //   { armyNumber: 'ARMY006', doctorName: 'Dr. Fiona' },
+  //   { armyNumber: 'ARMY007', doctorName: 'Dr. George' },
+  //   { armyNumber: 'ARMY008', doctorName: 'Dr. Hannah' },
+  //   { armyNumber: 'ARMY009', doctorName: 'Dr. Ian' },
+  //   { armyNumber: 'ARMY010', doctorName: 'Dr. Julia' },
+  //   { armyNumber: 'ARMY011', doctorName: 'Dr. Kyle' },
+  //   { armyNumber: 'ARMY012', doctorName: 'Dr. Laura' },
+  //   { armyNumber: 'ARMY013', doctorName: 'Dr. Mike' },
+  //   { armyNumber: 'ARMY014', doctorName: 'Dr. Nancy' },
+  //   { armyNumber: 'ARMY015', doctorName: 'Dr. Oliver' },
+  // ];
 
+  useEffect(() => {
+    console.log('data', data);
+    if (data) {
+      // Update rows state with fetched data
+      setRows(
+        data.map((item) => ({
+          armyNumber: item.armyNo,
+          doctorName: item.fullName,
+          status: item.status,
+        }))
+      );
+    }
+  }, [data]);
+
+  
   const handleSearch = () => {
     console.log('Search button clicked'); // Debug: Add this line to debug
     if (!searchValue) {
@@ -106,7 +97,7 @@ function AdminSearchPage () {
       setSelectedRow(null); // Clear the selected row if input is empty
       console.log('Error: Input is empty'); // Debug: Add this line to debug
     } else {
-      const foundRow = rows.find(row => row.armyNumber === searchValue);
+      const foundRow = rows.find((row) => row.armyNumber === searchValue);
       if (foundRow) {
         setSelectedRow(foundRow);
         setErrorMessage('');
@@ -137,24 +128,41 @@ function AdminSearchPage () {
 
   const handleDropdownChange = event => {
     setSelectedStatus(event.target.value);
-    const statusIndex = status.findIndex(s => s.value === event.target.value);
+    const statusIndex = status.findIndex((s) => s.value === event.target.value);
     setArrayNumber(statusIndex);
   };
 
   //for pagination
   const [currentPage, setCurrentPage] = useState(1); // Current page state
   const rowPerPage = 2;
-  const totalRows = rows.length;
+  const totalRows = rows?.length;
   const totalPages = Math.ceil(totalRows / rowPerPage);
-
-  const handlePageChange = newpage => {
+  const handlePageChange = (newpage) => {
     setCurrentPage(newpage);
   };
-
-  // Calculate range of rows to display
   const indexOfLastRow = currentPage * rowPerPage;
   const indexOfFirstRow = indexOfLastRow - rowPerPage;
-  const currentRows = rows.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = rows?.slice(indexOfFirstRow, indexOfLastRow);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  console.log(data);
+
+  const status = [
+    { value: 'Requested', label: 'Requested' },
+    { value: 'Accepted', label: 'Accepted' },
+  ];
+
+  const ButtonStatus = [
+    { label: 'Requested', Button1: 'View', Button2: 'Accept', Button3: 'Reject' },
+    { label: 'Accepted', Button1: 'View', Button2: 'Remove' },
+  ];
 
   return (
     <>

@@ -3,14 +3,16 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import db from '../lib/db.js';
 import Jwt from 'jsonwebtoken';
 
-export const verifyJwt = asyncHandler(async (req,res,next) => {
+export const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
+    console.log(req.header('Authorization'));
     const token = req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
       throw new apiError(400, 'Unauthorized request');
     }
-    const decodedToken = Jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-   
+    const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log('decodedToken:', decodedToken);
+
     const user = await db.user.findUnique({
       where: {
         id: decodedToken.id,
@@ -26,16 +28,29 @@ export const verifyJwt = asyncHandler(async (req,res,next) => {
   }
 });
 
-export const authorizeDoctor = (req, res, next) => {
+export const authorizeDoctor = asyncHandler(async (req, res, next) => {
   if (req.user.role !== 'DOCTOR') {
+    let doctor = await db.doctor.findUnique({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    if (doctor.status !== 'APPROVED') {
+      return next(new apiError(401, 'Access denied'));
+    }
+  }
+  next();
+});
+
+export const authorizeAdmin = (req, res, next) => {
+  if (req.user.role !== 'ADMIN') {
     // return next(new APIError(HttpStatusCode.FORBIDDEN, 'Access denied'));
     return next(new apiError(401, 'Access denied'));
   }
   next();
 };
-
-export const authorizeAdmin = (req, res, next) => {
-  if (req.user.role !== 'ADMIN') {
+export const authorizePatient = (req, res, next) => {
+  if (req.user.role !== 'PATIENT') {
     // return next(new APIError(HttpStatusCode.FORBIDDEN, 'Access denied'));
     return next(new apiError(401, 'Access denied'));
   }

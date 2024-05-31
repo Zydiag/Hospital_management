@@ -3,9 +3,17 @@ import '../styles/StylesC/Row.css';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
-function Row ({ button1, button2, button3, doctorName, armyNumber, handleClick, status ,disabled , href}) {
-
-  
+function Row({
+  button1,
+  button2,
+  button3,
+  doctorName,
+  armyNumber,
+  handleClick,
+  status,
+  disabled,
+  href,
+}) {
   return (
     <div className="row">
       <p className="doctor text-lg text-center font-medium" style={{marginLeft: '3vw'}}>{doctorName}</p>

@@ -150,10 +150,7 @@ model Request {
 model treatment {
   id             String   @id @default(uuid())
   diagnosis      String
-  note           String
-  medicationName String
-  knownAllergies String
-  miscellaneous  String
+  description    String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   patient        Patient? @relation(fields: [patientId], references: [id])

@@ -259,19 +259,24 @@ export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
   }
 
   const patientId = patient.id;
-  const treat = await prisma.treatment.findFirst({
-    where: {
-      patientId: patientId,
-      createdAt: new Date(date),
-    },
-    select: {
-      diagnosis: true,
-      note: true,
-      medicationName: true,
-      miscellaneous: true,
-      knownAllergies: true,
-    },
-  });
+   const treat = await prisma.treatment.findMany({
+      where: {
+        patientId,
+        createdAt:new Date(date),
+      },
+      select: {
+       diagnosis:true,
+       description:true,
+      },
+    });
+     const parseddescription=JSON.parse(description);
+     const info ={
+      diagnosis:treat.diagnosis,
+      note:parseddescription.note,
+      medicationName:parseddescription.medicationName,
+      knownAllergies:parseddescription.knownAllergies,
+      miscellaneous:parseddescription.miscellaneous,
+     }
 
   if (!treat) {
     throw new apiError(404, 'Date is not present in record');
@@ -355,9 +360,16 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+ const parseddescription=JSON.parse(ameReports.description);
+  const info ={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
 });
 
 // AME1 Report
@@ -390,9 +402,19 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+const parseddescription=JSON.parse(ameReports.description);
+  const info={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+    bloodSugarFasting:parseddescription.bloodSugarFasting,
+    bloodSugarPP:parseddescription.bloodSugarPP,
+    restingECG:parseddescription.restingECG,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
 });
 
 export const getPmeReports = asyncHandler(async (req, res) => {
@@ -425,9 +447,25 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+   const parseddescription=JSON.parse(ameReports.description);
+  const info={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+    bloodSugarFasting:parseddescription.bloodSugarFasting,
+    bloodSugarPP:parseddescription.bloodSugarPP,
+    restingECG:parseddescription.restingECG,
+    uricAcid:parseddescription.uricAcid,
+    urea:parseddescription.urea,
+    creatinine:parseddescription.creatinine,
+    cholesterol:parseddescription.cholesterol,
+    lipidProfile:parseddescription.lipidProfile,
+    xrayChestPA:parseddescription.xrayChestPA,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
 });
 // Error handling middleware
 export const errorHandler = (err, req, res, next) => {

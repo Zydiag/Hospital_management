@@ -402,24 +402,28 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
 
     // Fetch treatment records associated with the patient
 
-    const treatmentRecords = await prisma.treatment.findMany({
+  const treatmentRecords = await prisma.treatment.findMany({
       where: {
         patientId,
-        createdAt: new Date(date),
+        createdAt:new Date(date),
       },
-      include: {
-        diagnosis: true,
-        note: true,
-        medicationName: true,
-        miscellaneous: true,
-        knownAllergies: true,
+      select: {
+       diagnosis:true,
+       description:true,
       },
     });
-
+     const parseddescription=JSON.parse(treatmentRecords.description);
+     const info ={
+      diagnosis:treatmentRecords.diagnosis,
+      note:parseddescription.note,
+      medicationName:parseddescription.medicationName,
+      knownAllergies:parseddescription.knownAllergies,
+      miscellaneous:parseddescription.miscellaneous,
+     }
     res.json(
       new ApiResponse(
         200,
-        { treatmentRecords, descriptions },
+        { info },
         'Treatment records retrieved successfully'
       )
     );
@@ -470,25 +474,24 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
     }
     const patientId = patient.id;
 
-    // const description = JSON.stringify({
-    //  presentingComplaints: presentingComplaints,
-    //  diagnosis: diagnosis,
-    //   treatmentGiven: treatmentGiven,
-    //  miscellaneous: miscellaneous
-    //});
+   const description=JSON.stringify({
+    note:note,
+    medicationName:medicationName,
+    knownAllergies:knownAllergies,
+    miscellaneous:miscellaneous
+  })
 
     const newTreatment = await prisma.treatment.create({
       data: {
-        diagnosis: diagnosis,
-        note: note,
-        medicationName: medicationName,
-        knownAllergies: knownAllergies,
-        miscellaneous: miscellaneous,
-        createdAt: new Date(date),
-        updatedAt: new Date(date),
-        patientId: patientId,
-        doctorId: doctor.id,
+            diagnosis:diagnosis,
+             description:description,
+            createdAt:new Date(date),
+            updatedAt:new Date(date),
+            patientId:patientId,
+            doctorId:doctor.id,
+
       },
+     
     });
 
     // Accessing related data directly from newMedicalRecord
@@ -662,9 +665,16 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+const parseddescription=JSON.parse(ameReports.description);
+  const info ={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Ame test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
 });
 
 export const getAme1Reports = asyncHandler(async (req, res) => {
@@ -695,9 +705,19 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+ const parseddescription=JSON.parse(ameReports.description);
+  const info={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+    bloodSugarFasting:parseddescription.bloodSugarFasting,
+    bloodSugarPP:parseddescription.bloodSugarPP,
+    restingECG:parseddescription.restingECG,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Ame1 test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
 });
 export const getPmeReports = asyncHandler(async (req, res) => {
   const { armyNo, date } = req.body;
@@ -727,9 +747,25 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-
+ const parseddescription=JSON.parse(ameReports.description);
+  const info={
+    bloodHb:parseddescription.bloodHb,
+    TLC:parseddescription.TLC,
+    DLC:parseddescription.DLC,
+    urineRE:parseddescription.urineRE,
+    urineSpGravity:parseddescription.urineSpGravity,
+    bloodSugarFasting:parseddescription.bloodSugarFasting,
+    bloodSugarPP:parseddescription.bloodSugarPP,
+    restingECG:parseddescription.restingECG,
+    uricAcid:parseddescription.uricAcid,
+    urea:parseddescription.urea,
+    creatinine:parseddescription.creatinine,
+    cholesterol:parseddescription.cholesterol,
+    lipidProfile:parseddescription.lipidProfile,
+    xrayChestPA:parseddescription.xrayChestPA,
+  }
   // Return all the test reports
-  res.json(new ApiResponse(200, ameReports, 'Pme test reports retrieved successfully'));
+  res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
 });
 
 // Function to calculate age based on date of birth

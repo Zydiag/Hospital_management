@@ -4,10 +4,10 @@ import jwt from 'jsonwebtoken';
 export const generateAccessAndRefreshToken = asyncHandler(async (user) => {
   try {
     const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '30m',
+      expiresIn: '10m',
     });
     const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: '8h',
+      expiresIn: '5h',
     });
     return { accessToken, refreshToken };
   } catch (error) {

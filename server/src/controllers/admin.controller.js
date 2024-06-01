@@ -185,6 +185,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 // fetch  doctor requests which is not approved(pending)
 export const pendingRequests = asyncHandler(async (req, res) => {
   try {
+    console.log('step1');
     const requests = await prisma.request.findMany({
       where: {
         status: 'PENDING',

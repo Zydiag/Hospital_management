@@ -15,6 +15,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import LoginSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
+import useAuth from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
 // Zod schema for validation
 const loginSchema = z.object({
@@ -25,12 +27,16 @@ const loginSchema = z.object({
     .string()
     .min(1, 'ArmyNo is required')
     .max(50, 'ArmyNo must be less than 50 characters')
-    .regex(/^[a-zA-Z\s]*$/, 'ArmyNo should only contain letters and spaces'),
+    .regex(/^[a-zA-Z0-9\s]*$/, 'ArmyNo should only contain letters, numbers, and spaces'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+
+  const { loginAdmin } = useAuth();
+
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -44,9 +50,17 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log('Login data:', data);
-    // Implement your login logic here
+    if (data.profession === 'Admin') {
+      console.log('Admin login data:', data);
+      try {
+        await loginAdmin(data.armyNo, data.password);
+        navigate('/admin-panel');
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   return (

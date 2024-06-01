@@ -16,7 +16,10 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import '../../styles/StylesC/Row.css';
 import TextField from '@mui/material/TextField';
-import { usePendingDoctorRequests } from '../../api/admin.api';
+import { useDoctorRequestsByStatus } from '../../api/admin.api';
+import useAuth from '../../stores/authStore';
+import { useNavigate } from 'react-router-dom';
+import { calculateAge } from '../../utils/getAge';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -28,24 +31,40 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 function AdminSearchPage() {
-  const { data, error, isLoading, isError } = usePendingDoctorRequests();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+  const [doctorName, setDoctorName] = useState('');
+  const [armyNumber, setArmyNumber] = useState(0);
+  const [ageService, setAgeService] = useState('');
+  const [unitsArms, setUnitsArms] = useState('');
+  const [doctorId, setDoctorId] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('Requested');
+
+  if (!isAuthenticated) {
+    navigate('/login');
+  }
+
+  const query = selectedStatus === 'Requested' ? 'PENDING' : 'APPROVED';
+
+  const { data, error, isLoading, isError } = useDoctorRequestsByStatus(query);
+
   console.log(data);
 
   //for Modal page---> Profile Page of Doctor
-  const [open, setOpen] = React.useState(false);
-  const [doctorName, setDoctorName] = React.useState('Mrs Samsher Singh');
-  const [armyNumber, setArmyNumber] = React.useState(0);
-  const [ageService, setAgeService] = React.useState('15 YEARS');
-  const [unitsArms, setUnitsArms] = React.useState('NSDFJ');
   const handleClickOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
   };
-  const handleRowClick = (doctorName, armyNumber) => {
+  const handleRowClick = (doctorName, armyNumber, age, unit, doctorId) => {
     setArmyNumber(armyNumber);
     setDoctorName(doctorName);
+    setAgeService(age);
+    setUnitsArms(unit);
+    setDoctorId(doctorId);
     handleClickOpen();
   };
 
@@ -57,23 +76,6 @@ function AdminSearchPage() {
     setSearchValue(event.target.value);
   };
   const [rows, setRows] = useState([]);
-  // const rows = [
-  //   { armyNumber: 'ARMY001', doctorName: 'Dr. Alice' },
-  //   { armyNumber: 'ARMY002', doctorName: 'Dr. Bob' },
-  //   { armyNumber: 'ARMY003', doctorName: 'Dr. Charlie' },
-  //   { armyNumber: 'ARMY004', doctorName: 'Dr. Diana' },
-  //   { armyNumber: 'ARMY005', doctorName: 'Dr. Ethan' },
-  //   { armyNumber: 'ARMY006', doctorName: 'Dr. Fiona' },
-  //   { armyNumber: 'ARMY007', doctorName: 'Dr. George' },
-  //   { armyNumber: 'ARMY008', doctorName: 'Dr. Hannah' },
-  //   { armyNumber: 'ARMY009', doctorName: 'Dr. Ian' },
-  //   { armyNumber: 'ARMY010', doctorName: 'Dr. Julia' },
-  //   { armyNumber: 'ARMY011', doctorName: 'Dr. Kyle' },
-  //   { armyNumber: 'ARMY012', doctorName: 'Dr. Laura' },
-  //   { armyNumber: 'ARMY013', doctorName: 'Dr. Mike' },
-  //   { armyNumber: 'ARMY014', doctorName: 'Dr. Nancy' },
-  //   { armyNumber: 'ARMY015', doctorName: 'Dr. Oliver' },
-  // ];
 
   useEffect(() => {
     console.log('data', data);
@@ -83,7 +85,9 @@ function AdminSearchPage() {
         data.map((item) => ({
           armyNumber: item.armyNo,
           doctorName: item.fullName,
-          status: item.status,
+          doctorId: item.doctorId,
+          age: calculateAge(item.dob),
+          unit: item.unit,
         }))
       );
     }
@@ -123,11 +127,10 @@ function AdminSearchPage() {
   }, [selectedRow]);
 
   //for status of the DropdownMenu
-  const [selectedStatus, setSelectedStatus] = useState('Requested');
-  const [arrayNumber, setArrayNumber] = useState(0); // Declare arrayNumber state variable
-
-  const handleDropdownChange = event => {
+  const [arrayNumber, setArrayNumber] = useState(0);
+  const handleDropdownChange = (event) => {
     setSelectedStatus(event.target.value);
+
     const statusIndex = status.findIndex((s) => s.value === event.target.value);
     setArrayNumber(statusIndex);
   };
@@ -166,105 +169,66 @@ function AdminSearchPage() {
 
   return (
     <>
-      <React.Fragment>
-        <Navbar />
-        <div
-          className='bg-amber-400 '
-          style={{
-            marginTop: '5vh',
-            marginBottom: '5vh',
-            height: '50vh',
-            paddingTop: '15vh',
-          }}
-        >
-          <h1
-            className='text-3xl text-left font-medium '
-            style={{
-              width: '70%',
-              fontFamily: 'Manrope',
-              marginLeft: '17vh',
-              paddingBottom: '4vh',
-            }}
-          >
-            Doctor Search
-          </h1>
-
-          <SearchBar
-            handleSearch={handleSearch}
-            onChange={handleSearchChange}
-            value={searchValue}
-            placeholder='Search the doctor by Army Number'
-            className='align-bottom'
+      <Navbar />
+      <div className="adminSearchBar">
+        <h1>Doctor Search</h1>
+        <SearchBar
+          handleSearch={handleSearch}
+          onChange={handleSearchChange}
+          value={searchValue}
+          placeholder="Search the doctor by Army Number"
+        />
+        {errorMessage && <p className="searchError">{errorMessage}</p>}
+      </div>
+      {selectedRow && (
+        <div className="searchRow">
+          <p className="SearchPara">Look, What we found?</p>
+          <Row
+            key={selectedRow.armyNumber}
+            armyNumber={selectedRow.armyNumber}
+            doctorName={selectedRow.doctorName}
+            age={selectedRow.age}
+            unit={selectedRow.unit}
+            doctorId={selectedRow.doctorId}
+            button1={ButtonStatus[arrayNumber].Button1}
+            handleClick={handleRowClick}
+            button2={ButtonStatus[arrayNumber].Button2}
+            button3={ButtonStatus[arrayNumber].Button3}
+            status={selectedStatus}
           />
-          {errorMessage && (
-            <p
-              className='text-right text-1xl font-medium'
-              style={{
-                width: '83%',
-                paddingTop: '1vh',
-              }}
-            >
-              {errorMessage}
-            </p>
-          )}
         </div>
-        {selectedRow && !errorMessage && (
-          <div
-            className='searchRow'
-            ref={doctorSearchRef}
-            style={{
-              paddingTop: '12vh',
-              paddingBottom: '12vh',
-            }}
-          >
-            <p
-              className='text-left text-3xl font-semibold searchPara'
-              style={{
-                width: '85%',
-                marginLeft: '8vw',
-                paddingBottom: '3vh',
-              }}
-            >
-              Look, What we found?
-            </p>
-            <Row
-              key={selectedRow.armyNumber}
-              armyNumber={selectedRow.armyNumber}
-              doctorName={selectedRow.doctorName}
-              button1={ButtonStatus[arrayNumber].Button1}
-              handleClick={handleRowClick}
-              button2={ButtonStatus[arrayNumber].Button2}
-              button3={ButtonStatus[arrayNumber].Button3}
-              status={selectedStatus}
-            />
-          </div>
-        )}
+      )}
+      <div className="doctorStatus">
+        <div className="adminDropdown">
+          <Dropdown
+            style={{ width: ' 80%' }}
+            onChange={handleDropdownChange}
+            obj={status}
+            value={selectedStatus}
+            defaultValue={status[0].value}
+            label="Status"
+            helperText="Select the option"
+          />
+        </div>
 
-        <div className='doctorStatus'>
-          <div className='adminDropdown'>
-            <Dropdown
-              style={{ width: ' 80%' }}
-              onChange={handleDropdownChange}
-              obj={status}
-              value={selectedStatus}
-              defaultValue={status[0].value}
-              label='Status'
-              helperText='Select the option'
-            />
-          </div>
-
-          {currentRows.map(row => (
+        {currentRows?.map((row) => {
+          console.log('row', row);
+          return (
             <Row
               key={row.armyNumber}
               armyNumber={row.armyNumber}
               doctorName={row.doctorName}
+              age={row.age}
+              unit={row.unit}
+              doctorId={row.doctorId}
               button1={ButtonStatus[arrayNumber].Button1}
               handleClick={handleRowClick}
               button2={ButtonStatus[arrayNumber].Button2}
               button3={ButtonStatus[arrayNumber].Button3}
               status={selectedStatus}
             />
-          ))}
+          );
+        })}
 
           <div className='adminPagination'>
             <Pagination total={totalPages} onPageChange={handlePageChange} />

@@ -64,7 +64,6 @@ export const createAdmin = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
-    console.log(`accessToken, refreshToken`);
     return res
       .status(200)
       .cookie('refreshToken', refreshToken, options)
@@ -183,11 +182,13 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 });
 
 // fetch  doctor requests which is not approved(pending)
-export const pendingRequests = asyncHandler(async (req, res) => {
+export const getRequestsByStatus = asyncHandler(async (req, res) => {
+  console.log('req.query', req.query);
+  const { status } = req.query;
   try {
     const requests = await prisma.request.findMany({
       where: {
-        status: 'PENDING',
+        status: status,
       },
       include: {
         doctor: {
@@ -197,6 +198,7 @@ export const pendingRequests = asyncHandler(async (req, res) => {
                 firstName: true,
                 middleName: true,
                 lastName: true,
+                dob: true,
                 armyNo: true,
                 unit: true,
               },
@@ -213,6 +215,7 @@ export const pendingRequests = asyncHandler(async (req, res) => {
 
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,
+      dob: request.doctor.user.dob,
       status: request.status,
       specialization: request.doctor.specialization,
       createdAt: request.createdAt,
@@ -272,16 +275,16 @@ export const approvedRequests = asyncHandler(async (req, res) => {
 // approve request
 
 export const approveRequest = asyncHandler(async (req, res) => {
+  console.log('req from approve', req.query);
   const { doctorId } = req.query;
-  console.log(`doctorId:${doctorId}`);
 
-  const request = await prisma.Request.findUnique({ where: { doctorId } });
+  const request = await prisma.request.findUnique({ where: { doctorId } });
 
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
 
-  const updatedRequest = await prisma.Doctor.update({
+  const updatedRequest = await prisma.doctor.update({
     where: { id: doctorId },
     data: { status: 'APPROVED' },
   });
@@ -296,13 +299,14 @@ export const approveRequest = asyncHandler(async (req, res) => {
 // reject request
 export const rejectRequest = asyncHandler(async (req, res) => {
   const { doctorId } = req.query;
-  const request = await prisma.Request.findUnique({ where: { id: doctorId } });
+  console.log('doctorId', doctorId);
+  const request = await prisma.request.findUnique({ where: { doctorId } });
 
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
-  const updatedRequest = await prisma.Doctor.update({
-    where: { doctorId },
+  const updatedRequest = await prisma.doctor.update({
+    where: { id: doctorId },
     data: { status: 'REJECTED' },
   });
   await prisma.request.update({
@@ -310,23 +314,23 @@ export const rejectRequest = asyncHandler(async (req, res) => {
     data: { status: 'REJECTED' },
   });
   // clear the request after rejection
-  await prisma.Request.delete({ where: { doctorId } });
+  await prisma.request.delete({ where: { doctorId } });
   res.status(200).json({ updatedRequest });
 });
 
-// reject(block) accepted Doctor
-export const blokingAcceptedDoctor = asyncHandler(async (req, res) => {
+// remove/block accepted doctor
+export const blockAcceptedDoctor = asyncHandler(async (req, res) => {
   const { doctorId } = req.body;
-  const request = await prisma.Request.findUnique({ where: { doctorId } });
+  const request = await prisma.request.findUnique({ where: { doctorId } });
   if (!request) {
     throw new apiError(404, 'Request not found');
   }
-  const updatedRequest = await prisma.Doctor.update({
-    where: { doctorId },
+  const updatedRequest = await prisma.doctor.update({
+    where: { id: doctorId },
     data: { status: 'REJECTED' },
   });
   // clear the request after rejection
-  await prisma.Request.delete({ where: { doctorId } });
+  await prisma.request.delete({ where: { doctorId } });
   res.json(updatedRequest);
 });
 

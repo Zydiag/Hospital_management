@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
+const API = 'http://localhost:3000/api';
 const useAuth = create((set) => ({
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
@@ -9,7 +10,7 @@ const useAuth = create((set) => ({
 
   loginAdmin: async (armyNo, password) => {
     try {
-      const response = await axios.post('/api/admin/login', { armyNo, password });
+      const response = await axios.post(`${API}/admin/login`, { armyNo, password });
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);

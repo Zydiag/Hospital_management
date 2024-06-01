@@ -4,7 +4,7 @@ export const signup = async (data, navigate) => {
   const api = 'http://localhost:3000/api';
   const rolePaths = {
     Admin: { url: '/admin/create-admin-profile', navigate: '/admin-panel' },
-    Doctor: { url: '/doctor/doctor-profile', navigate: '/doctor-panel' },
+    Doctor: { url: '/doctor/doctor-profile', navigate: '/login' },
     Patient: { url: '/patient/create-patient-profile', navigate: '/patient-history' },
   };
   try {

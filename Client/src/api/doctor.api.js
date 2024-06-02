@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../stores/authStore';
+import usePatientStore from '../stores/patientStore';
 
 const API_URL = 'http://localhost:3000/api/doctor'; // Adjust the URL as per your backend
 

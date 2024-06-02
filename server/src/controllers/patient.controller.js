@@ -25,28 +25,26 @@ const router = Router();
 //patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
-
   const { armyNo, dob, firstName, password } = req.body;
   console.log('step1');
   if (!armyNo || !password || !dob || !firstName) {
     throw new apiError(501, 'all feilds are required');
   }
   console.log('step2');
-  const user = await prisma.User.findFirst({ where: { armyNo, role: 'PATIENT' } });
+  const user = await prisma.user.findFirst({ where: { armyNo, role: 'PATIENT' } });
   if (!user) {
     throw new apiError(404, 'Access Denied/User is not registered by doctor');
   }
   console.log('step3');
   if (user.password != null) {
-    res.json(new ApiResponse(200, user, 'user has signed up already'));
+    console.log('user.password', user.password);
+    throw new apiError(400, 'Patient already exists');
   }
   console.log(user);
   if (user.password == null) {
-    // Hash password
     const hashedPassword = await hashPassword(password);
     const parsedDob = new Date(dob);
-    //save in database
-    const newUser = await prisma.User.update({
+    const newUser = await prisma.user.update({
       where: {
         armyNo,
       },
@@ -56,35 +54,35 @@ export const profilepatient = asyncHandler(async (req, res) => {
         password: hashedPassword,
       },
     });
+    const findUser = await prisma.user.findFirst({
+      where: {
+        armyNo,
+      },
+    });
+    const newPatient = await prisma.patient.create({
+      data: {
+        userId: findUser.id,
+      },
+    });
+    console.log('newPatient', newPatient);
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser);
-
-    await prisma.User.update({
+    await prisma.user.update({
       where: {
         armyNo,
       },
       data: { refreshToken },
     });
-
-    //cookies ke liya hai , options for which cookie to be sent
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
     console.log(`accessToken, refreshToken`);
-    return res
-      .status(200)
-      .cookie('refreshToken', refreshToken, options)
-      .cookie('accessToken', accessToken, options)
-      .json(
-        new ApiResponse(
-          200,
-          {
-            accessToken,
-            refreshToken,
-          },
-          'User singup in successfully'
-        )
-      );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          accessToken,
+          refreshToken,
+        },
+        'User singup in successfully'
+      )
+    );
   }
 });
 
@@ -259,24 +257,24 @@ export const getPersonalMedicalHistory = asyncHandler(async (req, res) => {
   }
 
   const patientId = patient.id;
-   const treat = await prisma.treatment.findMany({
-      where: {
-        patientId,
-        createdAt:new Date(date),
-      },
-      select: {
-       diagnosis:true,
-       description:true,
-      },
-    });
-     const parseddescription=JSON.parse(description);
-     const info ={
-      diagnosis:treat.diagnosis,
-      note:parseddescription.note,
-      medicationName:parseddescription.medicationName,
-      knownAllergies:parseddescription.knownAllergies,
-      miscellaneous:parseddescription.miscellaneous,
-     }
+  const treat = await prisma.treatment.findMany({
+    where: {
+      patientId,
+      createdAt: new Date(date),
+    },
+    select: {
+      diagnosis: true,
+      description: true,
+    },
+  });
+  const parseddescription = JSON.parse(description);
+  const info = {
+    diagnosis: treat.diagnosis,
+    note: parseddescription.note,
+    medicationName: parseddescription.medicationName,
+    knownAllergies: parseddescription.knownAllergies,
+    miscellaneous: parseddescription.miscellaneous,
+  };
 
   if (!treat) {
     throw new apiError(404, 'Date is not present in record');
@@ -360,14 +358,14 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
- const parseddescription=JSON.parse(ameReports.description);
-  const info ={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
 });
@@ -402,17 +400,17 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-const parseddescription=JSON.parse(ameReports.description);
-  const info={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-    bloodSugarFasting:parseddescription.bloodSugarFasting,
-    bloodSugarPP:parseddescription.bloodSugarPP,
-    restingECG:parseddescription.restingECG,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+    bloodSugarFasting: parseddescription.bloodSugarFasting,
+    bloodSugarPP: parseddescription.bloodSugarPP,
+    restingECG: parseddescription.restingECG,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
 });
@@ -447,23 +445,23 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-   const parseddescription=JSON.parse(ameReports.description);
-  const info={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-    bloodSugarFasting:parseddescription.bloodSugarFasting,
-    bloodSugarPP:parseddescription.bloodSugarPP,
-    restingECG:parseddescription.restingECG,
-    uricAcid:parseddescription.uricAcid,
-    urea:parseddescription.urea,
-    creatinine:parseddescription.creatinine,
-    cholesterol:parseddescription.cholesterol,
-    lipidProfile:parseddescription.lipidProfile,
-    xrayChestPA:parseddescription.xrayChestPA,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+    bloodSugarFasting: parseddescription.bloodSugarFasting,
+    bloodSugarPP: parseddescription.bloodSugarPP,
+    restingECG: parseddescription.restingECG,
+    uricAcid: parseddescription.uricAcid,
+    urea: parseddescription.urea,
+    creatinine: parseddescription.creatinine,
+    cholesterol: parseddescription.cholesterol,
+    lipidProfile: parseddescription.lipidProfile,
+    xrayChestPA: parseddescription.xrayChestPA,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
 });

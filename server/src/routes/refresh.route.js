@@ -61,9 +61,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 // Get Current User
  const getCurrentUser = asyncHandler(async (req, res) => {
     console.log(`req.user.id: ${req.user.id}`);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
     return res
       .status(200)
-      .json(new ApiResponse(200, req.user.firstName, 'User fetched successfully'));
+      .json(new ApiResponse(200, user, 'User fetched successfully'));
   });
 
   

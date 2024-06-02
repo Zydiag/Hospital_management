@@ -13,18 +13,17 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     
 
-        const user = await db.user.findUnique({
-          where: {
-            id: decodedToken.id,
-          },
-        });
-        if (!user) {
-          throw new apiError(401, 'invalid Access Token');
-        }
-        req.user = user;
-        next();
-      }
-  catch (error) {
+    const user = await db.user.findUnique({
+      where: {
+        id: decodedToken.id,
+      },
+    });
+    if (!user) {
+      throw new apiError(401, 'invalid Access Token');
+    }
+    req.user = user;
+    next();
+  } catch (error) {
     throw new apiError(401, error?.message || 'Invalid access token');
   }
 });

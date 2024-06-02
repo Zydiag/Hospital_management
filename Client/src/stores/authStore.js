@@ -48,9 +48,35 @@ const useAuth = create((set) => ({
       throw new Error(error.response ? error.response.data.message : 'Login failed');
     }
   },
-  makeAuthRequest: async (method, url, data = null) => {
+
+  refreshToken: async () => {
+    console.log('refresh token');
     try {
-      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.post(`${API}/user/refresh-access-token`, null, {
+        withCredentials: true, // Ensure cookies are sent with the request
+      });
+
+      const newAccessToken = response.data.data.accessToken;
+      localStorage.setItem('accessToken', newAccessToken);
+      set({ accessToken: newAccessToken, isAuthenticated: true });
+      return newAccessToken;
+    } catch (error) {
+      set({ error: error.response ? error.response.data.message : 'Failed to refresh token' });
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      set({
+        accessToken: null,
+        refreshToken: null,
+        isAuthenticated: false,
+      });
+      throw new Error(error.response ? error.response.data.message : 'Failed to refresh token');
+    }
+  },
+
+  makeAuthRequest: async (method, url, data = null) => {
+    const state = useAuth.getState();
+    try {
+      let accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
         throw new Error('No access token found');
       }
@@ -66,10 +92,34 @@ const useAuth = create((set) => ({
 
       return response.data;
     } catch (error) {
-      set({
-        error: error.response ? error.response.data.message : 'Request failed',
-      });
-      throw new Error(error.response ? error.response.data.message : 'Request failed');
+      console.log(error.response.data.message);
+      if (error.response.data.message === 'jwt expired') {
+        try {
+          const newAccessToken = await state.refreshToken();
+          const response = await axios({
+            method,
+            url,
+            data,
+            headers: {
+              Authorization: `Bearer ${newAccessToken}`,
+            },
+          });
+
+          return response.data;
+        } catch (refreshError) {
+          set({
+            error: refreshError.response ? refreshError.response.data.message : 'Request failed',
+          });
+          throw new Error(
+            refreshError.response ? refreshError.response.data.message : 'Request failed'
+          );
+        }
+      } else {
+        set({
+          error: error.response ? error.response.data.message : 'Request failed',
+        });
+        throw new Error(error.response ? error.response.data.message : 'Request failed');
+      }
     }
   },
 

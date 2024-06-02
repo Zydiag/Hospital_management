@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import doctorRoutes from './routes/doctor.route.js';
 import adminRoutes from './routes/admin.route.js';
 import patientroutes from './routes/patient.route.js';
-import commonRoutes from './routes/refresh.route.js'
+import commonRoutes from './routes/refresh.route.js';
 import { corsOptions } from './config/index.js';
 import errorHandler from './middlewares/error.middleware.js';
 export const app = express();

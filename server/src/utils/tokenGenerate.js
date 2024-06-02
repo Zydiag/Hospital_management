@@ -15,4 +15,3 @@ export const generateAccessAndRefreshToken = asyncHandler(async (user) => {
     throw new apiError(500, 'Something went wrong while generating access and refresh token');
   }
 });
-

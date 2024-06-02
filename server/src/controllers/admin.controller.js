@@ -229,50 +229,6 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
   }
 });
 
-// fetch  doctor requests which is approved(Accepted)
-
-export const approvedRequests = asyncHandler(async (req, res) => {
-  try {
-    const requests = await prisma.Request.findMany({
-      where: {
-        status: 'APPROVED',
-      },
-      include: {
-        doctor: {
-          include: {
-            user: {
-              select: {
-                firstName: true,
-                middleName: true,
-                lastName: true,
-                armyNo: true,
-                unit: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const formattedRequests = requests.map((request) => ({
-      doctorId: request.doctor.id,
-      fullName:
-        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
-
-      armyNo: request.doctor.user.armyNo,
-      unit: request.doctor.user.unit,
-      status: request.status,
-      specialization: request.doctor.specialization,
-      createdAt: request.createdAt,
-      updatedAt: request.updatedAt,
-    }));
-
-    res.json(formattedRequests);
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred while fetching the requests.' });
-  }
-});
-
 // approve request
 
 export const approveRequest = asyncHandler(async (req, res) => {

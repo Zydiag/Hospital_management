@@ -183,6 +183,7 @@ function patientSearchPage() {
           </DialogContent>
           <DialogActions>
             <Button
+              href='/doctor/patient-record'
               variant="outlined"
               className="modalButton text-lg"
               autoFocus

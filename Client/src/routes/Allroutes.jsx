@@ -36,7 +36,7 @@ export const router = createBrowserRouter(
       <Route path="/doctor/ame-data" element={<AME />}></Route>
       <Route path="/doctor/ame1-data" element={<AME1 />}></Route>
       <Route path="/doctor/pme-data" element={<PME />}></Route>
-      <Route path="/doctor/create-data" element={<AddMedicalData />}></Route>
+      <Route path="/doctor/create-medical-data" element={<AddMedicalData />}></Route>
       <Route path="/doctor/create-test-data" element={<AddTestData />}></Route>
       <Route path="/patient/profile" element={<PatientMainPage />}></Route>
       <Route path="/patient/test" element={<PatientTestRecodsPage />}></Route>

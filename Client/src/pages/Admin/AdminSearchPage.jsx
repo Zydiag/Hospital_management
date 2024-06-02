@@ -9,13 +9,11 @@ import Row from '../../components/Row';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import '../../styles/StylesC/Row.css';
-import TextField from '@mui/material/TextField';
 import { usePendingDoctorRequests } from '../../api/admin.api';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -440,6 +438,7 @@ function AdminSearchPage() {
             )}
             {selectedStatus === 'Requested' && (
               <Button
+              
                 className='modalButton text-lg'
                 autoFocus
                 style={{

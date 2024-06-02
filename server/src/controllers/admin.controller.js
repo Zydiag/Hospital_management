@@ -315,7 +315,7 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
-  console.log(`req.user.id: ${req.user.id}`);
+  console.log('req.user.id', req.user.id);
   return res
     .status(200)
     .json(new ApiResponse(200, req.user.firstName, 'User fetched successfully'));

@@ -18,7 +18,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientroutes);
 app.use('/api/admin', adminRoutes);
-app.use('api/user', commonRoutes);
+app.use('/api/user', commonRoutes);
 app.use(errorHandler);
 // app.use(cors(corsOptions));
 // app.use(cors({ origin: true, credentials: true }));

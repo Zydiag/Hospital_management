@@ -30,7 +30,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="p-4">
+    <nav className="p-4 border-b-2 shrink-0">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className=" text-2xl font-bold">
@@ -98,3 +98,4 @@ function Navbar() {
 }
 
 export default Navbar;
+

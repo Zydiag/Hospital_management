@@ -16,9 +16,10 @@ import {
 } from '../controllers/patient.controller.js'; // Updated import path
 
 const router = express.Router();
-router.post('/patientprofile', profilepatient);
-router.post('/patient-login', loginpatient);
-router.post('/patient-logout', verifyJwt, authorizePatient, logoutPatient);
+router.post('/create-patient-profile', profilepatient);
+router.post('/login', loginpatient);
+router.post('/logout', verifyJwt, authorizePatient, logoutPatient);
+
 router.get('/personal-info', verifyJwt, authorizePatient, getpersonalinfo);
 router.get('/healthRecord', verifyJwt, authorizePatient, getHealthRecord);
 router.get('/familyHistory', verifyJwt, authorizePatient, getFamilyHistory);

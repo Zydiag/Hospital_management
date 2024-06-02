@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 export const generateAccessAndRefreshToken = asyncHandler(async (user) => {
   try {
     const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '10m',
+      expiresIn: '10s',
     });
     const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '5h',
@@ -15,4 +15,3 @@ export const generateAccessAndRefreshToken = asyncHandler(async (user) => {
     throw new apiError(500, 'Something went wrong while generating access and refresh token');
   }
 });
-

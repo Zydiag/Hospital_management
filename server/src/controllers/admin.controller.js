@@ -186,7 +186,6 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
   console.log('req.query', req.query);
   const { status } = req.query;
   try {
-    console.log('step1');
     const requests = await prisma.request.findMany({
       where: {
         status: status,

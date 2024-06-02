@@ -33,8 +33,9 @@ const loginSchema = z.object({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(true);
 
-  const { loginAdmin } = useAuth();
+  const { error: authError, loginAdmin, loginDoctor } = useAuth();
 
   const navigate = useNavigate();
 
@@ -53,12 +54,24 @@ export default function Login() {
   const onSubmit = async (data) => {
     console.log('Login data:', data);
     if (data.profession === 'Admin') {
-      console.log('Admin login data:', data);
+      console.log(' login data:', data);
       try {
         await loginAdmin(data.armyNo, data.password);
-        navigate('/admin-panel');
+        console.log('noError');
+        navigate('/admin/admin-panel');
+      } catch (error) {
+        console.log('error from admin login', error);
+        // console.log('error from admin login', authError);
+        setError(error);
+      }
+    } else if (data.profession === 'Doctor') {
+      console.log(' login data:', data);
+      try {
+        await loginDoctor(data.armyNo, data.password);
+        navigate('/doctor/doctor-panel');
       } catch (error) {
         console.log(error);
+        setError(error);
       }
     }
   };
@@ -92,6 +105,7 @@ export default function Login() {
         </div>
         <div className="relative flex-1 flex justify-center items-center h-full">
           <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
+            {error && <p className="text-red-500">{error.message}</p>}
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">

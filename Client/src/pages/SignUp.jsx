@@ -176,6 +176,9 @@ export default function SignUp() {
                       InputLabelProps={{
                         shrink: true,
                       }}
+                      inputProps={{
+                        max: new Date().toISOString().split('T')[0],
+                      }}
                     />
                   )}
                 />

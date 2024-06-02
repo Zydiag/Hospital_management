@@ -1,11 +1,9 @@
-.dropDown{
-    text-align: left;
-    width: 65%;
-    margin: 5vh auto 3vh;
+.dropDown {
+  text-align: left;
+  width: 65%;
+  margin: 5vh auto 3vh;
 }
 
-.M
-
-.dropDown TextField{
-    color:  #E99B00;
+.M .dropDown TextField {
+  color: #e99b00;
 }

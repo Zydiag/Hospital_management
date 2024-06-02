@@ -6,7 +6,6 @@ import {
   logoutAdmin,
   rejectRequest,
   approveRequest,
-  approvedRequests, //all approved requests
   getCurrentUser,
   getRequestsByStatus,
   blockAcceptedDoctor,
@@ -24,5 +23,5 @@ router.route('/all-doctor-requests').get(verifyJwt, authorizeAdmin, getRequestsB
 
 router.route('/reject-request').post(verifyJwt, authorizeAdmin, rejectRequest);
 router.route('/approve-request').post(verifyJwt, authorizeAdmin, approveRequest);
-router.route('/blocking-accepted-doctor').post(verifyJwt, authorizeAdmin, blockAcceptedDoctor);
+router.route('/block-request').post(verifyJwt, authorizeAdmin, blockAcceptedDoctor);
 export default router;

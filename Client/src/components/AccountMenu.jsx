@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, MenuItem, ListItemIcon, Divider, Avatar, Tooltip, IconButton } from '@mui/material';
 import { PersonAdd, Settings, Logout } from '@mui/icons-material';
 import useAuthStore from '../stores/authStore';
+import useAuth from '../stores/authStore';
 
 function stringToColor(string) {
   let hash = 0;
@@ -33,7 +34,11 @@ function stringAvatar(name) {
 }
 
 const AccountMenu = () => {
-  // const user = useAuthStore((state) => state.user);
+  const { isAuthenticated, logoutAdmin } = useAuth();
+  const handleLogout = () => {
+    console.log('handleLogout');
+    logoutAdmin();
+  };
   const user = { name: 'some name' };
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -110,7 +115,7 @@ const AccountMenu = () => {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

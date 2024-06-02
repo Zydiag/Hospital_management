@@ -21,34 +21,36 @@ const useAuth = create((set) => ({
         error: null,
       });
     } catch (error) {
+      console.log('admin login', error);
       set({
         error: error.response ? error.response.data.message : 'Login failed',
       });
+      throw new Error(error.response ? error.response.data.message : 'Login failed');
     }
   },
 
-  logoutAdmin: async () => {
+  loginDoctor: async (armyNo, password) => {
     try {
-      await axios.post('/api/admin/logout');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      const response = await axios.post(`${API}/doctor/login`, { armyNo, password });
+      const { accessToken, refreshToken } = response.data.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       set({
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: false,
+        accessToken,
+        refreshToken,
+        isAuthenticated: true,
         error: null,
       });
     } catch (error) {
       set({
-        error: error.response ? error.response.data.message : 'Logout failed',
+        error: error.response ? error.response.data.message : 'Login failed',
       });
+      throw new Error(error.response ? error.response.data.message : 'Login failed');
     }
   },
-
   makeAuthRequest: async (method, url, data = null) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      console.log('Access token:', accessToken);
       if (!accessToken) {
         throw new Error('No access token found');
       }
@@ -61,14 +63,31 @@ const useAuth = create((set) => ({
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      console.log('Response:', response);
 
       return response.data;
     } catch (error) {
       set({
         error: error.response ? error.response.data.message : 'Request failed',
       });
-      throw error;
+      throw new Error(error.response ? error.response.data.message : 'Request failed');
+    }
+  },
+
+  logoutAdmin: async () => {
+    try {
+      await useAuth.getState().makeAuthRequest('POST', `${API}/admin/logout`);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      set({
+        accessToken: null,
+        refreshToken: null,
+        isAuthenticated: false,
+        error: null,
+      });
+    } catch (error) {
+      set({
+        error: error.response ? error.response.data.message : 'Logout failed',
+      });
     }
   },
 

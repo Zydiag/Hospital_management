@@ -11,20 +11,17 @@ export const useDoctorRequestsByStatus = (status) => {
   });
 };
 
-// export const useApprovedDoctorRequests = () => {
-//   const { makeAuthRequest } = useAuth();
-//   return useQuery({
-//     queryKey: ['approvedDoctorRequests'],
-//     queryFn: () => makeAuthRequest('GET', `${API_URL}/all-approved-doctor-requests`),
-//   });
-// };
-
 const approveRequestApi = async (makeAuthRequest, doctorId) => {
   return makeAuthRequest('POST', `${API_URL}/approve-request?doctorId=${doctorId}`);
 };
 
 const rejectRequestApi = async (makeAuthRequest, doctorId) => {
   return makeAuthRequest('POST', `${API_URL}/reject-request?doctorId=${doctorId}`);
+};
+
+const blockRequestApi = async (makeAuthRequest, doctorId) => {
+  console.log('doctorId', doctorId);
+  return makeAuthRequest('POST', `${API_URL}/block-request?doctorId=${doctorId}`);
 };
 
 export const useApproveRequest = () => {
@@ -45,6 +42,17 @@ export const useRejectRequest = () => {
     mutationFn: (doctorId) => rejectRequestApi(makeAuthRequest, doctorId),
     onSuccess: () => {
       queryClient.invalidateQueries(['doctorRequests', 'PENDING']);
+    },
+  });
+};
+
+export const useBlockRequest = () => {
+  const queryClient = useQueryClient();
+  const { makeAuthRequest } = useAuth();
+  return useMutation({
+    mutationFn: (doctorId) => blockRequestApi(makeAuthRequest, doctorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['doctorRequests', 'APPROVED']);
     },
   });
 };

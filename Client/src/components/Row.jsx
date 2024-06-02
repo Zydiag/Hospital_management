@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/StylesC/Row.css';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { useApproveRequest, useRejectRequest } from '../api/admin.api';
+import { useApproveRequest, useBlockRequest, useRejectRequest } from '../api/admin.api';
 
 function Row({
   button1,
@@ -18,13 +18,12 @@ function Row({
   disabled,
   href,
 }) {
-  // Use the custom hooks
   const approveRequestMutation = useApproveRequest();
   const rejectRequestMutation = useRejectRequest();
+  const blockRequestMutation = useBlockRequest();
 
   const [message, setMessage] = React.useState({ type: '', text: '' });
 
-  // Handler functions
   const handleApprove = () => {
     approveRequestMutation.mutate(doctorId, {
       onSuccess: () => {
@@ -47,6 +46,18 @@ function Row({
       },
     });
   };
+
+  const handleBlock = () => {
+    blockRequestMutation.mutate(doctorId, {
+      onSuccess: () => {
+        setMessage({ type: 'success', text: 'Request approved successfully!' });
+      },
+      onError: (error) => {
+        setMessage({ type: 'error', text: `Failed to approve request: ${error.message}` });
+      },
+    });
+  };
+
   return (
     <div className="row">
       <p className="doctor text-lg text-center font-medium" style={{ marginLeft: '3vw' }}>
@@ -66,13 +77,7 @@ function Row({
           </Button>
           <Button
             className="button2"
-            onClick={
-              status === 'Requested'
-                ? handleApprove
-                : () => {
-                    console.log('work on it');
-                  }
-            }
+            onClick={status === 'Requested' ? handleApprove : handleBlock}
             variant="outlined"
             disabled={disabled || approveRequestMutation.isLoading}
             href={href}

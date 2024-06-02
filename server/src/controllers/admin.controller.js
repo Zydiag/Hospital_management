@@ -25,7 +25,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
   // Hash password
   const hashedPassword = await hashPassword(password);
   try {
-    const newUser = await prisma.User.create({
+    const newUser = await prisma.user.create({
       data: {
         armyNo,
         firstName,
@@ -34,12 +34,12 @@ export const createAdmin = asyncHandler(async (req, res) => {
         password: hashedPassword,
       },
     });
-    const finduser = await prisma.User.findFirst({
+    const finduser = await prisma.user.findFirst({
       where: {
         armyNo,
       },
     });
-    const newAdmin = await prisma.Admin.create({
+    const newAdmin = await prisma.admin.create({
       data: {
         userId: finduser.id,
         adminId,
@@ -52,7 +52,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
     }
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(finduser);
 
-    await prisma.User.update({
+    await prisma.user.update({
       where: {
         armyNo,
       },
@@ -132,7 +132,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   }
 
   // check if user exists
-  const Admin = await prisma.Admin.findFirst({
+  const Admin = await prisma.admin.findFirst({
     where: {
       adminId,
     },
@@ -147,13 +147,13 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   if (!isCorrect) {
     throw new apiError(401, 'Incorrect password');
   }
-  const user = await prisma.User.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: Admin.userId,
     },
   });
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user);
-  await prisma.User.update({
+  await prisma.user.update({
     where: {
       id: Admin.userId,
     },
@@ -320,7 +320,7 @@ export const rejectRequest = asyncHandler(async (req, res) => {
 
 // remove/block accepted doctor
 export const blockAcceptedDoctor = asyncHandler(async (req, res) => {
-  const { doctorId } = req.body;
+  const { doctorId } = req.query;
   const request = await prisma.request.findUnique({ where: { doctorId } });
   if (!request) {
     throw new apiError(404, 'Request not found');
@@ -337,7 +337,7 @@ export const blockAcceptedDoctor = asyncHandler(async (req, res) => {
 // Admin Logout
 export const logoutAdmin = asyncHandler(async (req, res) => {
   console.log(`req.user.id: ${req.user.id}`);
-  await prisma.User.update({
+  await prisma.user.update({
     where: {
       id: req.user.id,
     },

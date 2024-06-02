@@ -5,26 +5,69 @@ import Jwt from 'jsonwebtoken';
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
-    console.log(req.header('Authorization'));
-    const token = req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
+    // console.log(req.header('Authorization'));
+    const refreshToken =
+      req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
+    console.log('refreshToken:', refreshToken);
+    const accessToken =
+      req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
+    console.log('accessToken:', accessToken);
+    if (!refreshToken || !accessToken) {
       throw new apiError(400, 'Unauthorized request');
     }
-    const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log('decodedToken:', decodedToken);
 
-    const user = await db.user.findUnique({
-      where: {
-        id: decodedToken.id,
-      },
+    Jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+      if (err && err.name === 'TokenExpiredError') {
+        // Access token expired
+        console.log('Access token expired');
+
+        // Verify refresh token
+        Jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decodedRefresh) => {
+          if (err) {
+            return res.status(403).json({ message: 'Refresh token is invalid or expired' });
+          }
+          const user = await db.user.findUnique({
+            where: {
+              id: decodedRefresh.id,
+            },
+          });
+          if (!user) {
+            throw new apiError(401, 'invalid Access Token');
+          }
+          console.log('now we generate new access token');
+          // Generate new access token
+          const newAccessToken = Jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: '10m',
+          });
+
+          // Optionally set the new access token in cookies or headers
+          res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true });
+
+          req.user = user;
+          next();
+        });
+      } else if (err) {
+        // Other errors (invalid token, etc.)
+        return res.status(403).json({ message: 'Access token is invalid' });
+      } else {
+        // Access token is valid
+
+        const decodedToken = Jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+        const user = await db.user.findUnique({
+          where: {
+            id: decodedToken.id,
+          },
+        });
+        if (!user) {
+          throw new apiError(401, 'invalid Access Token');
+        }
+        req.user = user;
+        next();
+      }
     });
-    if (!user) {
-      throw new apiError(401, 'invalid Access Token');
-    }
-    req.user = user;
-    next();
   } catch (error) {
-    throw new apiError(401, error?.message || 'Invalid access token');
+    throw new apiError(401, `this is our eror ===> ${error.message}`);
   }
 });
 

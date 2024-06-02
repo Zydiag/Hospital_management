@@ -108,6 +108,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
 // login doctor
 export const loginDoctor = asyncHandler(async (req, res) => {
   const { armyNo, password } = req.body;
+  console.log('req.body from doctor login', req.body);
   // check if all fields are filled
   if (!password || !armyNo) {
     throw new apiError(400, 'All fields are  required');
@@ -136,7 +137,7 @@ export const loginDoctor = asyncHandler(async (req, res) => {
   });
   // check status of doctor ( pending or approved )
   if (userDoctor.status !== 'APPROVED') {
-    res.json(new ApiResponse(401, user, 'Doctor is not approved yet, so you cannot login'));
+    res.json(new ApiResponse(401, userDoctor, 'Doctor is not approved yet, so you cannot login'));
     throw new apiError(401, 'Doctor is not approved yet');
   }
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(doctor);
@@ -196,11 +197,9 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   const { armyNo } = req.body;
   // console.log(`req.user.id: ${req.user.id}`)
   // console.log(`armyNo: ${armyNo}`);
-
   if (!armyNo) {
     throw new apiError(401, 'Army number is required');
   }
-
   let user = await prisma.User.findFirst({
     where: {
       armyNo: armyNo,
@@ -216,8 +215,31 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
     age: calculateAge(user.dob),
     unit: user.unit,
   };
-
   res.json(new ApiResponse(200, info, 'Personal Record:-'));
+});
+
+export const createPatientProfile = asyncHandler(async (req, res, next) => {
+  console.log('creating patient profile', req.body);
+  try {
+    const { armyNo, unit, firstName, dob } = req.body;
+    const parsedDob = new Date(dob);
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        armyNo: armyNo,
+      },
+    });
+    console.log(existingUser);
+    if (!existingUser) {
+      console.log('step 2 ');
+      await prisma.user.create({
+        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
+      });
+    }
+  } catch (error) {
+    console.log('creating patient profile error', error);
+    next(error);
+  }
+  res.json(new ApiResponse(200, {}, 'Patient profile created successfully'));
 });
 
 // Update Personal Info
@@ -226,7 +248,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     const { armyNo, unit, firstName, dob } = req.body;
     const parsedDob = new Date(dob);
     // Find the user by army number
-    const existingUser = await prisma.User.findFirst({
+    const existingUser = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
       },
@@ -234,13 +256,13 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
     console.log('step 1 ');
     if (!existingUser) {
       console.log('step 2 ');
-      await prisma.User.create({
+      await prisma.user.create({
         data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
       });
     }
     console.log('step 3 ');
     // Update the user data
-    const updatedUser = await prisma.User.update({
+    const updatedUser = await prisma.user.update({
       where: {
         armyNo: armyNo, // Use id as the unique identifier
       },
@@ -402,31 +424,25 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
 
     // Fetch treatment records associated with the patient
 
-  const treatmentRecords = await prisma.treatment.findMany({
+    const treatmentRecords = await prisma.treatment.findMany({
       where: {
         patientId,
-        createdAt:new Date(date),
+        createdAt: new Date(date),
       },
       select: {
-       diagnosis:true,
-       description:true,
+        diagnosis: true,
+        description: true,
       },
     });
-     const parseddescription=JSON.parse(treatmentRecords.description);
-     const info ={
-      diagnosis:treatmentRecords.diagnosis,
-      note:parseddescription.note,
-      medicationName:parseddescription.medicationName,
-      knownAllergies:parseddescription.knownAllergies,
-      miscellaneous:parseddescription.miscellaneous,
-     }
-    res.json(
-      new ApiResponse(
-        200,
-        { info },
-        'Treatment records retrieved successfully'
-      )
-    );
+    const parseddescription = JSON.parse(treatmentRecords.description);
+    const info = {
+      diagnosis: treatmentRecords.diagnosis,
+      note: parseddescription.note,
+      medicationName: parseddescription.medicationName,
+      knownAllergies: parseddescription.knownAllergies,
+      miscellaneous: parseddescription.miscellaneous,
+    };
+    res.json(new ApiResponse(200, { info }, 'Treatment records retrieved successfully'));
   } catch (error) {
     next(error);
   }
@@ -474,24 +490,22 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
     }
     const patientId = patient.id;
 
-   const description=JSON.stringify({
-    note:note,
-    medicationName:medicationName,
-    knownAllergies:knownAllergies,
-    miscellaneous:miscellaneous
-  })
+    const description = JSON.stringify({
+      note: note,
+      medicationName: medicationName,
+      knownAllergies: knownAllergies,
+      miscellaneous: miscellaneous,
+    });
 
     const newTreatment = await prisma.treatment.create({
       data: {
-            diagnosis:diagnosis,
-             description:description,
-            createdAt:new Date(date),
-            updatedAt:new Date(date),
-            patientId:patientId,
-            doctorId:doctor.id,
-
+        diagnosis: diagnosis,
+        description: description,
+        createdAt: new Date(date),
+        updatedAt: new Date(date),
+        patientId: patientId,
+        doctorId: doctor.id,
       },
-     
     });
 
     // Accessing related data directly from newMedicalRecord
@@ -665,14 +679,14 @@ export const getAmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
-const parseddescription=JSON.parse(ameReports.description);
-  const info ={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
 });
@@ -705,17 +719,17 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
- const parseddescription=JSON.parse(ameReports.description);
-  const info={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-    bloodSugarFasting:parseddescription.bloodSugarFasting,
-    bloodSugarPP:parseddescription.bloodSugarPP,
-    restingECG:parseddescription.restingECG,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+    bloodSugarFasting: parseddescription.bloodSugarFasting,
+    bloodSugarPP: parseddescription.bloodSugarPP,
+    restingECG: parseddescription.restingECG,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
 });
@@ -747,23 +761,23 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
- const parseddescription=JSON.parse(ameReports.description);
-  const info={
-    bloodHb:parseddescription.bloodHb,
-    TLC:parseddescription.TLC,
-    DLC:parseddescription.DLC,
-    urineRE:parseddescription.urineRE,
-    urineSpGravity:parseddescription.urineSpGravity,
-    bloodSugarFasting:parseddescription.bloodSugarFasting,
-    bloodSugarPP:parseddescription.bloodSugarPP,
-    restingECG:parseddescription.restingECG,
-    uricAcid:parseddescription.uricAcid,
-    urea:parseddescription.urea,
-    creatinine:parseddescription.creatinine,
-    cholesterol:parseddescription.cholesterol,
-    lipidProfile:parseddescription.lipidProfile,
-    xrayChestPA:parseddescription.xrayChestPA,
-  }
+  const parseddescription = JSON.parse(ameReports.description);
+  const info = {
+    bloodHb: parseddescription.bloodHb,
+    TLC: parseddescription.TLC,
+    DLC: parseddescription.DLC,
+    urineRE: parseddescription.urineRE,
+    urineSpGravity: parseddescription.urineSpGravity,
+    bloodSugarFasting: parseddescription.bloodSugarFasting,
+    bloodSugarPP: parseddescription.bloodSugarPP,
+    restingECG: parseddescription.restingECG,
+    uricAcid: parseddescription.uricAcid,
+    urea: parseddescription.urea,
+    creatinine: parseddescription.creatinine,
+    cholesterol: parseddescription.cholesterol,
+    lipidProfile: parseddescription.lipidProfile,
+    xrayChestPA: parseddescription.xrayChestPA,
+  };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
 });

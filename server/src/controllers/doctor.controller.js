@@ -402,18 +402,13 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
         userId: user.id,
       },
       select: {
-        id: true, // Select only the id field
+        id: true,
       },
     });
-
     if (!patient) {
       throw new apiError(404, 'Patient not found');
     }
-
     const patientId = patient.id;
-
-    // Fetch treatment records associated with the patient
-
     const treatmentRecords = await prisma.treatment.findMany({
       where: {
         patientId,
@@ -443,12 +438,9 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
   try {
     const { diagnosis, note, medicationName, date, knownAllergies, miscellaneous, armyNo } =
       req.body;
+
+    console.log('update treatment record', req.body);
     const doctr_ArmyNo = req.user.armyNo;
-    // Find the patient by army number
-
-    // console.log(`date:${date}, armyNo:${armyNo}`);
-    // console.log(`doctorUserId:${doctorUserId}`);
-
     const patient = await prisma.Patient.findFirst({
       where: {
         user: {
@@ -487,6 +479,8 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
       miscellaneous: miscellaneous,
     });
 
+    console.log('description', description);
+
     const newTreatment = await prisma.treatment.create({
       data: {
         diagnosis: diagnosis,
@@ -501,7 +495,8 @@ export const updateTreatmentRecord = asyncHandler(async (req, res, next) => {
     // Accessing related data directly from newMedicalRecord
     res.json(new ApiResponse(200, newTreatment, 'Treatment record created successfully'));
   } catch (error) {
-    next(error);
+    console.log(error);
+    throw new apiError(500, 'update treatment error', error.message);
   }
 });
 

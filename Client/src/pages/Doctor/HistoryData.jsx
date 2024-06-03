@@ -1,3 +1,4 @@
+
 import React from 'react';
 import CustomTable from '../../components/CustomTable'; // Adjust the import path as necessary
 import '../../styles/StylesP/HistoryData.css';
@@ -56,23 +57,23 @@ const HistoryData = () => {
   };
 
   return (
-    <div className='historyData'>
+    <div className="historyData">
       <Navbar />
       <h1>Patient Profile</h1>
-      <div className='PersonelInfoTable'>
+      <div className="PersonelInfoTable">
         <CustomTable headings={headingsPersonelInfo} rows={rowsPI} />
       </div>
-      <div className='healthRecordTable'>
+      <div className="healthRecordTable">
         <CustomTable headings={headingsHealthRecord} rows={rowsHR} />
       </div>
-      <div className='healthRecordTable'>
+      <div className="healthRecordTable">
         <CustomTable headings={personelMedHistoryHeading} rows={rowsPMH} />
       </div>
-      <div className='healthRecordTable'>
+      <div className="healthRecordTable">
         <CustomTable headings={familyHistoryHeading} rows={familyHistoryData} />
       </div>
       <center>
-        <Button className='print' variant='outlined' onClick={handlePrint}>
+        <Button className="print" variant="outlined" onClick={handlePrint}>
           Print
         </Button>
       </center>

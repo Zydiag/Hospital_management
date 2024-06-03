@@ -92,7 +92,8 @@ const useAuth = create((set) => ({
 
       return response.data;
     } catch (error) {
-      console.log(error.response.data.message);
+      console.log(error);
+      console.log('error message', error.response.data.message);
       if (error.response.data.message === 'jwt expired') {
         try {
           const newAccessToken = await state.refreshToken();

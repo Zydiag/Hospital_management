@@ -120,7 +120,7 @@ export const getDoctorProfile = asyncHandler(async (req, res) => {
 });
 
 //Admin login
-export const loginAdmin = asyncHandler(async (req, res) => {
+export const loginAdmin = asyncHandler(async (req, res, next) => {
   const { armyNo, password } = req.body;
   const adminId = armyNo;
   // check if all fields are filled
@@ -137,6 +137,8 @@ export const loginAdmin = asyncHandler(async (req, res) => {
       adminId,
     },
   });
+
+  console.log('Admin', Admin);
 
   if (!Admin) {
     throw new apiError(404, 'User not found');
@@ -314,7 +316,7 @@ export const logoutAdmin = asyncHandler(async (req, res) => {
 
 // Get Current User
 export const getCurrentUser = asyncHandler(async (req, res) => {
-  console.log(`req.user.id: ${req.user.id}`);
+  console.log('req.user.id', req.user.id);
   return res
     .status(200)
     .json(new ApiResponse(200, req.user.firstName, 'User fetched successfully'));

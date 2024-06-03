@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import SearchBar from '../../components/SearchBar';
 import { AccountType } from '../../constants';
@@ -12,7 +12,7 @@ import {
   FormControl,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import '../../styles/StylesP/DoctorSearchPage.css'; // Retain the import statement for CSS
+import '../../styles/StylesP/DoctorSearchPage.css';
 import useAuth from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { useCreatePatientProfile } from '../../api/doctor.api';
@@ -20,8 +20,8 @@ import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { splitFullName } from '../../api/signUpService';
+import { usePatientStore } from '../../stores/patientStore';
 
-// Define Zod schema for patient profile
 const patientProfileSchema = z.object({
   name: z
     .string()
@@ -34,10 +34,15 @@ const patientProfileSchema = z.object({
 });
 
 function PatientSearchPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, accessToken } = useAuth();
+  const { patient } = usePatientStore();
+  console.log('accessToken', accessToken);
+  console.log('patient', patient);
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const createPatientProfile = useCreatePatientProfile();
+  const { mutateAsync: createPatientProfile } = useCreatePatientProfile();
+  const { setPatient } = usePatientStore();
 
   const {
     control,
@@ -66,12 +71,13 @@ function PatientSearchPage() {
     };
     delete formData.fullName;
 
-    console.log('Patient profile data:', formData);
     try {
-      await createPatientProfile.mutateAsync(formData);
-      setOpen(false);
-      console.log('Patient profile created successfully');
+      const patient = await createPatientProfile(formData);
+      console.log('patient', formData);
+      setPatient(formData);
       reset();
+      setOpen(false);
+      navigate('/doctor/create-medical-data');
     } catch (error) {
       console.error('Error creating patient profile:', error);
     }

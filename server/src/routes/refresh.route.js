@@ -8,7 +8,6 @@ import Jwt from 'jsonwebtoken';
 const router = Router();
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  console.log('refresh token', req.cookies);
   let accessToken = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
   let refreshToken =
     req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
@@ -24,7 +23,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       if (!refreshToken) {
         throw new apiError(401, 'Refresh token is missing');
       }
-
       // Verify refresh token
       Jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decodedRefresh) => {
         if (err) {
@@ -35,27 +33,32 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             id: decodedRefresh.id,
           },
         });
+
         // Generate new access token
         let newAccessToken = Jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: '10s',
+          expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
         });
         accessToken = newAccessToken;
-        // Optionally set the new access token in cookies or headers
+        req.user = user;
 
         res
           .cookie('accessToken', newAccessToken, { httpOnly: true, secure: true })
           .json(new ApiResponse(200, { accessToken }));
-
-        // res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true });
-
-        req.user = user;
-        next();
       });
     } else if (err) {
       // Other errors (invalid token, etc.)
       throw new apiError(403, err || 'Access token is invalid');
     } else {
-      next();
+      const user = await prisma.user.findUnique({
+        where: {
+          id: decoded.id,
+        },
+      });
+      if (!user) {
+        throw new apiError(401, 'invalid Access Token');
+      }
+      req.user = user;
+      res.json(new ApiResponse(200, {}));
     }
   });
 });

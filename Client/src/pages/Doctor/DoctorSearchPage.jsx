@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { splitFullName } from '../../api/signUpService';
-import usePatientStore from '../../stores/patientStore';
+import { usePatientStore } from '../../stores/patientStore';
 
 const patientProfileSchema = z.object({
   name: z

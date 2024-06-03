@@ -54,17 +54,6 @@ export const profilepatient = asyncHandler(async (req, res) => {
         password: hashedPassword,
       },
     });
-    const findUser = await prisma.user.findFirst({
-      where: {
-        armyNo,
-      },
-    });
-    const newPatient = await prisma.patient.create({
-      data: {
-        userId: findUser.id,
-      },
-    });
-    console.log('newPatient', newPatient);
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser);
     await prisma.user.update({
       where: {

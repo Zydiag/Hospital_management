@@ -50,9 +50,6 @@ function AddTestData() {
 
   const sections = [
     'Choose the Test',
-    'AME - Annual Medical Exam',
-    'AME1 - Annual Medical Exam 1',
-    'PME - Perodic medical Exam'
     
   ];
 

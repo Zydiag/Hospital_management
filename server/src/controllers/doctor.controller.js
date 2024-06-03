@@ -367,7 +367,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
 
     // If patient is not found, handle the error
     if (!patient) {
-      throw new apiError(404, 'Patient not found with the provided army number');
+      throw new apiError(404, 'error', 'Patient not found with the provided army number');
     }
 
     const patientId = patient.id;

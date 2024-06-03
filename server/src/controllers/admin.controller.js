@@ -139,7 +139,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
   });
 
   if (!Admin) {
-    throw new apiError(404, 'User not found');
+    throw new apiError(404, 'User not found', "User doesn't exist");
   }
 
   // check if password is correct

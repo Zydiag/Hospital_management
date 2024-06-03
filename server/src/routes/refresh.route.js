@@ -1,18 +1,16 @@
 import { Router } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
 import prisma from '../lib/db.js';
 import { ApiResponse } from '../utils/apiResponse.js';
-import { apiError } from '../utils/apiError.js';
 import { apiError } from '../utils/apiError.js';
 import Jwt from 'jsonwebtoken';
 
 const router = Router();
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-
   let accessToken = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
-  let refreshToken =req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
+  let refreshToken =
+    req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
 
   if (!accessToken) {
     throw new apiError(401, 'Access token is missing');
@@ -35,7 +33,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             id: decodedRefresh.id,
           },
         });
-        
+
         // Generate new access token
         let newAccessToken = Jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
@@ -46,7 +44,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         res
           .cookie('accessToken', newAccessToken, { httpOnly: true, secure: true })
           .json(new ApiResponse(200, { accessToken }));
-
       });
     } else if (err) {
       // Other errors (invalid token, etc.)
@@ -56,7 +53,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         where: {
           id: decoded.id,
         },
-      }); 
+      });
       if (!user) {
         throw new apiError(401, 'invalid Access Token');
       }
@@ -67,19 +64,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 // Get Current User
- const getCurrentUser = asyncHandler(async (req, res) => {
-    console.log(`req.user.id: ${req.user.id}`);
-    const user = await prisma.user.findUnique({
-      where: {
-        id: req.user.id,
-      },
-    });
-    return res
-      .status(200)
-      .json(new ApiResponse(200, user, 'User fetched successfully'));
+const getCurrentUser = asyncHandler(async (req, res) => {
+  console.log(`req.user.id: ${req.user.id}`);
+  const user = await prisma.user.findUnique({
+    where: {
+      id: req.user.id,
+    },
   });
+  return res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
+});
 
-  
 router.route('/current-user-profile').get(getCurrentUser);
 router.route('/refresh-access-token').post(refreshAccessToken);
 

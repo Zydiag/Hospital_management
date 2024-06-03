@@ -1,9 +1,6 @@
 import { create } from 'zustand';
-import axios from 'axios';
 
-const API = 'http://localhost:3000/api';
-
-const usePatientStore = create((set) => ({
+export const usePatientStore = create((set) => ({
   patient: null,
   setPatient: (patient) => {
     console.log('no set patient', patient);
@@ -13,4 +10,4 @@ const usePatientStore = create((set) => ({
   clearPatient: () => set({ patient: null }),
 }));
 
-export default usePatientStore;
+// export default usePatientStore;

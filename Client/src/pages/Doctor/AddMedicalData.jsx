@@ -20,10 +20,13 @@ import {
   useUpdateHealthRecord,
   useUpdateTreatmentRecord,
 } from '../../api/doctor.api';
+import { usePatientStore } from '../../stores/patientStore';
 
 const drawerWidth = 350;
 
 function AddMedicalData() {
+  const { patient } = usePatientStore();
+  console.log(patient);
   const [formData, setFormData] = useState({
     BMI: '',
     height: '',
@@ -78,6 +81,7 @@ function AddMedicalData() {
     switch (selectedSection) {
       case 'PERSONAL INFO':
         createPatientProfile({
+          armyno: formData.armyNumber,
           doctorName: formData.doctorName,
           armyNumber: formData.armyNumber,
           ageService: formData.ageService,

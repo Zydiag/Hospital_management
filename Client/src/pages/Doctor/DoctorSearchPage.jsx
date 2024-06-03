@@ -61,7 +61,7 @@ function PatientSearchPage() {
 
     try {
       const patient = await createPatientProfile(formData);
-      // console.log('patient', formData);
+      console.log('patient', formData);
       setPatient(formData);
       reset();
       setOpen(false);

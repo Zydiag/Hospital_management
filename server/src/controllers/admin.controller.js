@@ -120,7 +120,7 @@ export const getDoctorProfile = asyncHandler(async (req, res) => {
 });
 
 //Admin login
-export const loginAdmin = asyncHandler(async (req, res) => {
+export const loginAdmin = asyncHandler(async (req, res, next) => {
   const { armyNo, password } = req.body;
   const adminId = armyNo;
   // check if all fields are filled
@@ -138,8 +138,10 @@ export const loginAdmin = asyncHandler(async (req, res) => {
     },
   });
 
+  console.log('Admin', Admin);
+
   if (!Admin) {
-    throw new apiError(404, 'User not found', "User doesn't exist");
+    throw new apiError(404, 'User not found');
   }
 
   // check if password is correct

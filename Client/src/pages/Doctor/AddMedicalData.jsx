@@ -22,6 +22,7 @@ import {
 } from '../../api/doctor.api';
 import { usePatientStore } from '../../stores/patientStore';
 import useAuth from '../../stores/authStore';
+import { toast } from 'react-toastify';
 
 const drawerWidth = 350;
 
@@ -79,6 +80,7 @@ function AddMedicalData() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    toast('working really well');
     console.log('form data', formData);
     // const dataToSubmit = { ...formData };
 
@@ -250,9 +252,6 @@ function AddMedicalData() {
                   />
                 </div>
                 <div>
-                  <Button className="editForm" variant="contained">
-                    Edit
-                  </Button>
                   <Button
                     type="submit"
                     onClick={handleSubmit}
@@ -361,9 +360,6 @@ function AddMedicalData() {
                   />
                 </div>
                 <div>
-                  <Button className="editForm" variant="contained">
-                    Edit
-                  </Button>
                   <Button
                     type="submit"
                     onClick={handleSubmit}
@@ -432,9 +428,6 @@ function AddMedicalData() {
                   />
                 </div>
                 <div>
-                  <Button className="editForm" variant="contained">
-                    Edit
-                  </Button>
                   <Button
                     type="submit"
                     onClick={handleSubmit}
@@ -493,9 +486,6 @@ function AddMedicalData() {
                   />
                 </div>
                 <div>
-                  <Button className="editForm" variant="contained">
-                    Edit
-                  </Button>
                   <Button
                     type="submit"
                     onClick={handleSubmit}

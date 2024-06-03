@@ -338,9 +338,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       armyNo,
     } = req.body;
     const doctr_ArmyNo = req.user.armyNo;
-    //const armyNo = req.body.armyNo; // Assuming armyNo is available in the request
-    // Find the patient by army number
-    const patient = await prisma.Patient.findFirst({
+    const patient = await prisma.patient.findFirst({
       where: {
         user: {
           armyNo: armyNo,
@@ -348,11 +346,14 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
         },
       },
       select: {
-        id: true, // Select only the id field
+        id: true,
       },
     });
-
-    const doctor = await prisma.Doctor.findFirst({
+    if (!patient) {
+      throw new apiError(404, 'error', 'Patient not found with the provided army number');
+    }
+    const patientId = patient.id;
+    const doctor = await prisma.doctor.findFirst({
       where: {
         status: 'APPROVED',
         user: {
@@ -364,16 +365,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     if (!doctor) {
       throw new apiError(404, 'Doctor not found with the provided army number');
     }
-
-    // If patient is not found, handle the error
-    if (!patient) {
-      throw new apiError(404, 'error', 'Patient not found with the provided army number');
-    }
-
-    const patientId = patient.id;
-
-    // Create a new medical record
-    const newMedicalRecord = await prisma.Medical.create({
+    const newMedicalRecord = await prisma.medical.create({
       data: {
         heightCm,
         weightKg,
@@ -389,11 +381,9 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
         updatedAt: new Date(date),
       },
     });
-
-    // Send a JSON response in Postman
     res.json(new ApiResponse(202, newMedicalRecord, 'Medical record created successfully'));
   } catch (error) {
-    next(error);
+    throw new apiError(500, 'update medical error');
   }
 });
 

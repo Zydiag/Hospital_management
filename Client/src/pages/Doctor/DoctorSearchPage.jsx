@@ -26,11 +26,15 @@ const patientProfileSchema = z.object({
 });
 
 function PatientSearchPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, accessToken } = useAuth();
+  const { patient } = usePatientStore();
+  console.log('accessToken', accessToken);
+  console.log('patient', patient);
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const { mutateAsync: createPatientProfile } = useCreatePatientProfile();
-  const setPatient = usePatientStore((state) => state.setPatient);
+  const { setPatient } = usePatientStore();
 
   const {
     control,
@@ -66,7 +70,6 @@ function PatientSearchPage() {
       reset();
       setOpen(false);
       navigate('/doctor/create-medical-data');
-      reset();
     } catch (error) {
       console.error('Error creating patient profile:', error);
     }

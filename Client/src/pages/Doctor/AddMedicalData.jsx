@@ -21,12 +21,15 @@ import {
   useUpdateTreatmentRecord,
 } from '../../api/doctor.api';
 import { usePatientStore } from '../../stores/patientStore';
+import useAuth from '../../stores/authStore';
 
 const drawerWidth = 350;
 
 function AddMedicalData() {
-  const { patient } = usePatientStore();
-  console.log(patient);
+  const { accessToken } = useAuth();
+
+  const { patient, setPatient } = usePatientStore();
+  console.log('patient from add medical data', patient);
   const [formData, setFormData] = useState({
     BMI: '',
     height: '',
@@ -76,12 +79,13 @@ function AddMedicalData() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    console.log('form data', formData);
     // const dataToSubmit = { ...formData };
 
     switch (selectedSection) {
       case 'PERSONAL INFO':
         createPatientProfile({
-          armyno: formData.armyNumber,
+          armyno: patient?.armyNo,
           doctorName: formData.doctorName,
           armyNumber: formData.armyNumber,
           ageService: formData.ageService,
@@ -90,16 +94,16 @@ function AddMedicalData() {
         break;
       case 'HEALTH RECORD':
         updateHealthRecord({
-          heightCm: formData.height,
-          weightKg: formData.weight,
-          chest: formData.chest,
-          BMI: formData.BMI,
-          waist: formData.waist,
+          heightCm: parseInt(formData.height, 10),
+          weightKg: parseFloat(formData.weight),
+          chest: parseInt(formData.chest, 10),
+          BMI: parseFloat(formData.BMI),
+          waist: parseInt(formData.waist, 10),
           bloodPressure: formData.bloodPressure,
           disabilities: formData.disabilities,
           bloodGroup: formData.bloodGroup,
-          date: formData.date,
-          armyNo: formData.armyNumber,
+          date: formData.date.toISOString(), // Assuming date is a Dayjs object
+          armyno: patient?.armyNo,
         });
         break;
       case 'PERSONAL MEDICAL HISTORY':
@@ -110,7 +114,7 @@ function AddMedicalData() {
           date: formData.date,
           knownAllergies: formData.allergies,
           miscellaneous: formData.miscellaneous,
-          armyNo: formData.armyNumber,
+          armyno: patient?.armyNo,
         });
         break;
       case 'FAMILY HISTORY':
@@ -120,7 +124,7 @@ function AddMedicalData() {
           anyUnnaturalDeath: formData.unnaturalDeath,
           otherSignificantHistory: formData.significantHistory,
           date: formData.date,
-          armyNo: formData.armyNumber,
+          armyno: patient?.armyNo,
         });
         break;
       default:
@@ -272,6 +276,7 @@ function AddMedicalData() {
                     <input
                       className="piInput"
                       placeholder="Height.."
+                      type="number"
                       name="height"
                       value={formData.height}
                       onChange={handleChange}
@@ -285,6 +290,8 @@ function AddMedicalData() {
                     <input
                       className="piInput"
                       placeholder="Weight.."
+                      type="number"
+                      step="0.01"
                       name="weight"
                       value={formData.weight}
                       onChange={handleChange}
@@ -306,6 +313,7 @@ function AddMedicalData() {
                   <input
                     className="piInput"
                     placeholder="Chest.."
+                    type="number"
                     name="chest"
                     value={formData.chest}
                     onChange={handleChange}
@@ -316,6 +324,7 @@ function AddMedicalData() {
                   <input
                     className="piInput"
                     placeholder="Waist.."
+                    type="number"
                     name="waist"
                     value={formData.waist}
                     onChange={handleChange}

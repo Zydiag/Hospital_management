@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export const usePatientStore = create((set) => ({
-  patient: null,
+  patient: {},
   setPatient: (patient) => {
     console.log('no set patient', patient);
     set({ patient });

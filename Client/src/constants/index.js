@@ -5,9 +5,15 @@ export const AccountType = {
 };
 
 // use icon from material ui
-export const links = [
-  { to: '/doctor-panel', label: 'Home', icon: 'Home' },
-  { to: '/search-patient', label: 'Search Patient', icon: 'Search' },
+export const linksAdmin = [
+  { to: '/admin/admin-panel', label: 'Home', icon: 'Home' },
+  { to: '/admin/admin-panel', label: 'Search Doctor', icon: 'Search' },
+  // { to: '/create-patient', label: 'Create Patient', icon: 'Add' },
+];
+
+export const linksDoctor = [
+  { to: '/doctor/doctor-panel', label: 'Home', icon: 'Home' },
+  { to: '/doctor/doctor-panel', label: 'Search Patient', icon: 'Search' },
   { to: '/create-patient', label: 'Create Patient', icon: 'Add' },
 ];
 

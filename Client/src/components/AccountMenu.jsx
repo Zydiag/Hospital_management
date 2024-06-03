@@ -3,8 +3,9 @@ import { Menu, MenuItem, ListItemIcon, Divider, Avatar, Tooltip, IconButton } fr
 import { PersonAdd, Settings, Logout } from '@mui/icons-material';
 import useAuthStore from '../stores/authStore';
 import useAuth from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
-function stringToColor(string) {
+function stringToColor (string) {
   let hash = 0;
   let i;
 
@@ -24,7 +25,7 @@ function stringToColor(string) {
   return color;
 }
 
-function stringAvatar(name) {
+function stringAvatar (name) {
   return {
     sx: {
       bgcolor: stringToColor(name),
@@ -42,8 +43,9 @@ const AccountMenu = () => {
   const user = { name: 'some name' };
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -51,15 +53,27 @@ const AccountMenu = () => {
     setAnchorEl(null);
   };
 
+  const handleProfile = () => {
+    console.log("handleProfile");
+    navigate("/my-account"); // Redirect to /my-account
+    setAnchorEl(null);
+  };
+
+  const handleSettings = () => {
+    console.log("settings page");
+    navigate('/settings'); // Redirect to /settings
+    setAnchorEl(null);
+  };
+
   return (
     <div>
-      <Tooltip title="Account settings">
+      <Tooltip title='Account settings'>
         <IconButton
           onClick={handleClick}
-          size="small"
+          size='small'
           sx={{ ml: 2 }}
           aria-controls={open ? 'account-menu' : undefined}
-          aria-haspopup="true"
+          aria-haspopup='true'
           aria-expanded={open ? 'true' : undefined}
         >
           <Avatar {...stringAvatar(user?.name || 'User')} />
@@ -67,7 +81,7 @@ const AccountMenu = () => {
       </Tooltip>
       <Menu
         anchorEl={anchorEl}
-        id="account-menu"
+        id='account-menu'
         open={open}
         onClose={handleClose}
         sx={{
@@ -96,28 +110,20 @@ const AccountMenu = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleClose}>
-          <Avatar /> Profile
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleProfile}>
           <Avatar /> My account
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose}>
+
+        <MenuItem onClick={handleSettings}>
           <ListItemIcon>
-            <PersonAdd fontSize="small" />
-          </ListItemIcon>
-          Add another account
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
+            <Settings fontSize='small' />
           </ListItemIcon>
           Settings
         </MenuItem>
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
-            <Logout fontSize="small" />
+            <Logout fontSize='small' />
           </ListItemIcon>
           Logout
         </MenuItem>

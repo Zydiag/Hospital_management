@@ -10,6 +10,7 @@ import { useDoctorRequestsByStatus } from '../../api/admin.api';
 import useAuth from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { calculateAge } from '../../utils/getAge';
+import { AccountType } from '../../constants';
 
 import { Dialog, DialogContent, DialogActions, IconButton, Button, styled } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -151,9 +152,11 @@ function AdminSearchPage() {
     { label: 'Accepted', Button1: 'View', Button2: 'Remove' },
   ];
 
+  const accountType = AccountType.Admin;
+
   return (
     <div className="flex flex-col h-full">
-      <Navbar />
+      <Navbar accountType={accountType} />
       <div
         className="bg-amber-400 "
         style={{
@@ -163,12 +166,10 @@ function AdminSearchPage() {
         }}
       >
         <h1
-          className="text-3xl text-left font-medium "
+          className="lg:text-4xl font-semibold mx-auto w-3/4 text-center text-3xl"
           style={{
-            width: '70%',
             fontFamily: 'Manrope',
-            marginLeft: '17vh',
-            paddingBottom: '4vh',
+            paddingBottom: '6vh',
           }}
         >
           Doctor Search
@@ -226,9 +227,9 @@ function AdminSearchPage() {
         </div>
       )}
       <div className="doctorStatus flex-1">
-        <div className="adminDropdown">
+        <div className="md:w-10/12 lg:text-left mx-auto text-center"  style={{paddingBottom:'6vh'}}>
           <Dropdown
-            style={{ width: ' 80%' }}
+           
             onChange={handleDropdownChange}
             obj={status}
             value={selectedStatus}

@@ -12,14 +12,29 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import { links } from '../constants';
+import { AccountType , linksAdmin , linksDoctor } from '../constants';
 
 export const getIconComponent = (iconName) => {
   const IconComponent = Icons[iconName];
   return IconComponent ? <IconComponent /> : null;
 };
 
-function Navbar() {
+const getLinksByAccountType = (accountType) => {
+  switch (accountType) {
+    case AccountType.Admin:
+      return linksAdmin;
+    case AccountType.Doctor:
+      return linksDoctor;
+    case AccountType.Patient:
+      return []; // Add links for Patient if any
+    default:
+      return [];
+  }
+};
+
+function Navbar({ accountType }) {
+
+  const links = getLinksByAccountType(accountType);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
@@ -79,8 +94,8 @@ function Navbar() {
                 to={link.to}
                 className={({ isActive }) =>
                   isActive
-                    ? 'block py-2 px-4 text-blue-800'
-                    : 'block py-2 px-4 text-gray-800 hover:bg-gray-200'
+                    ? 'block py-2 px-4 text-secondary'
+                    : 'block py-2 px-4 text-primary hover:bg-gray-200'
                 }
               >
                 <ListItem>

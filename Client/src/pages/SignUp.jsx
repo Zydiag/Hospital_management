@@ -21,6 +21,7 @@ import useAuthStore from '../stores/authStore';
 import axios from 'axios';
 import { signup } from '../api/signUpService';
 
+
 export default function SignUp() {
   // const signUpSchema = z
   //   .object({
@@ -256,6 +257,7 @@ export default function SignUp() {
               )}
               <Button
                 onClick={handleSubmit(onSubmit)}
+                
                 type="submit"
                 variant="contained"
                 color="primary"
@@ -270,6 +272,7 @@ export default function SignUp() {
                 Sign Up
               </Button>
             </form>
+            <p className="text-lg w-4/5 text-center mx-auto">Already have an account?<a href='/login'> Sign In</a></p>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ const DropDown = ({
       <Box
         component='form'
         sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' }
+          '& .MuiTextField-root': { width: '25ch' }
         }}
         noValidate
         autoComplete='off'

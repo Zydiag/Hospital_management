@@ -56,7 +56,7 @@ function PatientTestRecodsPage() {
   return (
     <div>
         <Navbar />
-        <div className="patientCalendar md:mt-12 bg-gray-300">
+        <div className="patientCalendar bg-neutral-200">
         <p className='pt-20 text-center pb-7 md:text-2xl text-xl text-zinc-900 font-semibold'>Select the specific date for the test record.</p>
         <div className="md:w-7/12 w-2/5 mx-auto text-center">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -88,7 +88,7 @@ function PatientTestRecodsPage() {
           </div>
         ) : (
           selectedDate && (
-            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>No data found for the selected date.</p>
+            <p className='errorDate md:text-lg text-base md:w-full mt-10 w-3/4 mx-auto text-center'>No data found for the selected date.</p>
           )
         )}
       </div>

@@ -21,14 +21,16 @@ import MedicalRecord from "../pages/Patient/MedicalRecord";
 import AMERecord from "../pages/Patient/AMERecord";
 import AME1Record from "../pages/Patient/AME1Record";
 import PMERecord from "../pages/Patient/PMERecord";
+import Profile from "../pages/Profile";
 
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/login" element={<Login />} />
-      <Route path="/admin/admin-panel" element={<AdminSearchPage />} />
       <Route path="/" element={<SignUp />}></Route>
+      <Route path="/login" element={<Login />} />
+      <Route path="/my-account" element={<Profile />}></Route>
+      <Route path="/admin/admin-panel" element={<AdminSearchPage />} />
       <Route path="/doctor/doctor-panel" element={<DoctorSearchPage />}></Route>
       <Route path="/doctor/patient-record" element={<PatientMedicalHistory />}></Route>
       <Route path="/doctor/medical-record" element={<HistoryData />}></Route>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import SearchBar from '../../components/SearchBar';
+import { AccountType } from '../../constants';
 import {
   Dialog,
   DialogContent,
@@ -80,20 +81,22 @@ function PatientSearchPage() {
     setOpen(false);
   };
 
+  const accountType = AccountType.Doctor;
+
   return (
     <div>
-      <Navbar />
-      <div className="bg-tertiary py-10 flex flex-col gap-10 justify-center">
+      <Navbar accountType={accountType} />
+      <div className="bg-tertiary py-10 flex flex-col gap-10 justify-center " style={{height:"50vh"}}>
         <SearchBar placeholder="Search Patient by Army no." />
         <div className="flex flex-col-reverse justify-center items-center gap-5">
-          <p>Couldn't find the user? Create a New patient Record.</p>
+          <p className="md:text-lg text-base">Couldn't find the user? Create a New patient Record.</p>
           <Button
             variant="contained"
             color="primary"
-            className="h-full"
+            className="h-full md:text-2xl text-xl"
             onClick={() => setOpen(true)}
             style={{
-              padding: '8px 32px',
+              padding: '15px 32px',
               backgroundColor: '#E99B00',
               color: '#ffffff',
             }}

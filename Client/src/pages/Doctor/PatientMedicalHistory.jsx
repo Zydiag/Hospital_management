@@ -7,7 +7,7 @@ import man from '../../assets/Person with a cold-pana.svg';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
+
 
 function PatientMedicalHistory () {
   const patientDataByDate = [

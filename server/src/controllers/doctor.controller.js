@@ -236,32 +236,32 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log('creating patient profile error', error);
-    next(error);
+    throw new apiError(500, 'creating patient profile error', error.message);
   }
   res.json(new ApiResponse(200, {}, 'Patient profile created successfully'));
 });
 
 // Update Personal Info
 export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
+  console.log('updating personal info', req.body);
   try {
     const { armyNo, unit, firstName, dob } = req.body;
     const parsedDob = new Date(dob);
-    // Find the user by army number
     const existingUser = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
       },
     });
-    console.log('step 1 ');
+    console.log('existingUser:', existingUser);
     if (!existingUser) {
-      console.log('step 2 ');
-      await prisma.user.create({
-        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
-      });
+      throw new apiError(404, 'User (patient) not found', 'User (patient) not found');
     }
-    console.log('step 3 ');
-    // Update the user data
+    // if (!existingUser) {
+    //   console.log('step 2 ');
+    //   await prisma.user.create({
+    //     data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
+    //   });
+    // }
     const updatedUser = await prisma.user.update({
       where: {
         armyNo: armyNo, // Use id as the unique identifier
@@ -270,13 +270,13 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
         unit: unit,
         firstName: firstName,
         dob: parsedDob,
-        // Assuming refreshToken is part of the User model
       },
     });
+    console.log('updatedUser:', updatedUser);
 
     // res.redirect('/personal-info');
   } catch (error) {
-    next(error);
+    throw new apiError(500, error.message ? error.message : 'update personal info error', error);
   }
   res.json(new ApiResponse(200, {}, 'Personal Info updated successfully'));
   // res.status(500).message('Personal Info updated successfully');
@@ -383,7 +383,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     });
     res.json(new ApiResponse(202, newMedicalRecord, 'Medical record created successfully'));
   } catch (error) {
-    throw new apiError(500, 'update medical error');
+    throw new apiError(500, 'update medical error', error);
   }
 });
 
@@ -632,7 +632,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
 
     res.json(new ApiResponse(200, family, 'Family history created successfully'));
   } catch (error) {
-    next(error);
+    throw new apiError(500, 'update family history error', error.message);
   }
 });
 

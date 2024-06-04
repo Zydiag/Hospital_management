@@ -115,20 +115,20 @@ model PME {
 
 //Doctor model with relationships
 model Doctor {
-  id              String         @id @default(uuid())
-  userId          String         @unique
-  specialization  String
-  status          Status         @default(PENDING)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  user            User           @relation(fields: [userId], references: [id])
-  request         Request?
-  AMEs            AME[]
-  AME2s           AME2[]
-  PMEs            PME[]
-  Mediacls        Medical[]
-  Treatments      treatment[]
-  familyhistories familyHistory?
+  id             String          @id @default(uuid())
+  userId         String          @unique
+  specialization String
+  status         Status          @default(PENDING)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id])
+  request        Request?
+  AMEs           AME[]
+  AME2s          AME2[]
+  PMEs           PME[]
+  Mediacls       Medical[]
+  Treatments     treatment[]
+  familyHistory  familyHistory[]
 }
 
 enum Status {
@@ -169,6 +169,6 @@ model familyHistory {
   patient                 Patient  @relation(fields: [patientId], references: [id])
   patientId               String   @unique
   doctor                  Doctor   @relation(fields: [doctorId], references: [id])
-  doctorId                String   @unique
+  doctorId                String
   createdAt               DateTime @default(now())
 }

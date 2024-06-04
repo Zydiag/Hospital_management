@@ -226,21 +226,23 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
     const existingUser = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
-        role:"PATIENT",
+        role: 'PATIENT',
       },
     });
     console.log(existingUser);
     if (!existingUser) {
       console.log('step 2 ');
-      const user=await prisma.user.create({
+      const user = await prisma.user.create({
         data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
       });
-      const patient=await prisma.Patient.create({
-        data:{userId:user.id},
-      })
+      const patient = await prisma.Patient.create({
+        data: { userId: user.id },
+      });
+    } else {
+      throw new apiError(404, 'User (patient) already exists', 'User (patient) already exists');
     }
   } catch (error) {
-    throw new apiError(500, 'creating patient profile error', error.message);
+    throw new apiError(500, 'creating patient profile error', error);
   }
   res.json(new ApiResponse(200, {}, 'Patient profile created successfully'));
 });

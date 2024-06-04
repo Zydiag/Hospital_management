@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
-import { Button } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
@@ -27,15 +27,35 @@ import { toast } from 'react-toastify';
 import { calculateAge } from '../../utils/getAge.js';
 import { useNavigate } from 'react-router-dom';
 
+import { styled } from '@mui/system';
+
 const drawerWidth = 350;
 
 function AddMedicalData() {
+  const CustomTextField = styled(TextField)({
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#a8adb7', // default border color
+        borderWidth: 2,
+      },
+      '&:hover fieldset': {
+        borderColor: '#a8adb7', // border color on hover
+        borderWidth: 2,
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'black', // border color when focused
+        borderWidth: 2,
+      },
+    },
+  });
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   if (!isAuthenticated) {
     navigate('/login');
   }
   const { patient, setPatient } = usePatientStore();
+
+  console.log('patient', dayjs(patient?.dob).format('DD-MM-YYYY'));
   const [formData, setFormData] = useState({
     BMI: '',
     height: '',
@@ -43,7 +63,7 @@ function AddMedicalData() {
     date: dayjs(),
     patientName: '',
     armyNumber: '',
-    ageService: '',
+    ageService: null,
     unitServiceArms: '',
     chest: '',
     waist: '',
@@ -67,7 +87,7 @@ function AddMedicalData() {
         ...prevFormData,
         armyNumber: patient?.armyNo || '',
         patientName: patient?.name || '',
-        ageService: patient?.dob ? calculateAge(patient.dob) : '',
+        ageService: patient?.dob || '',
         unitServiceArms: patient?.unit || '',
       }));
     }
@@ -159,10 +179,11 @@ function AddMedicalData() {
           toast('Please fill all fields in Personal Info', { type: 'error' });
           return;
         }
+        console.log('formData update personal', formData);
         updatePatientProfile({
           armyNo: patient?.armyNo || formData.armyNumber,
           patientName: formData.patientName,
-          ageService: formData.ageService,
+          dob: formData.ageService,
           unitServiceArms: formData.unitServiceArms,
         });
         break;
@@ -316,13 +337,20 @@ function AddMedicalData() {
                   />
                 </div>
                 <div className="piFormGroup">
-                  <label className="piLabel">Age/Service</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Service.."
+                  {/*<label className="piLabel">Age/Service</label>*/}
+                  <CustomTextField
+                    label="Date of Birth"
+                    type="date"
                     name="ageService"
-                    value={formData.ageService}
+                    value={patient?.dob ? new Date(patient?.dob).toISOString().split('T')[0] : ''}
                     onChange={handleChange}
+                    className="piInput"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ max: new Date().toISOString().split('T')[0] }}
                   />
                 </div>
                 <div className="piFormGroup">

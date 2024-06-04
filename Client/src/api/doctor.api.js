@@ -37,7 +37,9 @@ export const useCreatePatientProfile = () => {
       toast.success('Patient profile created successfully');
     },
     onError: (error) => {
-      toast.error('Error creating patient profile');
+      console.log('error from create patient', error);
+      // toast.error(error);
+      toast.error(error.response ? error.response.data.message : 'Error creating patient profile');
     },
   });
 };

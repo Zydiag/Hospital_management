@@ -176,7 +176,52 @@ export const logoutDoctor = asyncHandler(async (req, res) => {
     .clearCookie('accessToken', options)
     .json(new ApiResponse(200, {}, 'Doctor logout successfully'));
 });
+//function for fetching all dates between ranges
+export const getUpdatedDates = asyncHandler(async (req, res, next) => {
+  try {
+    const { armyNo, startDate,endDate } = req.body;
 
+    // Find the user based on the army number
+    const user = await prisma.User.findFirst({
+      where: {
+        armyNo: armyNo,
+        role: 'PATIENT',
+      },
+    });
+
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+
+    // Find the patient based on the userId
+    const patient = await prisma.Patient.findFirst({
+      where: { userId: user.id },
+    });
+    if (!patient) {
+      throw new apiError(404, 'Patient not found');
+    }
+
+    // Create the start and end dates for the specified year
+
+    // Find medical records within the specified date range
+    const medicalRecords = await prisma.Medical.findMany({
+      where: {
+        patientId: patient.id,
+        createdAt: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+    });
+
+    // Extract unique dates from the medical records
+    const dates = [...new Set(medicalRecords.map(record => record.createdAt.toISOString().split('T')[0]))];
+
+    res.json(new ApiResponse(200, dates, 'Updated dates retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+});
 // Get Personal Info of patient by Army Number
 export const getPersonalInfo = asyncHandler(async (req, res) => {
   console.log('get personal info', req.query);

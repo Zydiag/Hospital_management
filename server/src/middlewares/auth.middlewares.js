@@ -5,13 +5,13 @@ import Jwt from 'jsonwebtoken';
 
 export const verifyJwt = asyncHandler(async (req, res, next) => {
   try {
-
     const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
       throw new apiError(400, 'Unauthorized request');
     }
     const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    
+
+    console.log('decodedToken from auth middleware: ', decodedToken);
 
     const user = await db.user.findUnique({
       where: {
@@ -19,6 +19,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
       },
     });
     if (!user) {
+      console.error('error is from here', user);
       throw new apiError(401, 'invalid Access Token');
     }
     req.user = user;

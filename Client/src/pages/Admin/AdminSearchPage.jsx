@@ -49,9 +49,11 @@ function AdminSearchPage() {
   const totalRows = rows?.length;
   const totalPages = Math.ceil(totalRows / rowPerPage);
 
-  if (!isAuthenticated) {
-    navigate('/login');
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
 
   const query = selectedStatus === 'Requested' ? 'PENDING' : 'APPROVED';
 
@@ -227,9 +229,11 @@ function AdminSearchPage() {
         </div>
       )}
       <div className="doctorStatus flex-1">
-        <div className="md:w-10/12 lg:text-left mx-auto text-center"  style={{paddingBottom:'6vh'}}>
+        <div
+          className="md:w-10/12 lg:text-left mx-auto text-center"
+          style={{ paddingBottom: '6vh' }}
+        >
           <Dropdown
-           
             onChange={handleDropdownChange}
             obj={status}
             value={selectedStatus}

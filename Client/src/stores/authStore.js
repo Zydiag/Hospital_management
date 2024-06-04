@@ -2,10 +2,8 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 const API = 'http://localhost:3000/api';
-const useAuth = create((set) => ({
+const useAuth = create((set, get) => ({
   accessToken: localStorage.getItem('accessToken'),
-  refreshToken: localStorage.getItem('refreshToken'),
-  // isAuthenticated: !!localStorage.getItem('accessToken'),
   isAuthenticated:
     localStorage.getItem('accessToken') !== 'undefined' &&
     localStorage.getItem('accessToken') !== null &&
@@ -17,7 +15,6 @@ const useAuth = create((set) => ({
       const response = await axios.post(`${API}/admin/login`, { armyNo, password });
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
       set({
         accessToken,
         refreshToken,
@@ -38,7 +35,6 @@ const useAuth = create((set) => ({
       const response = await axios.post(`${API}/doctor/login`, { armyNo, password });
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
       set({
         accessToken,
         refreshToken,
@@ -55,20 +51,25 @@ const useAuth = create((set) => ({
   },
 
   refreshToken: async () => {
-    console.log('refresh token');
+    const { accessToken } = get();
     try {
       const response = await axios.post(`${API}/user/refresh-access-token`, null, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
         withCredentials: true, // Ensure cookies are sent with the request
       });
-
+      // console.log('earlier token 🫀', accessToken);
       const newAccessToken = response.data.data.accessToken;
+      // console.log('response from refresh token function:  🫀', newAccessToken);
       localStorage.setItem('accessToken', newAccessToken);
       set({ accessToken: newAccessToken, isAuthenticated: true });
       return newAccessToken;
     } catch (error) {
+      console.log(error);
       set({ error: error.response ? error.response.data.message : 'Failed to refresh token' });
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // localStorage.removeItem('accessToken');
+      // localStorage.removeItem('refreshToken');
       set({
         accessToken: null,
         refreshToken: null,
@@ -79,7 +80,6 @@ const useAuth = create((set) => ({
   },
 
   makeAuthRequest: async (method, url, data = null) => {
-    const state = useAuth.getState();
     try {
       let accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
@@ -98,10 +98,9 @@ const useAuth = create((set) => ({
       return response.data;
     } catch (error) {
       console.log(error);
-      console.log('error message', error.response.data.message);
       if (error.response.data.message === 'jwt expired') {
         try {
-          const newAccessToken = await state.refreshToken();
+          const newAccessToken = await useAuth.getState().refreshToken();
           const response = await axios({
             method,
             url,
@@ -113,6 +112,7 @@ const useAuth = create((set) => ({
 
           return response.data;
         } catch (refreshError) {
+          console.log(refreshError);
           set({
             error: refreshError.response ? refreshError.response.data.message : 'Request failed',
           });
@@ -131,7 +131,7 @@ const useAuth = create((set) => ({
 
   logoutAdmin: async () => {
     try {
-      await useAuth.getState().makeAuthRequest('POST', `${API}/admin/logout`);
+      await get().makeAuthRequest('POST', `${API}/admin/logout`);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       set({

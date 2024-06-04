@@ -36,7 +36,15 @@ function Profile () {
   return (
     <div>
      
-      <form className='w-2/3' style={{ height: '70vh', marginTop: '5vh', marginBottom: '5vh' }}>
+      
+    </div>
+  );
+}
+
+export default Profile;
+
+
+{/* <form className='w-2/3' style={{ height: '70vh', marginTop: '5vh', marginBottom: '5vh' }}>
       <div className='bg-amber-400 w-full' style={{ height: '25vh' }}>
         <IconButton
           size='large'
@@ -141,9 +149,4 @@ function Profile () {
             }}
           ></input>
         </div>
-      </form>
-    </div>
-  );
-}
-
-export default Profile;
+      </form> */}

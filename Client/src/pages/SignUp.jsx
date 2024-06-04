@@ -102,12 +102,12 @@ export default function SignUp() {
           </div>
         </div>
         <div className="relative flex-1 flex justify-center items-center h-full">
-          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
+          <div className="flex flex-col gap-5 justify-center items-start p-8 max-w-md w-full h-full">
             <h1 className="text-4xl font-bold">Get Started</h1>
             <p className="text-lg">Create your account now</p>
             <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full">
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="account-type-label">Account Type</InputLabel>
+              <FormControl fullWidth margin="normal" size="small">
+                <InputLabel id="account-type-label" >Account Type</InputLabel>
                 <Controller
                   name="profession"
                   control={control}
@@ -129,13 +129,15 @@ export default function SignUp() {
                   <span className="text-red-500">{errors.profession.message}</span>
                 )}
               </FormControl>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" size='small'>
                 <Controller
                   name="armyNo"
+                  className="text-base"
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
                     <TextField
+                      size='small'
                       {...field}
                       label="Army No."
                       variant="outlined"
@@ -145,7 +147,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" >
                 <Controller
                   name="fullName"
                   control={control}
@@ -155,13 +157,14 @@ export default function SignUp() {
                       {...field}
                       label="Full Name"
                       variant="outlined"
+                      size="small"
                       error={!!errors.fullName}
                       helperText={errors.fullName ? errors.fullName.message : ''}
                     />
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" >
                 <Controller
                   name="dob"
                   control={control}
@@ -172,6 +175,7 @@ export default function SignUp() {
                       label="Date of Birth"
                       type="date"
                       variant="outlined"
+                      size="small"
                       error={!!errors.dob}
                       helperText={errors.dob ? errors.dob.message : ''}
                       InputLabelProps={{
@@ -184,7 +188,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" >
                 <Controller
                   name="password"
                   control={control}
@@ -195,6 +199,7 @@ export default function SignUp() {
                       type={showPassword ? 'text' : 'password'}
                       label="Password"
                       variant="outlined"
+                      size="small"
                       error={!!errors.password}
                       helperText={errors.password ? errors.password.message : ''}
                       InputProps={{
@@ -210,7 +215,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="normal" >
                 <Controller
                   name="confirmPassword"
                   control={control}
@@ -221,6 +226,7 @@ export default function SignUp() {
                       type={showPassword ? 'text' : 'password'}
                       label="Confirm Password"
                       variant="outlined"
+                      size="small"
                       error={!!errors.confirmPassword}
                       helperText={errors.confirmPassword ? errors.confirmPassword.message : ''}
                       InputProps={{
@@ -248,6 +254,7 @@ export default function SignUp() {
                         {...field}
                         label="Specialization"
                         variant="outlined"
+                        size="small"
                         error={!!errors.specialization}
                         helperText={errors.specialization ? errors.specialization.message : ''}
                       />
@@ -264,7 +271,7 @@ export default function SignUp() {
                 fullWidth
                 style={{
                   backgroundColor: '#EFB034',
-                  height: '56px',
+                  height: '40px',
                   color: '#ffffff',
                   margin: '8px 0',
                 }}
@@ -272,7 +279,7 @@ export default function SignUp() {
                 Sign Up
               </Button>
             </form>
-            <p className="text-lg w-4/5 text-center mx-auto">Already have an account?<a href='/login'> Sign In</a></p>
+            <p className="text-base w-4/5 text-center mx-auto">Already have an account?<a href='/login'> Sign In</a></p>
           </div>
         </div>
       </div>

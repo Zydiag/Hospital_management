@@ -31,9 +31,9 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/my-account" element={<Profile />}></Route>
       <Route path="/admin/admin-panel" element={<AdminSearchPage />} />
-      <Route path="/doctor/doctor-panel" element={<DoctorSearchPage />}></Route>
-      <Route path="/doctor/patient-record" element={<PatientMedicalHistory />}></Route>
-      <Route path="/doctor/medical-record" element={<HistoryData />}></Route>
+      <Route path="/doctor/doctor-panel" element={<DoctorSearchPage />}></Route>//search patient by army Number
+      <Route path="/doctor/patient-record" element={<PatientMedicalHistory />}></Route>//search patient medical record by date
+      <Route path="/doctor/medical-record" element={<HistoryData />}></Route>//database of the medical record
       <Route path="/doctor/test-record" element={<PatientTestRecord />}></Route>
       <Route path="/doctor/ame-data" element={<AME />}></Route>
       <Route path="/doctor/ame1-data" element={<AME1 />}></Route>

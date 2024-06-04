@@ -104,10 +104,10 @@ export default function Login() {
           </div>
         </div>
         <div className="relative flex-1 flex justify-center items-center h-full">
-          <div className="flex flex-col gap-8 justify-center items-start p-8 max-w-md w-full h-full">
+          <div className="flex flex-col gap-6 justify-center items-start p-8 max-w-md w-full h-full">
             {error && <p className="text-red-500">{error.message}</p>}
             <h1 className="text-4xl font-bold">Get Started</h1>
-            <p className="text-lg">Create your account now</p>
+            <p className="text-lg">Login into your account</p>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">
               <FormControl fullWidth margin="normal">
                 <InputLabel id="account-type-label">Account Type</InputLabel>
@@ -189,6 +189,7 @@ export default function Login() {
                 Login
               </Button>
             </form>
+            <p className="text-base w-4/5 text-center mx-auto">Need to create an account?<a href='/'> Sign Up</a></p>
           </div>
         </div>
       </div>

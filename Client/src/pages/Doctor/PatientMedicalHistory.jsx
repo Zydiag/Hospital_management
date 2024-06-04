@@ -7,6 +7,8 @@ import man from '../../assets/Person with a cold-pana.svg';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+
 
 
 function PatientMedicalHistory () {
@@ -14,39 +16,36 @@ function PatientMedicalHistory () {
     { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-05-12' },
     { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-06-14' },
     { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-07-16' },
-    { armyNumber: 'ARMY002', patientName: 'Dr. Bob', date: '2023-07-21' },
-    { armyNumber: 'ARMY002', patientName: 'Dr. Bob', date: '2023-08-22' },
-    { armyNumber: 'ARMY002', patientName: 'Dr. Bob', date: '2023-09-23' },
-    { armyNumber: 'ARMY003', patientName: 'Dr. Charlie', date: '2022-11-15' },
-    { armyNumber: 'ARMY003', patientName: 'Dr. Charlie', date: '2022-12-16' },
-    { armyNumber: 'ARMY003', patientName: 'Dr. Charlie', date: '2023-01-17' },
-    { armyNumber: 'ARMY004', patientName: 'Dr. Diana', date: '2023-02-28' },
-    { armyNumber: 'ARMY004', patientName: 'Dr. Diana', date: '2023-03-29' },
-    { armyNumber: 'ARMY004', patientName: 'Dr. Diana', date: '2023-04-30' },
-    { armyNumber: 'ARMY005', patientName: 'Dr. Ethan', date: '2023-01-30' },
-    { armyNumber: 'ARMY005', patientName: 'Dr. Ethan', date: '2023-02-28' },
-    { armyNumber: 'ARMY005', patientName: 'Dr. Ethan', date: '2023-03-30' },
+    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-07-21' },
+    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-08-22' },
+    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-09-23' },
   ];
 
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedRowDate, setSelectedRowDate] = useState(null);
+  const [selectedStartDate, setSelectedStartDate] = useState(null);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
   const patientSearchRef = useRef(null);
 
-  const handleDateChange = date => {
-    setSelectedDate(date);
-    const formattedDate = date.format('YYYY-MM-DD');
-    const foundData = patientDataByDate.find(patient => patient.date === formattedDate);
-    setSelectedRowDate(foundData || null);
-  };
-
   useEffect(() => {
-    if (selectedRowDate && patientSearchRef.current) {
-      patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        patientSearchRef.current.classList.add('show');
-      }, 200);
+    if (selectedStartDate && selectedEndDate) {
+      const start = dayjs(selectedStartDate);
+      const end = dayjs(selectedEndDate);
+      const filtered = patientDataByDate.filter((patient) => {
+        const date = dayjs(patient.date);
+        return date.isAfter(start.subtract(1, 'day')) && date.isBefore(end.add(1, 'day'));
+      });
+      setFilteredData(filtered);
+
+      if (filtered.length > 0) {
+        if (patientSearchRef.current) {
+          patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } else {
+      setFilteredData([]);
     }
-  }, [selectedRowDate]);
+  }, [selectedStartDate, selectedEndDate, patientDataByDate]);
+  
 
   return (
     <>
@@ -55,7 +54,6 @@ function PatientMedicalHistory () {
       <div
         className='historyIntro h-full flex md:flex-row w-full justify-center bg-neutral-200 flex-col md:pt-0 pt-20'
         style={{
-          marginTop: '10vh',
           marginBottom: '10vh',
           height: '65vh',
         }}
@@ -105,13 +103,28 @@ function PatientMedicalHistory () {
         <p className='md:text-left md:pt-10 pt-44 text-center pb-7  md:text-2xl text-xl text-zinc-500'>
           Select the specific date for the patient medical record.
         </p>
-        <div className="md:w-7/12 w-2/5 md:mx-0 mx-auto">
+        <div className='flex flex-rows justify-start gap-6 md:w-7/12 w-2/5 md:mx-0 mx-auto'>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              label='Choose the date'
-              value={selectedDate}
-              onChange={handleDateChange}
-              
+              label='Choose the start date'
+              value={selectedStartDate}
+              onChange={(date) => setSelectedStartDate(date)}
+              sx={{
+                '& .MuiTypography-root': {
+                  fontSize: '1rem', // Adjust the font size as needed
+                },
+                '& .Mui-selected': {
+                  backgroundColor: '#E99A01 !important',
+                  color: '#fff !important', // Optionally change text color
+                },
+              }}
+            />
+          </LocalizationProvider>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label='Choose the end date'
+              value={selectedEndDate}
+              onChange={(date) => setSelectedEndDate(date)}
               sx={{
                 '& .MuiTypography-root': {
                   fontSize: '1rem', // Adjust the font size as needed
@@ -125,8 +138,8 @@ function PatientMedicalHistory () {
           </LocalizationProvider>
         </div>
 
-        {selectedRowDate ? (
-          <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
+        {filteredData.length > 0 ? (
+          <div className='searchRow' id='patientSearch'>
             <p
               className='text-left text-2xl font-semibold w-full para'
               style={{
@@ -134,23 +147,26 @@ function PatientMedicalHistory () {
                 fontFamily: 'Manrope',
                 paddingTop: '6vh',
                 paddingBottom: '6vh',
-              
               }}
             >
-              Search Result by Date
+              Search Results by Date
             </p>
-            <RowPatient
-              key={selectedRowDate.armyNumber}
-              armyNumber={selectedRowDate.armyNumber}
-              date={selectedRowDate.date}
-              patientName={selectedRowDate.patientName}
-              button1='View Patient History'
-              href='/history-data'
-            />
+            {filteredData.map((data) => (
+              <RowPatient
+                key={data.armyNumber + data.date}
+                armyNumber={data.armyNumber}
+                date={data.date}
+                patientName={data.patientName}
+                button1='View Patient History'
+                href='/history-data'
+              />
+            ))}
           </div>
         ) : (
-          selectedDate && (
-            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>Not found data on the selected date.</p>
+          selectedStartDate && selectedEndDate && (
+            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>
+              No data found for the selected date range.
+            </p>
           )
         )}
       </div>

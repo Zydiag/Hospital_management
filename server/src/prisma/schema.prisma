@@ -14,9 +14,7 @@ model User {
   unit             String?
   rank             String?
   dateOfCommission DateTime?
-  firstName        String
-  middleName       String?
-  lastName         String?
+  fullname        String
   email            String?   @unique
   mobileNo         String?   @unique
   dob              DateTime

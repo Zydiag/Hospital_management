@@ -171,7 +171,52 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
 
   res.json(new ApiResponse(200, user, 'user personal info:'));
 });
+//for fetching all dates between range
+export const getUpdatedDates = asyncHandler(async (req, res, next) => {
+  try {
+    const { armyNo, startDate,endDate } = req.body;
 
+    // Find the user based on the army number
+    const user = await prisma.User.findFirst({
+      where: {
+        armyNo: armyNo,
+        role: 'PATIENT',
+      },
+    });
+
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+
+    // Find the patient based on the userId
+    const patient = await prisma.Patient.findFirst({
+      where: { userId: user.id },
+    });
+    if (!patient) {
+      throw new apiError(404, 'Patient not found');
+    }
+
+    // Create the start and end dates for the specified year
+
+    // Find medical records within the specified date range
+    const medicalRecords = await prisma.Medical.findMany({
+      where: {
+        patientId: patient.id,
+        createdAt: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+    });
+
+    // Extract unique dates from the medical records
+    const dates = [...new Set(medicalRecords.map(record => record.createdAt.toISOString().split('T')[0]))];
+
+    res.json(new ApiResponse(200, dates, 'Updated dates retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+});
 //read-health-record
 export const getHealthRecord = asyncHandler(async (req, res) => {
   console.log('You are inside getHealthRecord Route');

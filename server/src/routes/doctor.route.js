@@ -23,6 +23,7 @@ import {
   loginDoctor,
   logoutDoctor,
   createPatientProfile,
+  getUpdatedDates
   //deletePresentReferralDetails,
 } from '../controllers/doctor.controller.js'; // Updated import path
 
@@ -43,6 +44,7 @@ router.post(
   asyncHandler(createPatientProfile)
 );
 router.post('/logout', verifyJwt, authorizeDoctor, asyncHandler(logoutDoctor));
+router.get('/get-dates',verifyJwt,authorizeDoctor,asyncHandler(getUpdatedDates));
 router.get('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(getPersonalInfo));
 
 router.get('/health-record', verifyJwt, authorizeDoctor, asyncHandler(getHealthRecord));

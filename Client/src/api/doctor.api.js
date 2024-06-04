@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../stores/authStore';
 import { toast } from 'react-toastify';
 
@@ -23,6 +23,46 @@ const updateTreatmentRecordApi = async (makeAuthRequest, treatmentRecordData) =>
 
 const updateFamilyHistoryApi = async (makeAuthRequest, familyHistoryData) => {
   return makeAuthRequest('POST', `${API_URL}/update-family-history`, familyHistoryData);
+};
+
+export const getPersonalInfoApi = async (makeAuthRequest, armyNo) => {
+  // if (!armyNo) {
+  //   console.log('armyNo required');
+  //   return;
+  // }
+  const response = await makeAuthRequest('GET', `${API_URL}/personal-info?armyNo=${armyNo}`, {
+    armyNo,
+  });
+  console.log(response.data);
+  return response.data;
+};
+
+export const useGetPersonalInfo = (armyNo) => {
+  // if (!armyNo) {
+  //   console.log('armyNo required');
+  //   return;
+  // }
+  const { makeAuthRequest } = useAuth();
+
+  return useQuery({
+    queryKey: ['personalInfo', armyNo],
+    queryFn: () => getPersonalInfoApi(makeAuthRequest, armyNo),
+    onError: (error) => {
+      console.log('error from get personal info', error);
+      toast.error(
+        error.response ? error.response.data.message : 'Error fetching personal information'
+      );
+    },
+  });
+  // return useQuery(['personalInfo', armyNo], queryFn: () =>  getPersonalInfoApi(makeAuthRequest, armyNo),
+  // {
+  //   onError: (error) => {
+  //     console.log('error from get personal info', error);
+  //     toast.error(
+  //       error.response ? error.response.data.message : 'Error fetching personal information'
+  //     );
+  //   },
+  // });
 };
 
 export const useCreatePatientProfile = () => {

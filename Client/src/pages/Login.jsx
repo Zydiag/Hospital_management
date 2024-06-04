@@ -35,7 +35,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(true);
 
-  const { error: authError, loginAdmin, loginDoctor } = useAuth();
+  const { error: authError, loginAdmin, loginDoctor, isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
 
@@ -68,6 +68,15 @@ export default function Login() {
       console.log(' login data:', data);
       try {
         await loginDoctor(data.armyNo, data.password);
+        navigate('/doctor/doctor-panel');
+      } catch (error) {
+        console.log(error);
+        setError(error);
+      }
+    } else if (data.profession === 'Patient') {
+      console.log('patient login data:', data);
+      try {
+        // await loginDoctor(data.armyNo, data.password);
         // navigate('/doctor/doctor-panel');
       } catch (error) {
         console.log(error);
@@ -189,7 +198,9 @@ export default function Login() {
                 Login
               </Button>
             </form>
-            <p className="text-base w-4/5 text-center mx-auto">Need to create an account?<a href='/'> Sign Up</a></p>
+            <p className="text-base w-4/5 text-center mx-auto">
+              Need to create an account?<a href="/"> Sign Up</a>
+            </p>
           </div>
         </div>
       </div>

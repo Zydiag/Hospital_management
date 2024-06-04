@@ -7,8 +7,8 @@ const useAuth = create((set) => ({
   refreshToken: localStorage.getItem('refreshToken'),
   // isAuthenticated: !!localStorage.getItem('accessToken'),
   isAuthenticated:
-    !!localStorage.getItem('accessToken') &&
     localStorage.getItem('accessToken') !== 'undefined' &&
+    localStorage.getItem('accessToken') !== null &&
     localStorage.getItem('accessToken') !== '',
   error: null,
 

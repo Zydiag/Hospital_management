@@ -25,17 +25,7 @@ const generateRefreshToken = (user) => {
 
 //create Doctor profile
 export const createDoctorProfile = asyncHandler(async (req, res) => {
-  const {
-    armyNo,
-    unit,
-    rank,
-    fullname,
-    email,
-    mobileNo,
-    dob,
-    password,
-    specialization,
-  } = req.body;
+  const { armyNo, unit, rank, fullname, email, mobileNo, dob, password, specialization } = req.body;
 
   // Check if all fields are filled
   if (!armyNo || !fullname || !dob || !password || !specialization) {
@@ -135,7 +125,7 @@ export const loginDoctor = asyncHandler(async (req, res) => {
   });
   // check status of doctor ( pending or approved )
   if (userDoctor.status !== 'APPROVED') {
-    res.json(new ApiResponse(401, userDoctor, 'Doctor is not approved yet, so you cannot login'));
+    // res.json(new ApiResponse(401, userDoctor, 'Doctor is not approved yet, so you cannot login'));
     throw new apiError(401, 'Doctor is not approved yet');
   }
   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(doctor);
@@ -189,12 +179,9 @@ export const logoutDoctor = asyncHandler(async (req, res) => {
 
 // Get Personal Info of patient by Army Number
 export const getPersonalInfo = asyncHandler(async (req, res) => {
-  console.log('Inside getPersonalInfo function');
-  console.log('REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
+  console.log('get personal info', req.query);
 
-  const { armyNo } = req.body;
-  // console.log(`req.user.id: ${req.user.id}`)
-  // console.log(`armyNo: ${armyNo}`);
+  const { armyNo } = req.query;
   if (!armyNo) {
     throw new apiError(401, 'Army number is required');
   }
@@ -204,6 +191,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
       role: 'PATIENT',
     },
   });
+  console.log('user:', user);
   if (!user) {
     throw new apiError(501, 'Patient is not Regestered');
   }
@@ -220,8 +208,8 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
   console.log('creating patient profile', req.body);
   try {
     const { armyNo, unit, fullname, dob } = req.body;
-    if(!armyNo||!unit||!fullname||!dob){
-      throw new apiError(404,'All fields are required');
+    if (!armyNo || !unit || !fullname || !dob) {
+      throw new apiError(404, 'All fields are required');
     }
     const parsedDob = new Date(dob);
     const existingUser = await prisma.user.findFirst({
@@ -234,7 +222,7 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
     if (!existingUser) {
       console.log('step 2 ');
       const user = await prisma.user.create({
-        data: { armyNo: armyNo, unit: unit, fullname:fullname, dob: parsedDob, role: 'PATIENT' },
+        data: { armyNo: armyNo, unit: unit, fullname: fullname, dob: parsedDob, role: 'PATIENT' },
       });
       const patient = await prisma.Patient.create({
         data: { userId: user.id },
@@ -275,7 +263,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
       },
       data: {
         unit: unit,
-        fullname:fullname,
+        fullname: fullname,
         dob: parsedDob,
       },
     });
@@ -786,7 +774,7 @@ export const calculateAge = (dob) => {
   const fractionOfYear = (monthDiff * 30 + dayDiff) / 365;
 
   // Calculate age as a float value
-  age += fractionOfYear;
+  // age += fractionOfYear;
 
   return age;
 };

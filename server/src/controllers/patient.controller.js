@@ -25,7 +25,7 @@ const router = Router();
 //patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
-  const { armyNo, dob,fullname, password } = req.body;
+  const { armyNo, dob, fullname, password } = req.body;
   console.log('step1');
   if (!armyNo || !password || !dob || !fullname) {
     throw new apiError(501, 'all feilds are required');
@@ -50,7 +50,7 @@ export const profilepatient = asyncHandler(async (req, res) => {
       },
       data: {
         dob: parsedDob,
-        fullname;fullname,
+        fullname: fullname,
         password: hashedPassword,
       },
     });
@@ -160,7 +160,7 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
     },
     select: {
       armyNo: true,
-      fullname:true,
+      fullname: true,
       unit: true,
       dob: true,
     },

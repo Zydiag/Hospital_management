@@ -68,7 +68,7 @@ export default function Login() {
       console.log(' login data:', data);
       try {
         await loginDoctor(data.armyNo, data.password);
-        navigate('/doctor/doctor-panel');
+        // navigate('/doctor/doctor-panel');
       } catch (error) {
         console.log(error);
         setError(error);

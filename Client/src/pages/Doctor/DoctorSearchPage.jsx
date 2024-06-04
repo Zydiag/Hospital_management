@@ -30,17 +30,29 @@ const patientProfileSchema = z.object({
     .max(50, 'Name must be less than 50 characters')
     .regex(/^[a-zA-Z\s]*$/, 'Name should only contain letters and spaces'),
   armyNo: z.string().min(1, { message: 'Army Number is required' }),
-  dob: z.string().refine(val => !isNaN(Date.parse(val)), { message: 'Invalid date format' }),
+  dob: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid date format' }),
   unit: z.string().min(1, { message: 'Unit is required' }),
 });
 
-function PatientSearchPage () {
+function PatientSearchPage() {
   const { isAuthenticated, accessToken } = useAuth();
+  console.log('isAuthenticated', isAuthenticated);
   const { patient } = usePatientStore();
   console.log('accessToken', accessToken);
   console.log('patient', patient);
 
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, navigate]);
+
   const [open, setOpen] = useState(false);
   const { mutateAsync: createPatientProfile } = useCreatePatientProfile();
   const { setPatient } = usePatientStore();
@@ -57,20 +69,17 @@ function PatientSearchPage () {
   if (!isAuthenticated) {
     navigate('/login');
   }
-  const onInvalid = errors => console.error(errors);
+  const onInvalid = (errors) => console.error(errors);
 
-  const handleCreatePatient = async data => {
+  const handleCreatePatient = async (data) => {
     const { name, armyNo, dob, unit } = data;
-    const { firstName, middleName, lastName } = splitFullName(name);
+    // const { firstName, middleName, lastName } = splitFullName(name);
 
     const formData = {
       ...data,
-      firstName,
-      middleName,
-      lastName,
+      fullname: name,
       dob: new Date(dob).toISOString(),
     };
-    delete formData.fullName;
 
     try {
       const patient = await createPatientProfile(formData);
@@ -95,12 +104,12 @@ function PatientSearchPage () {
     { armyNumber: 'ARMY002', patientName: 'Dr. Bob' },
     { armyNumber: 'ARMY003', patientName: 'Dr. Charlie' },
   ];
-  
+
   const [searchValuePatient, setSearchValuePatient] = React.useState('');
   const [errorMessagePatient, setErrorMessagePatient] = React.useState('');
   const [selectedRowPatient, setSelectedRowPatient] = useState(null);
 
-  const handleSearchChange = event => {
+  const handleSearchChange = (event) => {
     setSearchValuePatient(event.target.value);
   };
 
@@ -110,7 +119,7 @@ function PatientSearchPage () {
       setErrorMessagePatient('Search Input is empty.');
       console.log('Error: Input is empty'); // Add this line to debug
     } else {
-      const foundData = patientData.find(data => data.armyNumber === searchValuePatient);
+      const foundData = patientData.find((data) => data.armyNumber === searchValuePatient);
 
       if (foundData) {
         setSelectedRowPatient(foundData);
@@ -138,24 +147,24 @@ function PatientSearchPage () {
     <div>
       <Navbar accountType={accountType} />
       <div
-        className='bg-tertiary py-10 flex flex-col gap-10 justify-center '
+        className="bg-tertiary py-10 flex flex-col gap-10 justify-center "
         style={{ height: '50vh' }}
       >
         <SearchBar
-          placeholder='Search Patient by Army no.'
+          placeholder="Search Patient by Army no."
           handleSearch={handleSearch}
           onChange={handleSearchChange}
           value={searchValuePatient}
         />
-        {errorMessagePatient && <p className='searchError'>{errorMessagePatient}</p>}
-        <div className='flex flex-col-reverse justify-center items-center gap-5'>
-          <p className='md:text-lg text-base'>
+        {errorMessagePatient && <p className="searchError">{errorMessagePatient}</p>}
+        <div className="flex flex-col-reverse justify-center items-center gap-5">
+          <p className="md:text-lg text-base">
             Couldn't find the user? Create a New patient Record.
           </p>
           <Button
-            variant='contained'
-            color='primary'
-            className='h-full md:text-2xl text-xl'
+            variant="contained"
+            color="primary"
+            className="h-full md:text-2xl text-xl"
             onClick={() => setOpen(true)}
             style={{
               padding: '15px 32px',
@@ -169,10 +178,9 @@ function PatientSearchPage () {
       </div>
 
       {selectedRowPatient && (
-        <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
-          
+        <div className="searchRow" id="patientSearch" ref={patientSearchRef}>
           <p
-            className='text-left text-3xl font-semibold searchPara'
+            className="text-left text-3xl font-semibold searchPara"
             style={{
               width: '85%',
               marginLeft: '8vw',
@@ -184,11 +192,10 @@ function PatientSearchPage () {
           </p>
           <RowPatient
             key={selectedRowPatient.armyNumber}
-              armyNumber={selectedRowPatient.armyNumber}
-              patientName={selectedRowPatient.patientName}
-              button1='View Patient History'
-              href='/doctor/patient-record'
-              
+            armyNumber={selectedRowPatient.armyNumber}
+            patientName={selectedRowPatient.patientName}
+            button1="View Patient History"
+            href="/doctor/patient-record"
             sx={{
               '& .MuiPaper-root': {
                 maxWidth: '90%', // Maximum width of the dialog paper element
@@ -205,7 +212,7 @@ function PatientSearchPage () {
 
       <Dialog
         onClose={handleClose}
-        aria-labelledby='customized-dialog-title'
+        aria-labelledby="customized-dialog-title"
         open={open}
         sx={{
           '& .MuiPaper-root': {
@@ -217,13 +224,13 @@ function PatientSearchPage () {
         }}
       >
         <IconButton
-          aria-label='close'
+          aria-label="close"
           onClick={handleClose}
           sx={{
             position: 'absolute',
             right: 8,
             top: 8,
-            color: theme => theme.palette.grey[500],
+            color: (theme) => theme.palette.grey[500],
           }}
         >
           <CloseIcon />
@@ -238,86 +245,86 @@ function PatientSearchPage () {
           }}
         >
           <form
-            className='flex flex-col justify-between h-full'
+            className="flex flex-col justify-between h-full"
             onSubmit={handleSubmit(handleCreatePatient, onInvalid)}
           >
-            <div className='flex flex-col gap-5'>
-              <h1 className='text-3xl'>Create a Patient Profile</h1>
+            <div className="flex flex-col gap-5">
+              <h1 className="text-3xl">Create a Patient Profile</h1>
               <Controller
-                name='name'
+                name="name"
                 control={control}
-                defaultValue=''
+                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label='Full Name'
-                    variant='outlined'
+                    label="Full Name"
+                    variant="outlined"
                     error={!!errors.doctorName}
                     helperText={errors.doctorName ? errors.doctorName.message : ''}
                     fullWidth
-                    margin='normal'
+                    margin="normal"
                   />
                 )}
               />
               <Controller
-                name='armyNo'
+                name="armyNo"
                 control={control}
-                defaultValue=''
+                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label='Army Number'
-                    variant='outlined'
+                    label="Army Number"
+                    variant="outlined"
                     error={!!errors.armyNumber}
                     helperText={errors.armyNumber ? errors.armyNumber.message : ''}
                     fullWidth
-                    margin='normal'
+                    margin="normal"
                   />
                 )}
               />
               <Controller
-                name='dob'
+                name="dob"
                 control={control}
-                defaultValue=''
+                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label='Date of Birth'
-                    type='date'
-                    variant='outlined'
+                    label="Date of Birth"
+                    type="date"
+                    variant="outlined"
                     error={!!errors.dob}
                     helperText={errors.dob ? errors.dob.message : ''}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
-                    margin='normal'
+                    margin="normal"
                     inputProps={{ max: new Date().toISOString().split('T')[0] }}
                   />
                 )}
               />
               <Controller
-                name='unit'
+                name="unit"
                 control={control}
-                defaultValue=''
+                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label='Units'
-                    variant='outlined'
+                    label="Units"
+                    variant="outlined"
                     error={!!errors.units}
                     helperText={errors.units ? errors.units.message : ''}
                     fullWidth
-                    margin='normal'
+                    margin="normal"
                   />
                 )}
               />
             </div>
             <DialogActions>
               <Button
-                type='submit'
-                variant='outlined'
-                className='modalButton text-lg'
+                type="submit"
+                variant="outlined"
+                className="modalButton text-lg"
                 onClick={handleSubmit(handleCreatePatient, onInvalid)}
                 autoFocus
                 style={{

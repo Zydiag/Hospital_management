@@ -5,7 +5,11 @@ const API = 'http://localhost:3000/api';
 const useAuth = create((set) => ({
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  // isAuthenticated: !!localStorage.getItem('accessToken'),
+  isAuthenticated:
+    !!localStorage.getItem('accessToken') &&
+    localStorage.getItem('accessToken') !== 'undefined' &&
+    localStorage.getItem('accessToken') !== '',
   error: null,
 
   loginAdmin: async (armyNo, password) => {
@@ -42,6 +46,7 @@ const useAuth = create((set) => ({
         error: null,
       });
     } catch (error) {
+      console.log(error);
       set({
         error: error.response ? error.response.data.message : 'Login failed',
       });

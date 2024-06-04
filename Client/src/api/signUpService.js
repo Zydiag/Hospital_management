@@ -9,13 +9,14 @@ export const signup = async (data, navigate) => {
   };
   try {
     const { profession, fullName, dob } = data;
-    const { firstName, middleName, lastName } = splitFullName(fullName);
+    // const { firstName, middleName, lastName } = splitFullName(fullName);
 
     const formData = {
       ...data,
-      firstName,
-      middleName,
-      lastName,
+      fullname: fullName,
+      // firstName,
+      // middleName,
+      // lastName,
       dob: new Date(dob).toISOString(),
     };
     delete formData.fullName;

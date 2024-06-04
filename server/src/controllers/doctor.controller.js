@@ -29,9 +29,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
     armyNo,
     unit,
     rank,
-    firstName,
-    middleName = '',
-    lastName = '',
+    fullname,
     email,
     mobileNo,
     dob,
@@ -40,7 +38,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
   } = req.body;
 
   // Check if all fields are filled
-  if (!armyNo || !firstName || !dob || !password || !specialization) {
+  if (!armyNo || !fullname || !dob || !password || !specialization) {
     throw new apiError(404, 'All fields are required to create a new user');
   }
   const parsedDob = new Date(dob);
@@ -70,7 +68,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
           user: {
             create: {
               armyNo,
-              firstName,
+              fullname,
               unit,
               rank,
               email,
@@ -211,7 +209,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   }
   let info = {
     armyNo: user.armyNo,
-    fullname: user.firstName,
+    fullname: user.fullname,
     age: calculateAge(user.dob),
     unit: user.unit,
   };
@@ -221,7 +219,10 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
 export const createPatientProfile = asyncHandler(async (req, res, next) => {
   console.log('creating patient profile', req.body);
   try {
-    const { armyNo, unit, firstName, dob } = req.body;
+    const { armyNo, unit, fullname, dob } = req.body;
+    if(!armyNo||!unit||!fullname||!dob){
+      throw new apiError(404,'All fields are required');
+    }
     const parsedDob = new Date(dob);
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -233,7 +234,7 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
     if (!existingUser) {
       console.log('step 2 ');
       const user = await prisma.user.create({
-        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
+        data: { armyNo: armyNo, unit: unit, fullname:fullname, dob: parsedDob, role: 'PATIENT' },
       });
       const patient = await prisma.Patient.create({
         data: { userId: user.id },
@@ -251,7 +252,7 @@ export const createPatientProfile = asyncHandler(async (req, res, next) => {
 export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
   console.log('updating personal info', req.body);
   try {
-    const { armyNo, unit, firstName, dob } = req.body;
+    const { armyNo, unit, fullname, dob } = req.body;
     const parsedDob = new Date(dob);
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -274,7 +275,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
       },
       data: {
         unit: unit,
-        firstName: firstName,
+        fullname:fullname,
         dob: parsedDob,
       },
     });

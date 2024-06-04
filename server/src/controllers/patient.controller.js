@@ -25,9 +25,9 @@ const router = Router();
 //patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
-  const { armyNo, dob, firstName, password } = req.body;
+  const { armyNo, dob,fullname, password } = req.body;
   console.log('step1');
-  if (!armyNo || !password || !dob || !firstName) {
+  if (!armyNo || !password || !dob || !fullname) {
     throw new apiError(501, 'all feilds are required');
   }
   console.log('step2');
@@ -50,21 +50,10 @@ export const profilepatient = asyncHandler(async (req, res) => {
       },
       data: {
         dob: parsedDob,
-        firstName: firstName,
+        fullname;fullname,
         password: hashedPassword,
       },
     });
-    const findUser = await prisma.user.findFirst({
-      where: {
-        armyNo,
-      },
-    });
-    const newPatient = await prisma.patient.create({
-      data: {
-        userId: findUser.id,
-      },
-    });
-    console.log('newPatient', newPatient);
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser);
     await prisma.user.update({
       where: {
@@ -171,9 +160,7 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
     },
     select: {
       armyNo: true,
-      firstName: true,
-      lastName: true,
-      middleName: true,
+      fullname:true,
       unit: true,
       dob: true,
     },

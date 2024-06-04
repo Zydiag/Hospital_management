@@ -29,9 +29,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
     armyNo,
     unit,
     rank,
-    firstName,
-    middleName = '',
-    lastName = '',
+    fullname,
     email,
     mobileNo,
     dob,
@@ -40,7 +38,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
   } = req.body;
 
   // Check if all fields are filled
-  if (!armyNo || !firstName || !dob || !password || !specialization) {
+  if (!armyNo || !fullname || !dob || !password || !specialization) {
     throw new apiError(404, 'All fields are required to create a new user');
   }
   const parsedDob = new Date(dob);
@@ -70,7 +68,7 @@ export const createDoctorProfile = asyncHandler(async (req, res) => {
           user: {
             create: {
               armyNo,
-              firstName,
+              fullname,
               unit,
               rank,
               email,
@@ -211,7 +209,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
   }
   let info = {
     armyNo: user.armyNo,
-    fullname: user.firstName,
+    fullname: user.fullname,
     age: calculateAge(user.dob),
     unit: user.unit,
   };
@@ -221,62 +219,71 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
 export const createPatientProfile = asyncHandler(async (req, res, next) => {
   console.log('creating patient profile', req.body);
   try {
-    const { armyNo, unit, firstName, dob } = req.body;
+    const { armyNo, unit, fullname, dob } = req.body;
+    if(!armyNo||!unit||!fullname||!dob){
+      throw new apiError(404,'All fields are required');
+    }
     const parsedDob = new Date(dob);
     const existingUser = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
+        role: 'PATIENT',
       },
     });
     console.log(existingUser);
     if (!existingUser) {
       console.log('step 2 ');
-      await prisma.user.create({
-        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
+      const user = await prisma.user.create({
+        data: { armyNo: armyNo, unit: unit, fullname:fullname, dob: parsedDob, role: 'PATIENT' },
       });
+      const patient = await prisma.Patient.create({
+        data: { userId: user.id },
+      });
+    } else {
+      throw new apiError(404, 'User (patient) already exists', 'User (patient) already exists');
     }
   } catch (error) {
-    console.log('creating patient profile error', error);
-    next(error);
+    throw new apiError(500, 'creating patient profile error', error);
   }
   res.json(new ApiResponse(200, {}, 'Patient profile created successfully'));
 });
 
 // Update Personal Info
 export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
+  console.log('updating personal info', req.body);
   try {
-    const { armyNo, unit, firstName, dob } = req.body;
+    const { armyNo, unit, fullname, dob } = req.body;
     const parsedDob = new Date(dob);
-    // Find the user by army number
     const existingUser = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
       },
     });
-    console.log('step 1 ');
+    console.log('existingUser:', existingUser);
     if (!existingUser) {
-      console.log('step 2 ');
-      await prisma.user.create({
-        data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
-      });
+      throw new apiError(404, 'User (patient) not found', 'User (patient) not found');
     }
-    console.log('step 3 ');
-    // Update the user data
+    // if (!existingUser) {
+    //   console.log('step 2 ');
+    //   await prisma.user.create({
+    //     data: { armyNo: armyNo, unit: unit, firstName: firstName, dob: parsedDob, role: 'PATIENT' },
+    //   });
+    // }
     const updatedUser = await prisma.user.update({
       where: {
         armyNo: armyNo, // Use id as the unique identifier
       },
       data: {
         unit: unit,
-        firstName: firstName,
+        fullname:fullname,
         dob: parsedDob,
-        // Assuming refreshToken is part of the User model
       },
     });
+    console.log('updatedUser:', updatedUser);
 
     // res.redirect('/personal-info');
   } catch (error) {
-    next(error);
+    throw new apiError(500, error.message ? error.message : 'update personal info error', error);
   }
   res.json(new ApiResponse(200, {}, 'Personal Info updated successfully'));
   // res.status(500).message('Personal Info updated successfully');
@@ -383,7 +390,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
     });
     res.json(new ApiResponse(202, newMedicalRecord, 'Medical record created successfully'));
   } catch (error) {
-    throw new apiError(500, 'update medical error');
+    throw new apiError(500, 'update medical error', error);
   }
 });
 
@@ -632,7 +639,7 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
 
     res.json(new ApiResponse(200, family, 'Family history created successfully'));
   } catch (error) {
-    next(error);
+    throw new apiError(500, 'update family history error', error.message);
   }
 });
 

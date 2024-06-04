@@ -5,6 +5,8 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { apiError } from '../utils/apiError.js';
 import Jwt from 'jsonwebtoken';
 
+import { verifyJwt } from '../middlewares/auth.middlewares.js';
+
 const router = Router();
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
@@ -74,7 +76,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
 });
 
-router.route('/current-user-profile').get(getCurrentUser);
+router.route('/current-user-profile').get(verifyJwt, getCurrentUser);
 router.route('/refresh-access-token').post(refreshAccessToken);
 
 export default router;

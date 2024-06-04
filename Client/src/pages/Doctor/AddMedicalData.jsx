@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
-import { Button } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
@@ -18,27 +18,52 @@ import {
   useCreatePatientProfile,
   useUpdateFamilyHistory,
   useUpdateHealthRecord,
+  useUpdatePatientProfile,
   useUpdateTreatmentRecord,
 } from '../../api/doctor.api';
 import { usePatientStore } from '../../stores/patientStore';
 import useAuth from '../../stores/authStore';
 import { toast } from 'react-toastify';
+import { calculateAge } from '../../utils/getAge.js';
+import { useNavigate } from 'react-router-dom';
+
+import { styled } from '@mui/system';
 
 const drawerWidth = 350;
 
 function AddMedicalData() {
-  const { accessToken } = useAuth();
-
+  const CustomTextField = styled(TextField)({
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#a8adb7', // default border color
+        borderWidth: 2,
+      },
+      '&:hover fieldset': {
+        borderColor: '#a8adb7', // border color on hover
+        borderWidth: 2,
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'black', // border color when focused
+        borderWidth: 2,
+      },
+    },
+  });
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  if (!isAuthenticated) {
+    navigate('/login');
+  }
   const { patient, setPatient } = usePatientStore();
-  console.log('patient from add medical data', patient);
+
+  console.log('patient', dayjs(patient?.dob).format('DD-MM-YYYY'));
   const [formData, setFormData] = useState({
     BMI: '',
     height: '',
     weight: '',
     date: dayjs(),
-    doctorName: '',
+    patientName: '',
     armyNumber: '',
-    ageService: '',
+    ageService: null,
     unitServiceArms: '',
     chest: '',
     waist: '',
@@ -55,6 +80,18 @@ function AddMedicalData() {
     unnaturalDeath: '',
     significantHistory: '',
   });
+
+  useEffect(() => {
+    if (patient) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        armyNumber: patient?.armyNo || '',
+        patientName: patient?.name || '',
+        ageService: patient?.dob || '',
+        unitServiceArms: patient?.unit || '',
+      }));
+    }
+  }, [patient]);
 
   const [selectedSection, setSelectedSection] = useState('PERSONAL INFO');
 
@@ -74,27 +111,87 @@ function AddMedicalData() {
   };
 
   const { mutate: createPatientProfile } = useCreatePatientProfile();
+  const { mutate: updatePatientProfile } = useUpdatePatientProfile();
   const { mutate: updateHealthRecord } = useUpdateHealthRecord();
   const { mutate: updateTreatmentRecord } = useUpdateTreatmentRecord();
   const { mutate: updateFamilyHistory } = useUpdateFamilyHistory();
+  const validatePersonalInfo = (data) => {
+    const requiredFields = ['patientName', 'armyNumber', 'ageService', 'unitServiceArms'];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateHealthRecord = (data) => {
+    const requiredFields = [
+      'height',
+      'weight',
+      'chest',
+      'BMI',
+      'waist',
+      'bloodPressure',
+      'bloodGroup',
+      'disabilities',
+    ];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validatePersonalMedicalHistory = (data) => {
+    const requiredFields = [
+      'diagnosis',
+      'description',
+      'medications',
+      'allergies',
+      'miscellaneous',
+    ];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateFamilyHistory = (data) => {
+    const requiredFields = ['hypertension', 'diabetes', 'unnaturalDeath', 'significantHistory'];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return false;
+      }
+    }
+    return true;
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    toast('working really well');
-    console.log('form data', formData);
-    // const dataToSubmit = { ...formData };
 
     switch (selectedSection) {
       case 'PERSONAL INFO':
-        createPatientProfile({
-          armyno: patient?.armyNo,
-          doctorName: formData.doctorName,
-          armyNumber: formData.armyNumber,
-          ageService: formData.ageService,
+        if (!validatePersonalInfo(formData)) {
+          toast('Please fill all fields in Personal Info', { type: 'error' });
+          return;
+        }
+        console.log('formData update personal', formData);
+        updatePatientProfile({
+          armyNo: patient?.armyNo || formData.armyNumber,
+          patientName: formData.patientName,
+          dob: formData.ageService,
           unitServiceArms: formData.unitServiceArms,
         });
         break;
       case 'HEALTH RECORD':
+        if (!validateHealthRecord(formData)) {
+          toast('Please fill all fields in Health Record', { type: 'error' });
+          return;
+        }
         updateHealthRecord({
           heightCm: parseInt(formData.height, 10),
           weightKg: parseFloat(formData.weight),
@@ -105,10 +202,14 @@ function AddMedicalData() {
           disabilities: formData.disabilities,
           bloodGroup: formData.bloodGroup,
           date: formData.date.toISOString(), // Assuming date is a Dayjs object
-          armyno: patient?.armyNo,
+          armyNo: patient?.armyNo,
         });
         break;
       case 'PERSONAL MEDICAL HISTORY':
+        if (!validatePersonalMedicalHistory(formData)) {
+          toast('Please fill all fields in Personal Medical History', { type: 'error' });
+          return;
+        }
         updateTreatmentRecord({
           diagnosis: formData.diagnosis,
           note: formData.description,
@@ -116,17 +217,21 @@ function AddMedicalData() {
           date: formData.date,
           knownAllergies: formData.allergies,
           miscellaneous: formData.miscellaneous,
-          armyno: patient?.armyNo,
+          armyNo: patient?.armyNo,
         });
         break;
       case 'FAMILY HISTORY':
+        if (!validateFamilyHistory(formData)) {
+          toast('Please fill all fields in Family History', { type: 'error' });
+          return;
+        }
         updateFamilyHistory({
           hypertension: formData.hypertension,
           diabetesMellitus: formData.diabetes,
           anyUnnaturalDeath: formData.unnaturalDeath,
           otherSignificantHistory: formData.significantHistory,
           date: formData.date,
-          armyno: patient?.armyNo,
+          armyNo: patient?.armyNo,
         });
         break;
       default:
@@ -212,12 +317,12 @@ function AddMedicalData() {
                   </LocalizationProvider>
                 </div>
                 <div className="piFormGroup">
-                  <label className="piLabel">Name of the Doctor</label>
+                  <label className="piLabel">Name of the Patient</label>
                   <input
                     className="piInput"
                     placeholder="Name.."
-                    name="doctorName"
-                    value={formData.doctorName}
+                    name="patientName"
+                    value={formData.patientName}
                     onChange={handleChange}
                   />
                 </div>
@@ -226,19 +331,26 @@ function AddMedicalData() {
                   <input
                     className="piInput"
                     placeholder="Army Number.."
-                    name="armyNo"
+                    name="armyNumber"
                     value={formData.armyNumber}
                     onChange={handleChange}
                   />
                 </div>
                 <div className="piFormGroup">
-                  <label className="piLabel">Age/Service</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Service.."
+                  {/*<label className="piLabel">Age/Service</label>*/}
+                  <CustomTextField
+                    label="Date of Birth"
+                    type="date"
                     name="ageService"
-                    value={formData.ageService}
+                    value={patient?.dob ? new Date(patient?.dob).toISOString().split('T')[0] : ''}
                     onChange={handleChange}
+                    className="piInput"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ max: new Date().toISOString().split('T')[0] }}
                   />
                 </div>
                 <div className="piFormGroup">

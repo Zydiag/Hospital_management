@@ -14,11 +14,11 @@ const prisma = new PrismaClient();
 // create admin profile
 
 export const createAdmin = asyncHandler(async (req, res) => {
-  const { armyNo, firstName, dob, password } = req.body;
+  const { armyNo, fullname, dob, password } = req.body;
 
   const adminId = armyNo;
   // Check if all fields are filled
-  if (!adminId || !firstName || !dob || !password) {
+  if (!adminId || !fullname || !dob || !password) {
     throw new apiError(400, 'All fields are required to create a new user');
   }
   const parsedDob = new Date(dob);
@@ -28,7 +28,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
     const newUser = await prisma.user.create({
       data: {
         armyNo,
-        firstName,
+        fullname,
         dob: parsedDob,
         role: 'ADMIN',
         password: hashedPassword,
@@ -112,7 +112,7 @@ export const getDoctorProfile = asyncHandler(async (req, res) => {
   }
   let ourDoctor = {
     armyNo: user.armyNo,
-    firstName: user.firstName,
+    fullname: user.fullname,
     specialization: doctor.specialization,
     status: doctor.status,
   };
@@ -197,9 +197,7 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
           include: {
             user: {
               select: {
-                firstName: true,
-                middleName: true,
-                lastName: true,
+                fullname:true,
                 dob: true,
                 armyNo: true,
                 unit: true,
@@ -212,8 +210,7 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
 
     const formattedRequests = requests.map((request) => ({
       doctorId: request.doctor.id,
-      fullName:
-        `${request.doctor.user.firstName} ${request.doctor.user.middleName ?? ''} ${request.doctor.user.lastName ?? ''}`.trim(),
+      fullName:request.doctor.user.fullname,
 
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,

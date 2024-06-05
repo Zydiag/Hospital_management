@@ -3,7 +3,7 @@ import CustomTable from '../../components/CustomTable'; // Adjust the import pat
 import '../../styles/StylesP/HistoryData.css';
 import { Button } from '@mui/material';
 
-import '../../styles/StylesP/Ame.css'
+import '../../styles/StylesP/Ame.css';
 
 function AMERecord () {
   const ameHeading = ['AME', 'Data'];
@@ -25,15 +25,18 @@ function AMERecord () {
 
   return (
     <div className='ameInfo'>
-    
-      <h1>AME</h1>
+      <h1 className='md:text-3xl text-2xl'>AME</h1>
       <div className='ameTable'>
         <CustomTable headings={ameHeading} rows={ameRows} />
       </div>
       <center>
-        <Button className='print' variant='outlined' onClick={handlePrint}>
+        <button
+          className='h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]'
+          onClick={handlePrint}
+          style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}
+        >
           Print
-        </Button>
+        </button>
       </center>
     </div>
   );

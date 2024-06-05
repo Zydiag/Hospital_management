@@ -71,9 +71,7 @@
 }
 
 .pi .editForm {
-  height: 6vh;
-  width: 8vw;
-  font-size: 18px;
+  height: 7vh;
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;
@@ -90,24 +88,7 @@
   border: solid 2px #e99a01;
   color: white;
 }
-.pi .saveForm {
-  height: 6vh;
-  width: 8vw;
-  font-size: 18px;
-  font-family: 'Manrope', sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-  color: #e99a01;
-  border: solid 2px #e99a01;
-  margin-left: 1vw;
-  border-radius: 4px;
-  margin-bottom: 5vh;
-}
- .pi .saveForm:hover {
-  border: solid 2px #e99a01;
-  background-color: white;
-}
+
 
 .piInputContainer .bmiInput {
   width: 49vw; 
@@ -122,8 +103,6 @@
 }
 
 .piInputContainer {
-  display: flex;
-  flex-direction: row;
   position: relative;
 }
 
@@ -136,19 +115,10 @@
   font-size: 1.1rem;
 }
 
-.bmiUnit {
-  position: absolute;
-  top: 50%;
-  right: 10vw; /* Adjust this value to position the unit as needed */
-  transform: translateY(-50%);
-  color: black; /* Adjust the color as needed */
-  font-size: 1.1rem;
-}
 
 .piInputContainer .calc {
   height: 6vh;
-  width: 8vw;
-  font-size: 0.8rem;
+  
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;

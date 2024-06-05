@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CustomTable from '../../components/CustomTable'; // Adjust the import path as necessary
 import '../../styles/StylesP/HistoryData.css';
@@ -57,25 +56,29 @@ const HistoryData = () => {
   };
 
   return (
-    <div className="historyData">
+    <div className='historyData h-screen'>
       <Navbar />
-      <h1>Patient Profile</h1>
-      <div className="PersonelInfoTable">
+      <h1 className='md:text-3xl text-2xl'>Patient Profile</h1>
+      <div className='PersonelInfoTable'>
         <CustomTable headings={headingsPersonelInfo} rows={rowsPI} />
       </div>
-      <div className="healthRecordTable">
+      <div className='healthRecordTable'>
         <CustomTable headings={headingsHealthRecord} rows={rowsHR} />
       </div>
-      <div className="healthRecordTable">
+      <div className='healthRecordTable'>
         <CustomTable headings={personelMedHistoryHeading} rows={rowsPMH} />
       </div>
-      <div className="healthRecordTable">
+      <div className='healthRecordTable'>
         <CustomTable headings={familyHistoryHeading} rows={familyHistoryData} />
       </div>
       <center>
-        <Button className="print" variant="outlined" onClick={handlePrint}>
+        <button
+          className="h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]"
+          onClick={handlePrint}
+          style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}
+        >
           Print
-        </Button>
+        </button>
       </center>
     </div>
   );

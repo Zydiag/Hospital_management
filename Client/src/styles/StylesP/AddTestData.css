@@ -24,10 +24,11 @@
   font-size: 2rem;
   margin: 4vh auto;
   text-align: center;
+  width: 100%;
 }
 
 .piFormGroup {
-  width: 80%; /* Ensure form groups take the full width of the form */
+  
   margin: 2vh auto; /* Add some space between each form group */
 }
 
@@ -71,8 +72,7 @@
 
 .pi .editForm {
   height: 6vh;
-  width: 8vw;
-  font-size: 18px;
+  /* width: 8vw; */
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;
@@ -91,8 +91,7 @@
 }
 .pi .saveForm {
   height: 6vh;
-  width: 8vw;
-  font-size: 18px;
+  /* width: 8vw; */
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;
@@ -186,13 +185,11 @@
   flex-direction: row;
   justify-content: center;
   margin: 5vh auto 0;
-  width: 80%;
+  width: 100%;
 }
 
 .selectedTest .dobButton {
-  height: 6vh;
-  width: 8vw;
-  font-size: 18px;
+  height: 8vh;
   font-family: 'Manrope', sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;
@@ -202,4 +199,8 @@
   border: none;
   border-radius: 4px;
   margin-left: 2vw;
+}
+
+.selectedTest .dobButton:hover{
+  background-color: #e99a01;
 }

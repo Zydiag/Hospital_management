@@ -59,11 +59,7 @@ const AccountMenu = () => {
     setAnchorEl(null);
   };
 
-  const handleSettings = () => {
-    console.log("settings page");
-    navigate('/settings'); // Redirect to /settings
-    setAnchorEl(null);
-  };
+
 
   return (
     <div>
@@ -115,12 +111,12 @@ const AccountMenu = () => {
         </MenuItem>
         <Divider />
 
-        <MenuItem onClick={handleSettings}>
+        {/* <MenuItem onClick={handleSettings}>
           <ListItemIcon>
             <Settings fontSize='small' />
           </ListItemIcon>
           Settings
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize='small' />

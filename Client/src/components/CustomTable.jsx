@@ -11,11 +11,15 @@ const CustomTable = ({ headings, rows }) => {
             {headings.map((heading, index) => (
               <TableCell
                 key={index}
-                style={{
-                  fontSize: '25px',
-                  backgroundColor: '#ffc34c',
-                  fontFamily: 'Manrope',
-                  fontWeight: 'bold',
+                sx={{
+                  '&.MuiTableCell-root':{
+                    fontSize: 'clamp(1rem, 2vw, 1.4rem)',
+                    backgroundColor:'#efb034',
+                    fontFamily:'Manrope',
+                    fontWeight:'bold'
+
+                  }
+                  
                 }}
               >
                 {heading}
@@ -32,8 +36,8 @@ const CustomTable = ({ headings, rows }) => {
                   component={cellIndex === 0 ? 'th' : undefined}
                   scope={cellIndex === 0 ? 'row' : undefined}
                   align={cellIndex === 0 ? 'left' : 'left'}
-                  style={{
-                    fontSize: '20px',
+                  sx={{
+                    fontSize: 'clamp(1rem, 1.2vw, 1.4rem)',
                     fontFamily: 'Manrope',
                     fontWeight: cellIndex === 0 ? 'bold' : 'normal',
                     width: cellIndex === 0 ? '30%' : 'auto',

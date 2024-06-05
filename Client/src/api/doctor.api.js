@@ -26,22 +26,34 @@ const updateFamilyHistoryApi = async (makeAuthRequest, familyHistoryData) => {
 };
 
 export const getPersonalInfoApi = async (makeAuthRequest, armyNo) => {
-  // if (!armyNo) {
-  //   console.log('armyNo required');
-  //   return;
-  // }
   const response = await makeAuthRequest('GET', `${API_URL}/personal-info?armyNo=${armyNo}`, {
     armyNo,
   });
   console.log(response.data);
   return response.data;
 };
+export const getUpdateDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
+  const response = await makeAuthRequest('POST', `${API_URL}/get-dates`, {
+    armyNo,
+    startDate,
+    endDate,
+  });
+  console.log(response.data);
+  return response.data;
+};
+export const getTreatmentRecordApi = async (makeAuthRequest, armyNo) => {
+  const response = await makeAuthRequest(
+    'GET',
+    `${API_URL}/treatment-record?armyNo=${armyNo}&date=${date}`,
+    {
+      armyNo,
+    }
+  );
+  console.log(response.data);
+  return response.data;
+};
 
 export const useGetPersonalInfo = (armyNo) => {
-  // if (!armyNo) {
-  //   console.log('armyNo required');
-  //   return;
-  // }
   const { makeAuthRequest } = useAuth();
 
   return useQuery({
@@ -54,15 +66,6 @@ export const useGetPersonalInfo = (armyNo) => {
       );
     },
   });
-  // return useQuery(['personalInfo', armyNo], queryFn: () =>  getPersonalInfoApi(makeAuthRequest, armyNo),
-  // {
-  //   onError: (error) => {
-  //     console.log('error from get personal info', error);
-  //     toast.error(
-  //       error.response ? error.response.data.message : 'Error fetching personal information'
-  //     );
-  //   },
-  // });
 };
 
 export const useCreatePatientProfile = () => {

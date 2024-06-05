@@ -11,7 +11,7 @@ export const verifyJwt = asyncHandler(async (req, res, next) => {
     }
     const decodedToken = Jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    console.log('decodedToken from auth middleware: ', decodedToken);
+    // console.log('decodedToken from auth middleware: ', decodedToken);
 
     const user = await db.user.findUnique({
       where: {

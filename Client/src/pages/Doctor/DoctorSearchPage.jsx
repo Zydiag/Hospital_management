@@ -217,7 +217,7 @@ function PatientSearchPage() {
                 armyNumber={selectedRowPatient.armyNo}
                 patientName={selectedRowPatient.fullname}
                 button1="View Patient History"
-                href="/doctor/patient-record"
+                handleClick={() => navigate('/doctor/patient-record')}
                 sx={{
                   '& .MuiPaper-root': {
                     maxWidth: '90%', // Maximum width of the dialog paper element

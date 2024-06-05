@@ -33,8 +33,6 @@ import { toast } from 'react-toastify';
 import { calculateAge } from '../../utils/getAge.js';
 import { useNavigate } from 'react-router-dom';
 
-
-
 const drawerWidth = 300;
 
 const openedMixin = (theme) => ({
@@ -66,7 +64,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
-
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -100,11 +97,12 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       ...closedMixin(theme),
       '& .MuiDrawer-paper': closedMixin(theme),
     }),
-  }),
+  })
 );
 
-
 function AddMedicalData() {
+  const { patient, setPatient } = usePatientStore();
+  console.log(patient);
   const CustomTextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
       '& fieldset': {
@@ -126,7 +124,7 @@ function AddMedicalData() {
   if (!isAuthenticated) {
     navigate('/login');
   }
-  const { patient, setPatient } = usePatientStore();
+  // const { patient, setPatient } = usePatientStore();
 
   console.log('patient', dayjs(patient?.dob).format('DD-MM-YYYY'));
   const [formData, setFormData] = useState({
@@ -159,7 +157,7 @@ function AddMedicalData() {
       setFormData((prevFormData) => ({
         ...prevFormData,
         armyNumber: patient?.armyNo || '',
-        patientName: patient?.name || '',
+        patientName: patient?.fullname || '',
         ageService: patient?.dob || '',
         unitServiceArms: patient?.unit || '',
       }));
@@ -189,6 +187,7 @@ function AddMedicalData() {
   const { mutate: updateTreatmentRecord } = useUpdateTreatmentRecord();
   const { mutate: updateFamilyHistory } = useUpdateFamilyHistory();
   const validatePersonalInfo = (data) => {
+    console.log('validate this data', data);
     const requiredFields = ['patientName', 'armyNumber', 'ageService', 'unitServiceArms'];
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -255,9 +254,9 @@ function AddMedicalData() {
         console.log('formData update personal', formData);
         updatePatientProfile({
           armyNo: patient?.armyNo || formData.armyNumber,
-          patientName: formData.patientName,
+          fullname: patient.fullname,
           dob: formData.ageService,
-          unitServiceArms: formData.unitServiceArms,
+          unit: formData.unitServiceArms,
         });
         break;
       case 'HEALTH RECORD':
@@ -337,360 +336,362 @@ function AddMedicalData() {
   return (
     <div>
       <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open} sx={{ backgroundColor: '#efb034' }}>
-        <Toolbar
-        sx={{
-          '& .MuiToolbar-regular':{
-            backgroundColor: '#e99a01'
-          }
-        }}
-        >
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
+        <CssBaseline />
+        <AppBar position="fixed" open={open} sx={{ backgroundColor: '#efb034' }}>
+          <Toolbar
             sx={{
-              marginRight: 5,
-              ...(open && { display: 'none' }),
+              '& .MuiToolbar-regular': {
+                backgroundColor: '#e99a01',
+              },
             }}
           >
-            <MenuIcon />
-          </IconButton>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{
+                marginRight: 5,
+                ...(open && { display: 'none' }),
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Drawer variant="permanent" open={open}>
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
+          <List>
+            {sections.map((text, index) => (
+              <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+                <ListItemButton
+                  onClick={() => setSelectedSection(text)}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
+                    textAlign: 'center',
+                  }}
+                >
+                  <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Drawer>
+        {selectedSection === 'PERSONAL INFO' && (
+          <div id="personal-info" className="personelInfo">
+            <form onSubmit={handleSubmit} className="pi">
+              <h1>PERSONAL INFO</h1>
+              <div className="piFormGroup" style={{ marginBottom: '1vh', textAlign: 'right' }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker label="Date" value={formData.date} onChange={handleDateChange} />
+                </LocalizationProvider>
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Name of the Patient</label>
+                <input
+                  className="piInput"
+                  placeholder="Name.."
+                  name="patientName"
+                  value={patient.fullname}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">ARMY NUMBER</label>
+                <input
+                  className="piInput"
+                  placeholder="Army Number.."
+                  name="armyNumber"
+                  value={patient.armyNo}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                {/*<label className="piLabel">Age/Service</label>*/}
+                <CustomTextField
+                  label="Date of Birth"
+                  type="date"
+                  name="ageService"
+                  value={patient?.dob ? new Date(patient?.dob).toISOString().split('T')[0] : ''}
+                  onChange={handleChange}
+                  className="piInput"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  fullWidth
+                  margin="normal"
+                  inputProps={{ max: new Date().toISOString().split('T')[0] }}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Units/Service/Arms</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Units.."
+                  name="unitServiceArms"
+                  value={formData.unitServiceArms}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="w-1/5">
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="editForm md:text-lg text-base  w-full"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
 
-        </Toolbar>
-      </AppBar>
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {sections.map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block'}}>
-              <ListItemButton
-                onClick={() => setSelectedSection(text)}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                  textAlign:"center"
-                }}
-              >
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-          {selectedSection === 'PERSONAL INFO' && (
-            <div id="personal-info" className="personelInfo">
-              <form onSubmit={handleSubmit} className="pi">
-                <h1>PERSONAL INFO</h1>
-                <div className="piFormGroup" style={{ marginBottom: '1vh', textAlign: 'right' }}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker label="Date" value={formData.date} onChange={handleDateChange} />
-                  </LocalizationProvider>
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Name of the Patient</label>
+        {selectedSection === 'HEALTH RECORD' && (
+          <section id="health-record" className="personelInfo">
+            <form onSubmit={handleSubmit} className="pi">
+              <h1>HEALTH RECORD</h1>
+              <div className="piFormGroup">
+                <label className="piLabel">Height</label>
+                <div className="piInputContainer">
                   <input
                     className="piInput"
-                    placeholder="Name.."
-                    name="patientName"
-                    value={formData.patientName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">ARMY NUMBER</label>
-                  <input
-                    className="piInput"
-                    placeholder="Army Number.."
-                    name="armyNumber"
-                    value={formData.armyNumber}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  {/*<label className="piLabel">Age/Service</label>*/}
-                  <CustomTextField
-                    label="Date of Birth"
-                    type="date"
-                    name="ageService"
-                    value={patient?.dob ? new Date(patient?.dob).toISOString().split('T')[0] : ''}
-                    onChange={handleChange}
-                    className="piInput"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    fullWidth
-                    margin="normal"
-                    inputProps={{ max: new Date().toISOString().split('T')[0] }}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Units/Service/Arms</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Units.."
-                    name="unitServiceArms"
-                    value={formData.unitServiceArms}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="w-1/5">
-                  <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    className="editForm md:text-lg text-base  w-full" 
-                    variant='contained'
-                  >
-                    Save
-                  </Button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {selectedSection === 'HEALTH RECORD' && (
-            <section id="health-record" className="personelInfo">
-              <form onSubmit={handleSubmit} className="pi">
-                <h1>HEALTH RECORD</h1>
-                <div className="piFormGroup">
-                  <label className="piLabel">Height</label>
-                  <div className="piInputContainer">
-                    <input
-                      className="piInput"
-                      placeholder="Height.."
-                      type="number"
-                      name="height"
-                      value={formData.height}
-                      onChange={handleChange}
-                    />
-                    <span className="piUnit">cm</span>
-                  </div>
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Weight</label>
-                  <div className="piInputContainer">
-                    <input
-                      className="piInput"
-                      placeholder="Weight.."
-                      type="number"
-                      step="0.01"
-                      name="weight"
-                      value={formData.weight}
-                      onChange={handleChange}
-                    />
-                    <span className="piUnit">kg</span>
-                  </div>
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">BMI</label>
-                  <div className="piInputContainer flex-intial flex-row justify-start">
-                    <input className="piInput lg:w-full w-4/5 " value={formData.BMI} readOnly />
-                    <Button variant="contained" className="calc text-sm lg:text-base lg:w-full w-1/5" onClick={BMIcal}>
-                      Calculate
-                    </Button>
-                  </div>
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Chest</label>
-                  <input
-                    className="piInput"
-                    placeholder="Chest.."
+                    placeholder="Height.."
                     type="number"
-                    name="chest"
-                    value={formData.chest}
+                    name="height"
+                    value={formData.height}
                     onChange={handleChange}
                   />
+                  <span className="piUnit">cm</span>
                 </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Waist</label>
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Weight</label>
+                <div className="piInputContainer">
                   <input
                     className="piInput"
-                    placeholder="Waist.."
+                    placeholder="Weight.."
                     type="number"
-                    name="waist"
-                    value={formData.waist}
+                    step="0.01"
+                    name="weight"
+                    value={formData.weight}
                     onChange={handleChange}
                   />
+                  <span className="piUnit">kg</span>
                 </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Blood Pressure</label>
-                  <input
-                    className="piInput"
-                    placeholder="Blood Pressure.."
-                    name="bloodPressure"
-                    value={formData.bloodPressure}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Blood Group</label>
-                  <input
-                    className="piInput"
-                    placeholder="Blood Group.."
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Disabilities</label>
-                  <input
-                    className="piInput"
-                    placeholder="Disabilities.."
-                    name="disabilities"
-                    value={formData.disabilities}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="w-1/5">
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">BMI</label>
+                <div className="piInputContainer flex-intial flex-row justify-start">
+                  <input className="piInput lg:w-full w-4/5 " value={formData.BMI} readOnly />
                   <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    className="editForm md:text-lg text-base  w-10/12" 
-                    variant='contained'
+                    variant="contained"
+                    className="calc text-sm lg:text-base lg:w-full w-1/5"
+                    onClick={BMIcal}
                   >
-                    Save
+                    Calculate
                   </Button>
-                  </div>
-              </form>
-            </section>
-          )}
+                </div>
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Chest</label>
+                <input
+                  className="piInput"
+                  placeholder="Chest.."
+                  type="number"
+                  name="chest"
+                  value={formData.chest}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Waist</label>
+                <input
+                  className="piInput"
+                  placeholder="Waist.."
+                  type="number"
+                  name="waist"
+                  value={formData.waist}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Blood Pressure</label>
+                <input
+                  className="piInput"
+                  placeholder="Blood Pressure.."
+                  name="bloodPressure"
+                  value={formData.bloodPressure}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Blood Group</label>
+                <input
+                  className="piInput"
+                  placeholder="Blood Group.."
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Disabilities</label>
+                <input
+                  className="piInput"
+                  placeholder="Disabilities.."
+                  name="disabilities"
+                  value={formData.disabilities}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="w-1/5">
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="editForm md:text-lg text-base  w-10/12"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </div>
+            </form>
+          </section>
+        )}
 
-          {selectedSection === 'PERSONAL MEDICAL HISTORY' && (
-            <section id="medical-history" className="personelInfo">
-              <form onSubmit={handleSubmit} className="pi">
-                <h1>PERSONAL MEDICAL HISTORY</h1>
-                <div className="piFormGroup">
-                  <label className="piLabel">Present medications</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Present medications.."
-                    name="medications"
-                    value={formData.medications}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Diagnosis</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Diagnosis.."
-                    name="diagnosis"
-                    value={formData.diagnosis}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Description</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Description.."
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Known Allergies</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Known Allergies.."
-                    name="allergies"
-                    value={formData.allergies}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Miscellaneous</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Miscellaneous.."
-                    name="miscellaneous"
-                    value={formData.miscellaneous}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="w-1/5">
-                  <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    className="editForm md:text-lg text-base  w-full" 
-                    variant='contained'
-                  >
-                    Save
-                  </Button>
-                  </div>
-              </form>
-            </section>
-          )}
+        {selectedSection === 'PERSONAL MEDICAL HISTORY' && (
+          <section id="medical-history" className="personelInfo">
+            <form onSubmit={handleSubmit} className="pi">
+              <h1>PERSONAL MEDICAL HISTORY</h1>
+              <div className="piFormGroup">
+                <label className="piLabel">Present medications</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Present medications.."
+                  name="medications"
+                  value={formData.medications}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Diagnosis</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Diagnosis.."
+                  name="diagnosis"
+                  value={formData.diagnosis}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Description</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Description.."
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Known Allergies</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Known Allergies.."
+                  name="allergies"
+                  value={formData.allergies}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Miscellaneous</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Miscellaneous.."
+                  name="miscellaneous"
+                  value={formData.miscellaneous}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="w-1/5">
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="editForm md:text-lg text-base  w-full"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </div>
+            </form>
+          </section>
+        )}
 
-          {selectedSection === 'FAMILY HISTORY' && (
-            <section id="Family-history" className="personelInfo">
-              <form onSubmit={handleSubmit} className="pi">
-                <h1>FAMILY HISTORY</h1>
-                <div className="piFormGroup">
-                  <label className="piLabel">Hypertension</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Hypertension cases.."
-                    name="hypertension"
-                    value={formData.hypertension}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Diabetes Mellitus</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Diabetes Mellitus.."
-                    name="diabetes"
-                    value={formData.diabetes}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel">Any Unnatural Death</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Description.."
-                    name="unnaturalDeath"
-                    value={formData.unnaturalDeath}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="piFormGroup">
-                  <label className="piLabel"> Any Other Significant History</label>
-                  <textarea
-                    className="piTextarea"
-                    placeholder="Any Other Significant History.."
-                    name="significantHistory"
-                    value={formData.significantHistory}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="w-1/5">
-                  <Button
-                    type="submit"
-                    onClick={handleSubmit}
-                    className="editForm md:text-lg text-base  w-full" 
-                    variant='contained'
-                  >
-                    Save
-                  </Button>
-                </div>
-              </form>
-            </section>
-          )}
-        </Box>
-      
+        {selectedSection === 'FAMILY HISTORY' && (
+          <section id="Family-history" className="personelInfo">
+            <form onSubmit={handleSubmit} className="pi">
+              <h1>FAMILY HISTORY</h1>
+              <div className="piFormGroup">
+                <label className="piLabel">Hypertension</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Hypertension cases.."
+                  name="hypertension"
+                  value={formData.hypertension}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Diabetes Mellitus</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Diabetes Mellitus.."
+                  name="diabetes"
+                  value={formData.diabetes}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Any Unnatural Death</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Description.."
+                  name="unnaturalDeath"
+                  value={formData.unnaturalDeath}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel"> Any Other Significant History</label>
+                <textarea
+                  className="piTextarea"
+                  placeholder="Any Other Significant History.."
+                  name="significantHistory"
+                  value={formData.significantHistory}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="w-1/5">
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="editForm md:text-lg text-base  w-full"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </div>
+            </form>
+          </section>
+        )}
+      </Box>
     </div>
   );
 }

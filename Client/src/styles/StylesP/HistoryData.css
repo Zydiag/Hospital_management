@@ -3,13 +3,12 @@
   font-optical-sizing: auto;
   font-weight: 700;
   font-style: normal;
-  font-size: 2vw;
   text-align: center;
   width: 60%;
   margin: 5vh auto 0 auto;
 }
 
-.historyData .print {
+/* .historyData .print {
   height: 6vh;
   width: 10%;
   font-size: 22px;
@@ -27,7 +26,7 @@
   background-color: #9095a1;
   color: white;
   border: solid 2px #9095a1;
-}
+} */
 
 .PersonelInfoTable {
   width: 80%;

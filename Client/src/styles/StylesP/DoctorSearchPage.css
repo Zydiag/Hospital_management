@@ -39,6 +39,17 @@
   border: solid 2px #8b6119;
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .searchRow {
   transition: opacity 1s ease-out, transform 1s ease-out;
   opacity: 0;

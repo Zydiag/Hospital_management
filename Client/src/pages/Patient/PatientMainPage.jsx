@@ -8,9 +8,7 @@ import RowPatient from '../../components/RowPatient';
 import { Button } from '@mui/material';
 
 function PatientMainPage () {
-  const [selectedDate, setSelectedDate] = React.useState(null);
-  const [selectedRowDate, setSelectedRowDate] = useState(null);
-  const patientSearchRef = useRef(null);
+
 
   const medicalRecord = [
     { armyNumber: 'ARMY005', patientName: 'Dr. Ethan', date: '2023-05-30' },
@@ -18,21 +16,31 @@ function PatientMainPage () {
     { armyNumber: 'ARMY005', patientName: 'Dr. Ethan', date: '2023-08-30' },
   ];
 
-  const handleDateChange = date => {
-    setSelectedDate(date);
-    const formattedDate = date.format('YYYY-MM-DD');
-    const foundData = medicalRecord.find(patient => patient.date === formattedDate);
-    setSelectedRowDate(foundData || null);
-  };
+  const [selectedStartDate, setSelectedStartDate] = useState(null);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
+  const patientSearchRef = useRef(null);
 
   useEffect(() => {
-    if (selectedRowDate && patientSearchRef.current) {
-      patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        patientSearchRef.current.classList.add('show');
-      }, 200);
+    if (selectedStartDate && selectedEndDate) {
+      const start = dayjs(selectedStartDate);
+      const end = dayjs(selectedEndDate);
+      const filtered = medicalRecord.filter((patient) => {
+        const date = dayjs(patient.date);
+        return date.isAfter(start.subtract(1, 'day')) && date.isBefore(end.add(1, 'day'));
+      });
+      setFilteredData(filtered);
+
+      if (filtered.length > 0 && patientSearchRef.current) {
+        patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+          patientSearchRef.current.classList.add('show');
+        }, 200);
+      }
+    } else {
+      setFilteredData([]);
     }
-  }, [selectedRowDate]);
+  }, [selectedStartDate, selectedEndDate]);
 
   return (
     <div>
@@ -40,7 +48,7 @@ function PatientMainPage () {
       <div
         className='historyIntro h-full flex md:flex-row w-full justify-center bg-neutral-200 flex-col md:pt-0 pt-20'
         style={{
-          marginTop: '10vh',
+        
           marginBottom: '10vh',
           height: '65vh',
         }}
@@ -82,15 +90,30 @@ function PatientMainPage () {
 
       <div className='patientCalendar'>
         <p className='md:text-left md:pt-10 pt-44 text-center pb-7  md:text-2xl text-xl text-zinc-500'>
-          Select the specific date for the medical record.
+          Select the specific date for the patient medical record.
         </p>
-        <div className="md:w-7/12 w-2/5 md:mx-0 mx-auto">
+        <div className='flex flex-rows justify-start gap-6 md:w-7/12 w-11/12 md:mx-0 mx-auto'>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
-              label='Choose the date'
-              value={selectedDate}
-              onChange={handleDateChange}
-              
+              label='Choose the start date'
+              value={selectedStartDate}
+              onChange={(date) => setSelectedStartDate(date)}
+              sx={{
+                '& .MuiTypography-root': {
+                  fontSize: '1rem', // Adjust the font size as needed
+                },
+                '& .Mui-selected': {
+                  backgroundColor: '#E99A01 !important',
+                  color: '#fff !important', // Optionally change text color
+                },
+              }}
+            />
+          </LocalizationProvider>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label='Choose the end date'
+              value={selectedEndDate}
+              onChange={(date) => setSelectedEndDate(date)}
               sx={{
                 '& .MuiTypography-root': {
                   fontSize: '1rem', // Adjust the font size as needed
@@ -104,7 +127,7 @@ function PatientMainPage () {
           </LocalizationProvider>
         </div>
 
-        {selectedRowDate ? (
+        {filteredData.length > 0 ? (
           <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
             <p
               className='text-left text-2xl font-semibold w-full para'
@@ -113,23 +136,26 @@ function PatientMainPage () {
                 fontFamily: 'Manrope',
                 paddingTop: '6vh',
                 paddingBottom: '6vh',
-              
               }}
             >
-              Search Result by Date
+              Search Results by Date
             </p>
-            <RowPatient
-              key={selectedRowDate.armyNumber}
-              armyNumber={selectedRowDate.armyNumber}
-              date={selectedRowDate.date}
-              patientName={selectedRowDate.patientName}
-              button1='View Patient History'
-              href='/patient/medical-record'
-            />
+            {filteredData.map((data) => (
+              <RowPatient
+                key={data.armyNumber + data.date}
+                armyNumber={data.armyNumber}
+                date={data.date}
+                patientName={data.patientName}
+                button1='View Patient History'
+                href='/doctor/medical-record'
+              />
+            ))}
           </div>
         ) : (
-          selectedDate && (
-            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>Not found data on the selected date.</p>
+          selectedStartDate && selectedEndDate && (
+            <p className='errorDate md:text-lg text-base md:w-full w-3/4 md:mx-0 mx-auto md:text-left text-center'>
+              No data found for the selected date range.
+            </p>
           )
         )}
       </div>

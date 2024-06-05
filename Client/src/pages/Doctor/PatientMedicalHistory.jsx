@@ -36,15 +36,16 @@ function PatientMedicalHistory () {
       });
       setFilteredData(filtered);
 
-      if (filtered.length > 0) {
-        if (patientSearchRef.current) {
-          patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
+      if (filtered.length > 0 && patientSearchRef.current) {
+        patientSearchRef.current.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+          patientSearchRef.current.classList.add('show');
+        }, 200);
       }
     } else {
       setFilteredData([]);
     }
-  }, [selectedStartDate, selectedEndDate, patientDataByDate]);
+  }, [selectedStartDate, selectedEndDate]);
   
 
   return (
@@ -103,7 +104,7 @@ function PatientMedicalHistory () {
         <p className='md:text-left md:pt-10 pt-44 text-center pb-7  md:text-2xl text-xl text-zinc-500'>
           Select the specific date for the patient medical record.
         </p>
-        <div className='flex flex-rows justify-start gap-6 md:w-7/12 w-2/5 md:mx-0 mx-auto'>
+        <div className='flex flex-rows justify-start gap-6 md:w-7/12 w-11/12 md:mx-0 mx-auto'>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label='Choose the start date'
@@ -139,7 +140,7 @@ function PatientMedicalHistory () {
         </div>
 
         {filteredData.length > 0 ? (
-          <div className='searchRow' id='patientSearch'>
+          <div className='searchRow' id='patientSearch' ref={patientSearchRef}>
             <p
               className='text-left text-2xl font-semibold w-full para'
               style={{
@@ -158,7 +159,7 @@ function PatientMedicalHistory () {
                 date={data.date}
                 patientName={data.patientName}
                 button1='View Patient History'
-                href='/history-data'
+                href='/doctor/medical-record'
               />
             ))}
           </div>

@@ -28,14 +28,18 @@ function AME1Record () {
   return (
     <div className='ameInfo'>
     
-      <h1>AME1</h1>
+      <h1 className='md:text-3xl text-2xl'>AME1</h1>
       <div className='ameTable'>
         <CustomTable headings={ame1Heading} rows={ame1Rows} />
       </div>
       <center>
-        <Button className='print' variant='outlined' onClick={handlePrint}>
+      <button
+          className="h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]"
+          onClick={handlePrint}
+          style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}
+        >
           Print
-        </Button>
+        </button>
       </center>
     </div>
   );

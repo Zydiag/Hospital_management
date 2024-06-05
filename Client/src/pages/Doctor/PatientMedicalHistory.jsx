@@ -89,7 +89,7 @@ function PatientMedicalHistory () {
             <Button
               className='test lg:h-11 lg:w-4/12 lg:text-lg text-6xl w-fit h-3/4 '
               variant='outlined'
-              href='/doctor/create-test-data'
+              href='/doctor/test-record'
             >
               View Record Test
             </Button>

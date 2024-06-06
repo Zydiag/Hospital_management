@@ -2,34 +2,33 @@ import React, { useEffect, useState } from 'react';
 import CustomTable from '../../components/CustomTable'; // Adjust the import path as necessary
 import '../../styles/StylesP/HistoryData.css';
 import { Button } from '@mui/material';
-
+import Navbar from '../../components/Navbar';
 import '../../styles/StylesP/Ame.css';
 import { usePatientStore } from '../../stores/patientStore';
 import useAuth from '../../stores/authStore';
 
-function AME() {
+function PME() {
   const { patient, testDate } = usePatientStore();
   // console.log('armyno', patient.armyNo, 'testDate', testDate);
-  const ameHeading = ['AME', 'Data'];
 
-  const [ameData, setAMEData] = useState({});
+  const [pmeData, setPMEData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/doctor';
+  const API = 'http://localhost:3000/api/user';
   const { makeAuthRequest } = useAuth();
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const armyNo = patient?.armyNo; // Replace with the actual army number
-        const ameResponse = await makeAuthRequest('POST', `${API}/ametestreports`, {
+        const pmeResponse = await makeAuthRequest('POST', `${API}/pmetestreports`, {
           armyNo,
           date: testDate, // Utilize medicalDate
         });
-        console.log('ame data', ameResponse.data);
-        setAMEData(ameResponse?.data);
+        console.log('ame data', pmeResponse.data);
+        setPMEData(pmeResponse?.data);
 
-        console.log('ame response', ameResponse);
+        console.log('ame response', pmeResponse);
       } catch (error) {
         setIsLoading(false);
         console.error('Error fetching data:', error);
@@ -38,16 +37,32 @@ function AME() {
 
     fetchData();
   }, []);
+  const PMEHeading = ['PME', 'Data'];
 
-  const ameRows = [
-    { ameInfo: 'BLOOD HB', data: 'MPQ134' },
+  const PMERows = [
+    { PMEInfo: 'BLOOD HB', data: '13.5 g/dL' },
     {
-      ameInfo: 'TLC',
-      data: 'In this example, each row object contains two key-value pairs. The CustomTable component maps through these objects, ensuring the first value goes to the first column and the second value goes to the second column. This setup maintains flexibility while ensuring a consistent two-column structure.',
+      PMEInfo: 'TLC',
+      data: '6,000 cells/cu mm',
     },
-    { ameInfo: 'DLC', data: 'Null' },
-    { ameInfo: 'URINE', data: 'M89' },
-    { ameInfo: 'URINESPGRAVITY', data: 'M89' },
+    {
+      PMEInfo: 'DLC',
+      data: 'Neutrophils: 60%, Lymphocytes: 30%, Monocytes: 5%, Eosinophils: 3%, Basophils: 2%',
+    },
+    { PMEInfo: 'URINE', data: 'Normal' },
+    { PMEInfo: 'URINE SP. GRAVITY', data: '1.020' },
+    { PMEInfo: 'BLOOD SUGAR FASTING', data: '90 mg/dL' },
+    { PMEInfo: 'BLOOD SUGAR PP', data: '120 mg/dL' },
+    { PMEInfo: 'RESTING ECG', data: 'Normal sinus rhythm' },
+    { PMEInfo: 'URIC ACID', data: '5.5 mg/dL' },
+    { PMEInfo: 'UREA', data: '30 mg/dL' },
+    { PMEInfo: 'CREATININE', data: '1.0 mg/dL' },
+    { PMEInfo: 'CHOLESTEROL', data: '180 mg/dL' },
+    {
+      PMEInfo: 'LIPID PROFILE',
+      data: 'Total Cholesterol: 180 mg/dL, HDL: 50 mg/dL, LDL: 100 mg/dL, Triglycerides: 150 mg/dL',
+    },
+    { PMEInfo: 'X-RAY CHEST PA', data: 'Normal' },
   ];
 
   const handlePrint = () => {
@@ -56,9 +71,9 @@ function AME() {
 
   return (
     <div className="ameInfo">
-      <h1 className="md:text-3xl text-2xl">AME</h1>
+      <h1 className="md:text-3xl text-2xl">PME</h1>
       <div className="ameTable">
-        <CustomTable headings={ameHeading} rows={Object.entries(ameData)} />
+        <CustomTable headings={PMEHeading} rows={Object.entries(pmeData)} />
       </div>
       <center>
         <button
@@ -73,4 +88,4 @@ function AME() {
   );
 }
 
-export default AME;
+export default PME;

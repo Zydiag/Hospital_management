@@ -3,26 +3,11 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { hashPassword } from '../utils/hashPassword.js';
 import { generateAccessAndRefreshToken } from '../utils/tokenGenerate.js';
-import pkg from 'pg';
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
-import { Router } from 'express';
 import bcrypt from 'bcrypt';
-const { Client } = pkg;
 const prisma = new PrismaClient();
-const router = Router();
 
-// // Function to generate a refresh token
-// const generateRefreshToken = (user) => {
-//   return jwt.sign(
-//     { userId: user.id },
-//     process.env.REFRESH_TOKEN_SECRET,
-//     { expiresIn: '7d' } // Refresh token valid for 7 days
-//   );
-// };
-
-//patient sets up profile
 export const profilepatient = asyncHandler(async (req, res) => {
   console.log('you are inside patient profile creation');
   const { armyNo, dob, fullname, password } = req.body;
@@ -66,6 +51,7 @@ export const profilepatient = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
+          user: newUser,
           accessToken,
           refreshToken,
         },
@@ -295,8 +281,8 @@ export const getUpdatedDatesAME1 = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
+          gte: new Date(startDate),
+          lte: new Date(endDate),
           //gte: start,
           //lte: end,
         },
@@ -345,10 +331,10 @@ export const getUpdatedDatesAME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
-         // gte: start,
-         // lte: end,
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+          // gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -395,10 +381,10 @@ export const getUpdatedDatesPME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-         gte: new Date(startDate),
+          gte: new Date(startDate),
           lte: new Date(endDate),
-         // gte: start,
-         // lte: end,
+          // gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -667,14 +653,10 @@ export const getPmeReports = asyncHandler(async (req, res) => {
       userId: user.id,
     },
   });
-  // Find all AME, AME2, and PME test reports associated with the user
   const ameReports = await prisma.PME.findMany({
     where: { patientId: patient.id, createdAt: new Date(date) },
   });
   console.log(ameReports);
-
-  // If no reports found, return an empty array
-
   if (!ameReports) {
     return res.json(new ApiResponse(404, [], 'No test reports found'));
   }
@@ -698,10 +680,3 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
 });
-// Error handling middleware
-export const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-  });
-};

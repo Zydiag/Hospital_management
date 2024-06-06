@@ -17,15 +17,6 @@ import { usePatientStore } from '../../stores/patientStore';
 dayjs.extend(utc);
 
 function PatientMedicalHistory() {
-  const patientDataByDate = [
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-05-12' },
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-06-14' },
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-07-16' },
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-07-21' },
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-08-22' },
-    { armyNumber: 'ARMY001', patientName: 'Dr. Alice', date: '2023-09-23' },
-  ];
-
   const navigate = useNavigate();
 
   const [selectedStartDate, setSelectedStartDate] = useState(null);

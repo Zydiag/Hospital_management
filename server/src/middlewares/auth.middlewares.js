@@ -50,8 +50,10 @@ export const authorizeAdmin = (req, res, next) => {
   }
   next();
 };
-export const authorizePatient = (req, res, next) => {
-  if (req.user.role !== 'PATIENT') {
+
+export const authorizePatientOrDoctor = (req, res, next) => {
+  console.log('req.user.role', req.user.role);
+  if (req.user.role !== 'PATIENT' && req.user.role !== 'DOCTOR') {
     // return next(new APIError(HttpStatusCode.FORBIDDEN, 'Access denied'));
     return next(new apiError(401, 'Access denied'));
   }

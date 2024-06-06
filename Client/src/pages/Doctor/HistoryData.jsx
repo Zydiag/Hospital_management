@@ -18,7 +18,7 @@ const HistoryData = () => {
   const { patient, medicalDate } = usePatientStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/doctor';
+  const API = 'http://localhost:3000/api/user';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,7 +62,7 @@ const HistoryData = () => {
           createdAt: new Date(familyHistoryResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
         };
         const { doctor, ...healthRecordWithoutDoctor } = formattedHealthRecord;
-        console.log('family history response', familyHistoryResponse);
+
         setPersonnelInfo(updatedPersonalInfoResponse);
         setHealthRecord(healthRecordWithoutDoctor);
         setTreatmentRecord(treatmentRecordResponse?.data?.info);

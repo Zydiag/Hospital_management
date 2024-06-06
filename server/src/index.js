@@ -2,7 +2,7 @@ import { app } from './app.js';
 import doctorRoutes from './routes/doctor.route.js';
 import adminRoutes from './routes/admin.route.js';
 import patientroutes from './routes/patient.route.js';
-import commonRoutes from './routes/refresh.route.js';
+import commonRoutes from './routes/common.route.js';
 const port = process.env.PORT || 3000;
 
 app.use('/api/doctor', doctorRoutes);

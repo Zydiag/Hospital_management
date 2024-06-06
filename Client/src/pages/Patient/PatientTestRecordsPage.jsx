@@ -8,6 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
+  getCombinedDates,
   getUpdateAME1DatesApi,
   getUpdateAMEDatesApi,
   getUpdatePMEDatesApi,
@@ -15,6 +16,7 @@ import {
 import useAuth from '../../stores/authStore';
 import { usePatientStore } from '../../stores/patientStore';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 export const calculateAge = (dob) => {
   const birthDate = new Date(dob);
@@ -44,7 +46,7 @@ export const getTestType = (age) => {
     (age > 54 && age <= 57) ||
     (age > 58 && age <= 59)
   ) {
-    return 'AME2';
+    return 'AME1';
   } else if (
     (age >= 35 && age <= 36) ||
     (age >= 40 && age <= 41) ||
@@ -55,7 +57,7 @@ export const getTestType = (age) => {
   ) {
     return 'PME';
   } else {
-    return 'AME1';
+    return 'AME';
   }
 };
 
@@ -67,9 +69,8 @@ function PatientTestRecordsPage() {
   const patientSearchRef = useRef(null);
 
   const { makeAuthRequest } = useAuth();
-  const { patient } = usePatientStore();
-
-  console.log('patient', patient);
+  const { patient, setTestDate } = usePatientStore();
+  const navigate = useNavigate();
 
   const fetchData = useCallback(
     async (start, end) => {
@@ -79,23 +80,14 @@ function PatientTestRecordsPage() {
         const testType = getTestType(age);
 
         let res;
-        switch (testType) {
-          case 'AME2':
-            res = await getUpdateAME1DatesApi(makeAuthRequest, 'POST', start, end);
-            break;
-          case 'PME':
-            res = await getUpdatePMEDatesApi(makeAuthRequest, 'POST', start, end);
-            break;
-          default:
-            res = await getUpdateAMEDatesApi(makeAuthRequest, 'POST', start, end);
-            break;
-        }
+        const someData = await getCombinedDates(makeAuthRequest, patient.armyNo, start, end);
+        console.log('combined dates', someData);
 
-        const updatedPatientData = res.data.map((date) => ({
+        const updatedPatientData = someData?.map((obj) => ({
           armyNumber: patient.armyNo,
           patientName: patient.fullname,
-          date: date,
-          test: testType,
+          date: new Date(obj.date),
+          test: obj.test,
         }));
 
         setFilteredData(updatedPatientData);
@@ -130,11 +122,11 @@ function PatientTestRecordsPage() {
   const getHref = (test) => {
     switch (test) {
       case 'AME':
-        return '/doctor/ame-data';
+        return '/common/ame';
       case 'PME':
-        return '/doctor/pme-data';
+        return '/common/pme';
       case 'AME1':
-        return '/doctor/ame1-data';
+        return '/common/ame1';
       default:
         return '#';
     }
@@ -158,7 +150,7 @@ function PatientTestRecordsPage() {
             className="text-lg font-medium md:text-left text-center w-3/4 md:w-full mx-auto md:mx-0"
             style={{ paddingTop: '3vh', paddingBottom: '10vh', fontFamily: 'Manrope' }}
           >
-            Select the range of dates to view the specific test record.
+            Select the range of dates to view the specfic test record.
           </p>
         </div>
         <img src={man} alt="man" className="w-2/5 mx-auto md:ml-0 md:mr-0 md:mb-0 mb-12" />
@@ -220,11 +212,14 @@ function PatientTestRecordsPage() {
               <RowPatient
                 key={data.armyNumber + data.date}
                 armyNumber={data.armyNumber}
-                date={data.date}
+                date={new Date(data.date).toISOString().split('T')[0]}
                 patientName={data.patientName}
                 test={data.test}
                 button1="View Patient History"
-                // href={getHref(data.test)}
+                handleClick={() => {
+                  setTestDate(data.date);
+                  navigate(getHref(data.test));
+                }}
               />
             ))}
           </div>

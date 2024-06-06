@@ -17,12 +17,10 @@ export const createAdmin = asyncHandler(async (req, res) => {
   const { armyNo, fullname, dob, password } = req.body;
 
   const adminId = armyNo;
-  // Check if all fields are filled
   if (!adminId || !fullname || !dob || !password) {
     throw new apiError(400, 'All fields are required to create a new user');
   }
   const parsedDob = new Date(dob);
-  // Hash password
   const hashedPassword = await hashPassword(password);
   try {
     const newUser = await prisma.user.create({
@@ -58,8 +56,6 @@ export const createAdmin = asyncHandler(async (req, res) => {
       },
       data: { refreshToken },
     });
-
-    //cookies ke liya hai , options for which cookie to be sent
     const options = {
       httpOnly: true,
       secure: true,
@@ -72,6 +68,7 @@ export const createAdmin = asyncHandler(async (req, res) => {
         new ApiResponse(
           200,
           {
+            user: finduser,
             accessToken,
             refreshToken,
           },
@@ -123,28 +120,22 @@ export const getDoctorProfile = asyncHandler(async (req, res) => {
 export const loginAdmin = asyncHandler(async (req, res, next) => {
   const { armyNo, password } = req.body;
   const adminId = armyNo;
-  // check if all fields are filled
   if (!adminId) {
     throw new apiError(400, 'adminId  required');
   }
   if (!password) {
     throw new apiError(400, 'password  required');
   }
-
-  // check if user exists
   const Admin = await prisma.admin.findFirst({
     where: {
       adminId,
     },
   });
-
   console.log('Admin', Admin);
 
   if (!Admin) {
     throw new apiError(404, 'User not found');
   }
-
-  // check if password is correct
   const isCorrect = await bcrypt.compare(password, Admin.password);
   if (!isCorrect) {
     throw new apiError(401, 'Incorrect password');
@@ -161,8 +152,6 @@ export const loginAdmin = asyncHandler(async (req, res, next) => {
     },
     data: { refreshToken },
   });
-
-  //cookies ke liya hai , options for which cookie to be sent
   const options = {
     httpOnly: true,
     secure: true,
@@ -175,6 +164,7 @@ export const loginAdmin = asyncHandler(async (req, res, next) => {
       new ApiResponse(
         200,
         {
+          user,
           accessToken,
           refreshToken,
         },
@@ -197,7 +187,7 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
           include: {
             user: {
               select: {
-                fullname:true,
+                fullname: true,
                 dob: true,
                 armyNo: true,
                 unit: true,
@@ -210,7 +200,7 @@ export const getRequestsByStatus = asyncHandler(async (req, res) => {
 
     const formattedRequests = requests.map((request) => ({
       doctorId: request.doctor.id,
-      fullName:request.doctor.user.fullname,
+      fullName: request.doctor.user.fullname,
 
       armyNo: request.doctor.user.armyNo,
       unit: request.doctor.user.unit,

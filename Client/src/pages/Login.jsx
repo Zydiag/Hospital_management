@@ -17,6 +17,7 @@ import LoginSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
 import useAuth from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import { usePatientStore } from '../stores/patientStore';
 
 // Zod schema for validation
 const loginSchema = z.object({
@@ -35,7 +36,16 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(true);
 
-  const { error: authError, loginAdmin, loginDoctor, isAuthenticated } = useAuth();
+  const {
+    error: authError,
+    loginAdmin,
+    loginDoctor,
+    loginPatient,
+    isAuthenticated,
+    user,
+  } = useAuth();
+
+  const { setPatient } = usePatientStore();
 
   const navigate = useNavigate();
 
@@ -76,8 +86,8 @@ export default function Login() {
     } else if (data.profession === 'Patient') {
       console.log('patient login data:', data);
       try {
-        // await loginDoctor(data.armyNo, data.password);
-        // navigate('/doctor/doctor-panel');
+        await loginPatient(data.armyNo, data.password);
+        navigate('/patient/profile');
       } catch (error) {
         console.log(error);
         setError(error);

@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { usePatientStore } from './patientStore';
 
 const API = 'http://localhost:3000/api';
 const useAuth = create((set, get) => ({
+  user: null,
   accessToken: localStorage.getItem('accessToken'),
   isAuthenticated:
     localStorage.getItem('accessToken') !== 'undefined' &&
@@ -16,6 +18,7 @@ const useAuth = create((set, get) => ({
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       set({
+        user,
         accessToken,
         refreshToken,
         isAuthenticated: true,
@@ -36,11 +39,33 @@ const useAuth = create((set, get) => ({
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       set({
+        user,
         accessToken,
         refreshToken,
         isAuthenticated: true,
         error: null,
       });
+    } catch (error) {
+      console.log(error);
+      set({
+        error: error.response ? error.response.data.message : 'Login failed',
+      });
+      throw new Error(error.response ? error.response.data.message : 'Login failed');
+    }
+  },
+  loginPatient: async (armyNo, password) => {
+    try {
+      const response = await axios.post(`${API}/patient/login`, { armyNo, password });
+      const { accessToken, refreshToken, user } = response.data.data;
+      localStorage.setItem('accessToken', accessToken);
+      set({
+        user,
+        accessToken,
+        refreshToken,
+        isAuthenticated: true,
+        error: null,
+      });
+      usePatientStore.getState().setPatient(user);
     } catch (error) {
       console.log(error);
       set({
@@ -129,9 +154,9 @@ const useAuth = create((set, get) => ({
     }
   },
 
-  logoutAdmin: async () => {
+  logout: async (role) => {
     try {
-      await get().makeAuthRequest('POST', `${API}/admin/logout`);
+      await get().makeAuthRequest('POST', `${API}/${role}/logout`);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       set({
@@ -144,6 +169,51 @@ const useAuth = create((set, get) => ({
       set({
         error: error.response ? error.response.data.message : 'Logout failed',
       });
+    }
+  },
+  signup: async (data, navigate) => {
+    const rolePaths = {
+      Admin: { url: '/admin/create-admin-profile', navigate: '/admin/admin-panel' },
+      Doctor: { url: '/doctor/create-doctor-profile', navigate: '/login' },
+      Patient: { url: '/patient/create-patient-profile', navigate: '/patient/profile' },
+    };
+
+    try {
+      const { profession, fullName, dob } = data;
+
+      const formData = {
+        ...data,
+        fullname: fullName,
+        dob: new Date(dob).toISOString(),
+      };
+      delete formData.fullName;
+
+      const { url, navigate: navigatePath } = rolePaths[profession];
+      const response = await axios.post(`${API}${url}`, formData, { withCredentials: true });
+
+      if (response.status === 200 || response.status === 201) {
+        const { accessToken, refreshToken, user } = response.data.data;
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        set({
+          user,
+          accessToken,
+          refreshToken,
+          isAuthenticated: true,
+          error: null,
+        });
+
+        // Set the patient in the patient store if the profession is Patient
+        if (profession === 'Patient') {
+          console.log('patient was here');
+          usePatientStore.getState().setPatient(response.data.data.user);
+        }
+
+        navigate(navigatePath);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error.response?.data || error.message);
     }
   },
 

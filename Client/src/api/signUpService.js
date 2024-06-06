@@ -5,7 +5,7 @@ export const signup = async (data, navigate) => {
   const rolePaths = {
     Admin: { url: '/admin/create-admin-profile', navigate: '/admin/admin-panel' },
     Doctor: { url: '/doctor/create-doctor-profile', navigate: '/login' },
-    Patient: { url: '/patient/create-patient-profile', navigate: '/patient-history' },
+    Patient: { url: '/patient/create-patient-profile', navigate: '/patient/profile' },
   };
   try {
     const { profession, fullName, dob } = data;
@@ -23,7 +23,7 @@ export const signup = async (data, navigate) => {
     const { url, navigate: navigatePath } = rolePaths[profession];
     const response = await axios.post(`${api}${url}`, formData, { withCredentials: true });
     if (response.status === 200 || response.status === 201) {
-      console.log('signup service:', response.data);
+      // console.log('signup service:', response.data);
       const { accessToken, refreshToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);

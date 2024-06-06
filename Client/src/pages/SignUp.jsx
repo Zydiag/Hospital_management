@@ -17,10 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import SignUpSideImage from '../assets/login-side-image.jpg';
 import { AccountType } from '../constants';
-import useAuthStore from '../stores/authStore';
-import axios from 'axios';
-import { signup } from '../api/signUpService';
-
+import useAuth from '../stores/authStore';
 
 export default function SignUp() {
   // const signUpSchema = z
@@ -70,6 +67,8 @@ export default function SignUp() {
     console.log(error);
   };
 
+  const { signup } = useAuth();
+
   const onSubmit = (data) => {
     signup(data, navigate);
   };
@@ -107,7 +106,7 @@ export default function SignUp() {
             <p className="text-lg">Create your account now</p>
             <form onSubmit={handleSubmit(onSubmit, onError)} className="w-full">
               <FormControl fullWidth margin="normal" size="small">
-                <InputLabel id="account-type-label" >Account Type</InputLabel>
+                <InputLabel id="account-type-label">Account Type</InputLabel>
                 <Controller
                   name="profession"
                   control={control}
@@ -129,7 +128,7 @@ export default function SignUp() {
                   <span className="text-red-500">{errors.profession.message}</span>
                 )}
               </FormControl>
-              <FormControl fullWidth margin="normal" size='small'>
+              <FormControl fullWidth margin="normal" size="small">
                 <Controller
                   name="armyNo"
                   className="text-base"
@@ -137,7 +136,7 @@ export default function SignUp() {
                   defaultValue=""
                   render={({ field }) => (
                     <TextField
-                      size='small'
+                      size="small"
                       {...field}
                       label="Army No."
                       variant="outlined"
@@ -147,7 +146,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal" >
+              <FormControl fullWidth margin="normal">
                 <Controller
                   name="fullName"
                   control={control}
@@ -164,7 +163,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal" >
+              <FormControl fullWidth margin="normal">
                 <Controller
                   name="dob"
                   control={control}
@@ -188,7 +187,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal" >
+              <FormControl fullWidth margin="normal">
                 <Controller
                   name="password"
                   control={control}
@@ -215,7 +214,7 @@ export default function SignUp() {
                   )}
                 />
               </FormControl>
-              <FormControl fullWidth margin="normal" >
+              <FormControl fullWidth margin="normal">
                 <Controller
                   name="confirmPassword"
                   control={control}
@@ -264,7 +263,6 @@ export default function SignUp() {
               )}
               <Button
                 onClick={handleSubmit(onSubmit)}
-                
                 type="submit"
                 variant="contained"
                 color="primary"
@@ -279,7 +277,9 @@ export default function SignUp() {
                 Sign Up
               </Button>
             </form>
-            <p className="text-base w-4/5 text-center mx-auto">Already have an account?<a href='/login'> Sign In</a></p>
+            <p className="text-base w-4/5 text-center mx-auto">
+              Already have an account?<a href="/login"> Sign In</a>
+            </p>
           </div>
         </div>
       </div>

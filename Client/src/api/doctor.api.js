@@ -3,6 +3,7 @@ import useAuth from '../stores/authStore';
 import { toast } from 'react-toastify';
 
 const API_URL = 'http://localhost:3000/api/doctor';
+const API = 'http://localhost:3000/api';
 
 const createPatientProfileApi = async (makeAuthRequest, patientData) => {
   return makeAuthRequest('POST', `${API_URL}/create-patient-profile`, patientData);
@@ -49,14 +50,23 @@ export const useAddTestReport = () => {
 };
 
 export const getPersonalInfoApi = async (makeAuthRequest, armyNo) => {
-  const response = await makeAuthRequest('GET', `${API_URL}/personal-info?armyNo=${armyNo}`, {
+  const response = await makeAuthRequest('GET', `${API}/user/personal-info?armyNo=${armyNo}`, {
     armyNo,
   });
   console.log(response.data);
   return response.data;
 };
+export const getCombinedDates = async (makeAuthRequest, armyNo, startDate, endDate) => {
+  const response = await makeAuthRequest('POST', `${API}/user/get-combined-dates`, {
+    armyNo,
+    startDate,
+    endDate,
+  });
+  console.log(response.data);
+  return response.data;
+};
 export const getUpdateAMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
-  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-ame`, {
+  const response = await makeAuthRequest('POST', `${API}/user/get-dates-ame`, {
     armyNo,
     startDate,
     endDate,
@@ -65,7 +75,7 @@ export const getUpdateAMEDatesApi = async (makeAuthRequest, armyNo, startDate, e
   return response.data;
 };
 export const getUpdateAME1DatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
-  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-ame1`, {
+  const response = await makeAuthRequest('POST', `${API}/user/get-dates-ame1`, {
     armyNo,
     startDate,
     endDate,
@@ -74,7 +84,7 @@ export const getUpdateAME1DatesApi = async (makeAuthRequest, armyNo, startDate, 
   return response.data;
 };
 export const getUpdatePMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
-  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-pme`, {
+  const response = await makeAuthRequest('POST', `${API}/user/get-dates-pme`, {
     armyNo,
     startDate,
     endDate,
@@ -83,7 +93,7 @@ export const getUpdatePMEDatesApi = async (makeAuthRequest, armyNo, startDate, e
   return response.data;
 };
 export const getUpdateDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
-  const response = await makeAuthRequest('POST', `${API_URL}/get-dates`, {
+  const response = await makeAuthRequest('POST', `${API}/user/get-dates`, {
     armyNo,
     startDate,
     endDate,
@@ -94,7 +104,7 @@ export const getUpdateDatesApi = async (makeAuthRequest, armyNo, startDate, endD
 export const getTreatmentRecordApi = async (makeAuthRequest, armyNo) => {
   const response = await makeAuthRequest(
     'GET',
-    `${API_URL}/treatment-record?armyNo=${armyNo}&date=${date}`,
+    `${API}/user/treatment-record?armyNo=${armyNo}&date=${date}`,
     {
       armyNo,
     }

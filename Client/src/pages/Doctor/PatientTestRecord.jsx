@@ -8,6 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
+  getCombinedDates,
   getUpdateAME1DatesApi,
   getUpdateAMEDatesApi,
   getUpdatePMEDatesApi,
@@ -80,28 +81,37 @@ function PatientTestRecordsPage() {
         const age = calculateAge(patient.dob);
         const testType = getTestType(age);
 
-        let res;
-        switch (testType) {
-          case 'AME1':
-            res = await getUpdateAME1DatesApi(makeAuthRequest, patient.armyNo, start, end);
-            break;
-          case 'PME':
-            res = await getUpdatePMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
-            break;
-          case 'AME':
-            res = await getUpdateAMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
-            break;
-          default:
-            throw new Error('test type not defined', testType);
-            break;
-        }
+        const someData = await getCombinedDates(makeAuthRequest, patient.armyNo, start, end);
+        console.log('combined dates', someData);
 
-        const updatedPatientData = res?.map((date) => ({
+        const updatedPatientData = someData?.map((obj) => ({
           armyNumber: patient.armyNo,
           patientName: patient.fullname,
-          date: new Date(date),
-          test: testType,
+          date: new Date(obj.date),
+          test: obj.test,
         }));
+        // let res;
+        // switch (testType) {
+        //   case 'AME1':
+        //     res = await getUpdateAME1DatesApi(makeAuthRequest, patient.armyNo, start, end);
+        //     break;
+        //   case 'PME':
+        //     res = await getUpdatePMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
+        //     break;
+        //   case 'AME':
+        //     res = await getUpdateAMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
+        //     break;
+        //   default:
+        //     throw new Error('test type not defined', testType);
+        //     break;
+        // }
+        //
+        // const updatedPatientData = res?.map((date) => ({
+        //   armyNumber: patient.armyNo,
+        //   patientName: patient.fullname,
+        //   date: new Date(date),
+        //   test: testType,
+        // }));
 
         setFilteredData(updatedPatientData);
       } catch (error) {
@@ -135,11 +145,11 @@ function PatientTestRecordsPage() {
   const getHref = (test) => {
     switch (test) {
       case 'AME':
-        return '/doctor/ame-data';
+        return '/common/ame';
       case 'PME':
-        return '/doctor/pme-data';
+        return '/common/pme';
       case 'AME1':
-        return '/doctor/ame1-data';
+        return '/common/ame1';
       default:
         return '#';
     }

@@ -6,11 +6,10 @@ import { apiError } from '../utils/apiError.js';
 import Jwt from 'jsonwebtoken';
 
 import { verifyJwt } from '../middlewares/auth.middlewares.js';
-import { access } from 'fs';
 
 const router = Router();
 
-const refreshAccessToken = asyncHandler(async (req, res) => {
+export const refreshAccessToken = asyncHandler(async (req, res) => {
   let accessToken = req.header('Authorization')?.replace('Bearer ', '') || req.cookies?.accessToken;
   let refreshToken =
     req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
@@ -66,7 +65,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 // Get Current User
-const getCurrentUser = asyncHandler(async (req, res) => {
+export const getCurrentUser = asyncHandler(async (req, res) => {
   console.log(`req.user.id: ${req.user.id}`);
   const user = await prisma.user.findUnique({
     where: {
@@ -75,8 +74,3 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   });
   return res.status(200).json(new ApiResponse(200, user, 'User fetched successfully'));
 });
-
-router.route('/current-user-profile').get(verifyJwt, getCurrentUser);
-router.route('/refresh-access-token').post(refreshAccessToken);
-
-export default router;

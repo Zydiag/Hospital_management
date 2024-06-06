@@ -47,19 +47,6 @@ router.post(
   asyncHandler(createPatientProfile)
 );
 router.post('/logout', verifyJwt, authorizeDoctor, asyncHandler(logoutDoctor));
-router.post('/get-dates', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDates));
-router.post('/get-dates-ame', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesAME));
-router.post('/get-dates-ame1', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesAME1));
-router.post('/get-dates-pme', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesPME));
-router.get('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(getPersonalInfo));
-
-router.post('/health-record', verifyJwt, authorizeDoctor, asyncHandler(getHealthRecord));
-router.post('/treatment-record', verifyJwt, authorizeDoctor, asyncHandler(getTreatmentRecord));
-router.post('/family-history', verifyJwt, authorizeDoctor, asyncHandler(getFamilyHistory));
-
-router.post('/ametestreports', verifyJwt, authorizeDoctor, asyncHandler(getAmeReports));
-router.post('/ame1testreports', verifyJwt, authorizeDoctor, asyncHandler(getAme1Reports));
-router.post('/pmetestreports', verifyJwt, authorizeDoctor, asyncHandler(getPmeReports));
 
 router.post('/update-personal-info', verifyJwt, authorizeDoctor, asyncHandler(updatePersonalInfo));
 router.post('/update-health-record', verifyJwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked

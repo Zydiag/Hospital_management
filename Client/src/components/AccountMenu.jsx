@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Menu, MenuItem, ListItemIcon, Divider, Avatar, Tooltip, IconButton } from '@mui/material';
-import { PersonAdd, Settings, Logout } from '@mui/icons-material';
-import useAuthStore from '../stores/authStore';
+import { Logout } from '@mui/icons-material';
 import useAuth from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 
-function stringToColor (string) {
+function stringToColor(string) {
   let hash = 0;
   let i;
 
@@ -25,7 +24,7 @@ function stringToColor (string) {
   return color;
 }
 
-function stringAvatar (name) {
+function stringAvatar(name) {
   return {
     sx: {
       bgcolor: stringToColor(name),
@@ -35,17 +34,18 @@ function stringAvatar (name) {
 }
 
 const AccountMenu = () => {
-  const { isAuthenticated, logoutAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
   const handleLogout = () => {
-    console.log('handleLogout');
-    logoutAdmin();
+    console.log('handleLogout', user);
+    logout(user?.role?.toLowerCase());
+    navigate('/login');
   };
-  const user = { name: 'some name' };
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate();
 
-  const handleClick = event => {
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -54,30 +54,28 @@ const AccountMenu = () => {
   };
 
   const handleProfile = () => {
-    console.log("handleProfile");
-    navigate("/my-account"); // Redirect to /my-account
+    console.log('handleProfile');
+    navigate('/my-account'); // Redirect to /my-account
     setAnchorEl(null);
   };
 
-
-
   return (
     <div>
-      <Tooltip title='Account settings'>
+      <Tooltip title="Account settings">
         <IconButton
           onClick={handleClick}
-          size='small'
+          size="small"
           sx={{ ml: 2 }}
           aria-controls={open ? 'account-menu' : undefined}
-          aria-haspopup='true'
+          aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
         >
-          <Avatar {...stringAvatar(user?.name || 'User')} />
+          <Avatar {...stringAvatar(user?.fullname || 'User')} />
         </IconButton>
       </Tooltip>
       <Menu
         anchorEl={anchorEl}
-        id='account-menu'
+        id="account-menu"
         open={open}
         onClose={handleClose}
         sx={{
@@ -119,7 +117,7 @@ const AccountMenu = () => {
         </MenuItem> */}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
-            <Logout fontSize='small' />
+            <Logout fontSize="small" />
           </ListItemIcon>
           Logout
         </MenuItem>

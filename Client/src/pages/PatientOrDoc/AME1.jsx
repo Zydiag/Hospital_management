@@ -14,7 +14,7 @@ function AME1() {
   const [ame1Data, setAME1Data] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/doctor';
+  const API = 'http://localhost:3000/api/user';
   const { makeAuthRequest } = useAuth();
   useEffect(() => {
     const fetchData = async () => {

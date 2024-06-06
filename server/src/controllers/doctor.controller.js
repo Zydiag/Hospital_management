@@ -148,6 +148,7 @@ export const loginDoctor = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
+          user: doctor,
           accessToken,
           refreshToken,
         },
@@ -176,6 +177,91 @@ export const logoutDoctor = asyncHandler(async (req, res) => {
     .clearCookie('accessToken', options)
     .json(new ApiResponse(200, {}, 'Doctor logout successfully'));
 });
+
+export const getCombinedUpdatedDates = asyncHandler(async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const { armyNo, startDate, endDate } = req.body;
+    const user = await prisma.User.findFirst({
+      where: {
+        armyNo: armyNo,
+        role: 'PATIENT',
+      },
+    });
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+    const patient = await prisma.Patient.findFirst({
+      where: { userId: user.id },
+    });
+    if (!patient) {
+      throw new apiError(404, 'Patient not found');
+    }
+    const start = new Date(new Date(startDate).setUTCHours(0, 0, 0, 0));
+    const end = new Date(new Date(endDate).setUTCHours(23, 59, 59, 999));
+
+    // Fetch records from AME, AME2, and PME tables concurrently
+    const [ameRecords, ame2Records, pmeRecords] = await Promise.all([
+      prisma.AME.findMany({
+        where: {
+          patientId: patient.id,
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.AME2.findMany({
+        where: {
+          patientId: patient.id,
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.PME.findMany({
+        where: {
+          patientId: patient.id,
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+    ]);
+
+    // Combine unique dates from all records
+    const allDates = [
+      ...ameRecords.map((record) => ({
+        date: record.createdAt.toISOString(),
+        test: 'AME',
+      })),
+      ...ame2Records.map((record) => ({
+        date: record.createdAt.toISOString(),
+        test: 'AME1',
+      })),
+      ...pmeRecords.map((record) => ({
+        date: record.createdAt.toISOString(),
+        test: 'PME',
+      })),
+    ];
+
+    // Respond with the combined dates
+    res.json(new ApiResponse(200, allDates, 'Combined updated dates retrieved successfully'));
+  } catch (error) {
+    throw new apiError(500, 'getting date error', error);
+  }
+});
 //function for fetching all dates between ranges
 export const getUpdatedDates = asyncHandler(async (req, res, next) => {
   console.log(req.body);
@@ -203,10 +289,10 @@ export const getUpdatedDates = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
-        //  gte: start,
-         // lte: end,
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+          //  gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -253,10 +339,10 @@ export const getUpdatedDatesAME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
-         // gte: start,
-         // lte: end,
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+          // gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -303,10 +389,10 @@ export const getUpdatedDatesAME1 = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
-         // gte: start,
-         // lte: end,
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+          // gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -353,10 +439,10 @@ export const getUpdatedDatesPME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-           gte: new Date(startDate),
-           lte: new Date(endDate),
-         // gte: start,
-         // lte: end,
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+          // gte: start,
+          // lte: end,
         },
       },
       orderBy: {
@@ -604,7 +690,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
 // Read Personal Medical History
 export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
   const { armyNo, date } = req.body;
-  // console.log('treatment record', `date:${date}, armyNo:${armyNo}`);
+  console.log('treatment record', `date:${date}, armyNo:${armyNo}`);
   try {
     const user = await prisma.User.findFirst({
       where: {
@@ -958,58 +1044,57 @@ export const getAme1Reports = asyncHandler(async (req, res) => {
   }
 });
 export const getPmeReports = asyncHandler(async (req, res) => {
-	console.log('pme req', req.body)
-	try {
+  console.log('pme req', req.body);
+  try {
+    const { armyNo, date } = req.body;
 
-  const { armyNo, date } = req.body;
+    // Find the user by army number
+    const user = await prisma.User.findFirst({
+      where: { armyNo, role: 'PATIENT' },
+      select: { id: true },
+    });
 
-  // Find the user by army number
-  const user = await prisma.User.findFirst({
-    where: { armyNo, role: 'PATIENT' },
-    select: { id: true },
-  });
+    // If user not found, throw an error
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+    const patient = await prisma.Patient.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+    // Find all AME, AME2, and PME test reports associated with the user
+    const ameReports = await prisma.PME.findFirst({
+      where: { patientId: patient.id, createdAt: new Date(date) },
+    });
+    console.log(ameReports);
 
-  // If user not found, throw an error
-  if (!user) {
-    throw new apiError(404, 'User not found');
+    // If no reports found, return an empty array
+    if (!ameReports) {
+      return res.json(new ApiResponse(404, [], 'No test reports found'));
+    }
+    const parseddescription = JSON.parse(ameReports.description);
+    const info = {
+      bloodHb: parseddescription.bloodHb,
+      TLC: parseddescription.TLC,
+      DLC: parseddescription.DLC,
+      urineRE: parseddescription.urineRE,
+      urineSpGravity: parseddescription.urineSpGravity,
+      bloodSugarFasting: parseddescription.bloodSugarFasting,
+      bloodSugarPP: parseddescription.bloodSugarPP,
+      restingECG: parseddescription.restingECG,
+      uricAcid: parseddescription.uricAcid,
+      urea: parseddescription.urea,
+      creatinine: parseddescription.creatinine,
+      cholesterol: parseddescription.cholesterol,
+      lipidProfile: parseddescription.lipidProfile,
+      xrayChestPA: parseddescription.xrayChestPA,
+    };
+    // Return all the test reports
+    res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
+  } catch (error) {
+    throw new apiError(500, 'get pme error', error);
   }
-  const patient = await prisma.Patient.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-  // Find all AME, AME2, and PME test reports associated with the user
-  const ameReports = await prisma.PME.findFirst({
-    where: { patientId: patient.id, createdAt: new Date(date) },
-  });
-  console.log(ameReports);
-
-  // If no reports found, return an empty array
-  if (!ameReports) {
-    return res.json(new ApiResponse(404, [], 'No test reports found'));
-  }
-  const parseddescription = JSON.parse(ameReports.description);
-  const info = {
-    bloodHb: parseddescription.bloodHb,
-    TLC: parseddescription.TLC,
-    DLC: parseddescription.DLC,
-    urineRE: parseddescription.urineRE,
-    urineSpGravity: parseddescription.urineSpGravity,
-    bloodSugarFasting: parseddescription.bloodSugarFasting,
-    bloodSugarPP: parseddescription.bloodSugarPP,
-    restingECG: parseddescription.restingECG,
-    uricAcid: parseddescription.uricAcid,
-    urea: parseddescription.urea,
-    creatinine: parseddescription.creatinine,
-    cholesterol: parseddescription.cholesterol,
-    lipidProfile: parseddescription.lipidProfile,
-    xrayChestPA: parseddescription.xrayChestPA,
-  };
-  // Return all the test reports
-  res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
-	} catch (error) {
-		throw new apiError(500, 'get pme error', error)
-	}
 });
 
 // Function to calculate age based on date of birth

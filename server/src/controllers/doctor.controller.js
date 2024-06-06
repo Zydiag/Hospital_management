@@ -203,10 +203,10 @@ export const getUpdatedDates = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-          // gte: new Date(startDate),
-          // lte: new Date(endDate),
-          gte: start,
-          lte: end,
+           gte: new Date(startDate),
+           lte: new Date(endDate),
+        //  gte: start,
+         // lte: end,
         },
       },
       orderBy: {
@@ -253,10 +253,10 @@ export const getUpdatedDatesAME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-          // gte: new Date(startDate),
-          // lte: new Date(endDate),
-          gte: start,
-          lte: end,
+           gte: new Date(startDate),
+           lte: new Date(endDate),
+         // gte: start,
+         // lte: end,
         },
       },
       orderBy: {
@@ -303,10 +303,10 @@ export const getUpdatedDatesAME1 = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-          // gte: new Date(startDate),
-          // lte: new Date(endDate),
-          gte: start,
-          lte: end,
+           gte: new Date(startDate),
+           lte: new Date(endDate),
+         // gte: start,
+         // lte: end,
         },
       },
       orderBy: {
@@ -353,10 +353,10 @@ export const getUpdatedDatesPME = asyncHandler(async (req, res, next) => {
       where: {
         patientId: patient.id,
         createdAt: {
-          // gte: new Date(startDate),
-          // lte: new Date(endDate),
-          gte: start,
-          lte: end,
+           gte: new Date(startDate),
+           lte: new Date(endDate),
+         // gte: start,
+         // lte: end,
         },
       },
       orderBy: {

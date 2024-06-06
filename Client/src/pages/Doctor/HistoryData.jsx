@@ -11,34 +11,32 @@ import { getPersonalInfoApi } from '../../api/doctor.api';
 const HistoryData = () => {
   const [personnelInfo, setPersonnelInfo] = useState({});
   const [healthRecord, setHealthRecord] = useState({});
-  const [personelMedHistory, setPersonelMedHistory] = useState({});
+  const [treatmentRecord, setTreatmentRecord] = useState({});
   const [familyHistory, setFamilyHistory] = useState({});
 
   const { makeAuthRequest } = useAuth();
   const { patient, medicalDate } = usePatientStore();
+  const [isLoading, setIsLoading] = useState(false);
 
   const API = 'http://localhost:3000/api/doctor';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const armyNo = patient?.armyNo; // Replace with the actual army number
         const personalInfoResponse = await getPersonalInfoApi(makeAuthRequest, armyNo);
         const healthRecordResponse = await makeAuthRequest('POST', `${API}/health-record`, {
           armyNo,
           date: medicalDate, // Utilize medicalDate
         });
-        // const personelMedHistoryResponse = await makeAuthRequest(
-        //   'POST',
-        //   `${API}/treatment-record`,
-        //   {
-        //     armyNo,
-        //     date: medicalDate, // Utilize medicalDate
-        //   }
-        // );
-        // const familyHistoryResponse = await makeAuthRequest('POST', `${API}/family-history`, {
-        //   armyNo,
-        // });
+        const treatmentRecordResponse = await makeAuthRequest('POST', `${API}/treatment-record`, {
+          armyNo,
+          date: medicalDate, // Utilize medicalDate
+        });
+        const familyHistoryResponse = await makeAuthRequest('POST', `${API}/family-history`, {
+          armyNo,
+        });
 
         const dobDate = new Date(personalInfoResponse.dob);
 
@@ -53,12 +51,25 @@ const HistoryData = () => {
           ...personalInfoResponse,
           dob: formattedDOB,
         };
-        console.log('healthRecord', healthRecordResponse);
+        const formattedHealthRecord = {
+          ...healthRecordResponse.data,
+          createdAt: new Date(healthRecordResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
+          doctorName: healthRecordResponse?.data?.doctor?.user?.fullname, // Extract the doctor's full name
+        };
+
+        const formattedFamilyHistory = {
+          ...familyHistoryResponse.data,
+          createdAt: new Date(familyHistoryResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
+        };
+        const { doctor, ...healthRecordWithoutDoctor } = formattedHealthRecord;
+        console.log('family history response', familyHistoryResponse);
         setPersonnelInfo(updatedPersonalInfoResponse);
-        setHealthRecord(healthRecordResponse?.data[0]);
-        // setPersonelMedHistory(personelMedHistoryResponse.data);
-        // setFamilyHistory(familyHistoryResponse.data);
+        setHealthRecord(healthRecordWithoutDoctor);
+        setTreatmentRecord(treatmentRecordResponse?.data?.info);
+        setFamilyHistory(formattedFamilyHistory);
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error('Error fetching data:', error);
       }
     };
@@ -71,25 +82,46 @@ const HistoryData = () => {
   };
 
   return (
-    <div className="historyData h-screen">
-      <Navbar />
-      <h1 className="md:text-3xl text-2xl">Patient Profile</h1>
-      <div className="PersonelInfoTable">
-        <CustomTable headings={['Personnel Info', 'Data']} rows={Object.entries(personnelInfo)} />
-      </div>
-      <div className="healthRecordTable">
-        <CustomTable headings={['Health Record', 'Data']} rows={Object.entries(healthRecord)} />
-      </div>
-      <center>
-        <Button
-          className="h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]"
-          onClick={handlePrint}
-          style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}
-        >
-          Print
-        </Button>
-      </center>
-    </div>
+    <>
+      {isLoading ? (
+        <div className="h-screen flex justify-center items-center"> loading....</div>
+      ) : (
+        <div className="historyData h-screen">
+          <Navbar />
+          <h1 className="md:text-3xl text-2xl">Patient Profile</h1>
+          <div className="PersonelInfoTable">
+            <CustomTable
+              headings={['Personnel Info', 'Data']}
+              rows={Object.entries(personnelInfo)}
+            />
+          </div>
+          <div className="healthRecordTable">
+            <CustomTable headings={['Health Record', 'Data']} rows={Object.entries(healthRecord)} />
+          </div>
+          <div className="healthRecordTable">
+            <CustomTable
+              headings={['Treatment Record', 'Data']}
+              rows={Object.entries(treatmentRecord)}
+            />
+          </div>
+          <div className="healthRecordTable">
+            <CustomTable
+              headings={['Family History', 'Data']}
+              rows={Object.entries(familyHistory)}
+            />
+          </div>
+          <center>
+            <button
+              className="h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]"
+              onClick={handlePrint}
+              style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}
+            >
+              Print
+            </button>
+          </center>
+        </div>
+      )}
+    </>
   );
 };
 

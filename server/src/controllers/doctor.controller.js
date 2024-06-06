@@ -333,7 +333,7 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
   try {
     const { armyNo, date } = req.body;
     const parsedDate = new Date(date);
-    const user = await prisma.User.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
         role: 'PATIENT',
@@ -342,17 +342,40 @@ export const getHealthRecord = asyncHandler(async (req, res, next) => {
     if (!user) {
       throw new apiError(404, 'User not found');
     }
-    const patient = await prisma.Patient.findFirst({
+    const patient = await prisma.patient.findFirst({
       where: { userId: user.id },
     });
     if (!patient) {
       throw new apiError(404, 'Patient not found');
     }
     console.log('date query', new Date(date));
-    const medicalRecord = await prisma.Medical.findMany({
+    const medicalRecord = await prisma.medical.findFirst({
       where: {
         patientId: patient.id,
         createdAt: new Date(date),
+      },
+      select: {
+        heightCm: true,
+        weightKg: true,
+        BMI: true,
+        chest: true,
+        waist: true,
+        bloodPressure: true,
+        disabilities: true,
+        allergies: true,
+        bloodGroup: true,
+        // patientId: true,
+        // doctorId: true,
+        createdAt: true,
+        doctor: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+              },
+            },
+          },
+        },
       },
     });
     res.json(new ApiResponse(200, medicalRecord, 'Health records retrieved successfully'));
@@ -373,6 +396,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
       bloodPressure,
       disabilities,
       bloodGroup,
+      allergies,
       date,
       armyNo,
     } = req.body;
@@ -412,6 +436,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
         BMI,
         waist,
         bloodPressure,
+        allergies,
         disabilities,
         bloodGroup,
         patientId,
@@ -429,7 +454,7 @@ export const updateHealthRecord = asyncHandler(async (req, res, next) => {
 // Read Personal Medical History
 export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
   const { armyNo, date } = req.body;
-  console.log('treatment record', `date:${date}, armyNo:${armyNo}`);
+  // console.log('treatment record', `date:${date}, armyNo:${armyNo}`);
   try {
     const user = await prisma.User.findFirst({
       where: {
@@ -449,18 +474,25 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
       throw new apiError(404, 'Patient not found');
     }
     const patientId = patient.id;
-    console.log('searching for query', new Date(date));
-    const treatmentRecords = await prisma.treatment.findMany({
+		const parsedDate = new Date(date);
+    const startOfDay = new Date(parsedDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(parsedDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    const treatmentRecords = await prisma.treatment.findFirst({
       where: {
         patientId,
-        createdAt: new Date(date),
+				createdAt: {
+          gte: startOfDay,
+          lt: endOfDay,
+        },
       },
       select: {
         diagnosis: true,
         description: true,
       },
     });
-    console.log(treatmentRecords);
     const parseddescription = JSON.parse(treatmentRecords.description);
     const info = {
       diagnosis: treatmentRecords.diagnosis,
@@ -547,7 +579,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
   const { armyNo } = req.body;
   try {
     // Ensure the ID is provided
-    const user = await prisma.User.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         armyNo: armyNo,
         role: 'PATIENT',
@@ -558,7 +590,7 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
       throw new apiError(404, 'User not found');
     }
 
-    const patient = await prisma.Patient.findFirst({
+    const patient = await prisma.patient.findFirst({
       where: {
         userId: userId,
       },
@@ -573,14 +605,21 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
     }
 
     const patientId = patient.id;
-    const familyhistories = await prisma.familyHistory.findMany({
+    const familyHistory = await prisma.familyHistory.findFirst({
       where: {
         patientId,
       },
+			select: {
+				hypertension: true,
+				diabetesMellitus: true,
+				anyUnnaturalDeath: true,
+				otherSignificantHistory: true,
+				createdAt: true,
+			}
     });
 
     res.json(
-      new ApiResponse(200, familyHistories, 'Family history records retrieved successfully')
+      new ApiResponse(200, familyHistory, 'Family history records retrieved successfully')
     );
   } catch (error) {
     console.error('Failed to retrieve family history:', error);

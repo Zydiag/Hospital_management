@@ -274,6 +274,7 @@ function AddMedicalData() {
           disabilities: formData.disabilities,
           bloodGroup: formData.bloodGroup,
           date: formData.date.toISOString(), // Assuming date is a Dayjs object
+          allergies: formData.allergies,
           armyNo: patient?.armyNo,
         });
         break;
@@ -539,6 +540,16 @@ function AddMedicalData() {
                   placeholder="Blood Group.."
                   name="bloodGroup"
                   value={formData.bloodGroup}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="piFormGroup">
+                <label className="piLabel">Allergies</label>
+                <input
+                  className="piInput"
+                  placeholder="Any Allergies.."
+                  name="allergies"
+                  value={formData.allergies}
                   onChange={handleChange}
                 />
               </div>

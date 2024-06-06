@@ -26,7 +26,7 @@ import {
   getUpdatedDates,
   getUpdatedDatesAME,
   getUpdatedDatesAME1,
-  getUpdatedDatesPME
+  getUpdatedDatesPME,
   //deletePresentReferralDetails,
 } from '../controllers/doctor.controller.js'; // Updated import path
 
@@ -56,9 +56,10 @@ router.get('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(getPersona
 router.post('/health-record', verifyJwt, authorizeDoctor, asyncHandler(getHealthRecord));
 router.post('/treatment-record', verifyJwt, authorizeDoctor, asyncHandler(getTreatmentRecord));
 router.post('/family-history', verifyJwt, authorizeDoctor, asyncHandler(getFamilyHistory));
-router.get('/ametestreports', verifyJwt, authorizeDoctor, asyncHandler(getAmeReports));
-router.get('/ame1testreports', verifyJwt, authorizeDoctor, asyncHandler(getAme1Reports));
-router.get('/pmetestreports', verifyJwt, authorizeDoctor, asyncHandler(getPmeReports));
+
+router.post('/ametestreports', verifyJwt, authorizeDoctor, asyncHandler(getAmeReports));
+router.post('/ame1testreports', verifyJwt, authorizeDoctor, asyncHandler(getAme1Reports));
+router.post('/pmetestreports', verifyJwt, authorizeDoctor, asyncHandler(getPmeReports));
 
 router.post('/update-personal-info', verifyJwt, authorizeDoctor, asyncHandler(updatePersonalInfo));
 router.post('/update-health-record', verifyJwt, authorizeDoctor, asyncHandler(updateHealthRecord)); //checked

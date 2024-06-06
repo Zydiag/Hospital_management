@@ -624,7 +624,7 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
       throw new apiError(404, 'Patient not found');
     }
     const patientId = patient.id;
-		const parsedDate = new Date(date);
+    const parsedDate = new Date(date);
     const startOfDay = new Date(parsedDate);
     startOfDay.setUTCHours(0, 0, 0, 0);
 
@@ -633,7 +633,7 @@ export const getTreatmentRecord = asyncHandler(async (req, res, next) => {
     const treatmentRecords = await prisma.treatment.findFirst({
       where: {
         patientId,
-				createdAt: {
+        createdAt: {
           gte: startOfDay,
           lt: endOfDay,
         },
@@ -759,18 +759,16 @@ export const getFamilyHistory = asyncHandler(async (req, res, next) => {
       where: {
         patientId,
       },
-			select: {
-				hypertension: true,
-				diabetesMellitus: true,
-				anyUnnaturalDeath: true,
-				otherSignificantHistory: true,
-				createdAt: true,
-			}
+      select: {
+        hypertension: true,
+        diabetesMellitus: true,
+        anyUnnaturalDeath: true,
+        otherSignificantHistory: true,
+        createdAt: true,
+      },
     });
 
-    res.json(
-      new ApiResponse(200, familyHistory, 'Family history records retrieved successfully')
-    );
+    res.json(new ApiResponse(200, familyHistory, 'Family history records retrieved successfully'));
   } catch (error) {
     console.error('Failed to retrieve family history:', error);
     res.status(500).json({ error: 'Internal server error.' });
@@ -868,88 +866,101 @@ export const updateFamilyHistory = asyncHandler(async (req, res, next) => {
 });
 
 export const getAmeReports = asyncHandler(async (req, res) => {
-  const { armyNo, date } = req.body;
+  console.log('get ame report', req.body);
 
-  // Find the user by army number
-  const user = await prisma.User.findFirst({
-    where: { armyNo, role: 'PATIENT' },
-    select: { id: true },
-  });
+  try {
+    const { armyNo, date } = req.body;
+    // Find the user by army number
+    const user = await prisma.User.findFirst({
+      where: { armyNo, role: 'PATIENT' },
+      select: { id: true },
+    });
 
-  // If user not found, throw an error
-  if (!user) {
-    throw new apiError(404, 'User not found');
+    // If user not found, throw an error
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+    const patient = await prisma.Patient.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+    // Find all AME, AME2, and PME test reports associated with the user
+    const ameReports = await prisma.AME.findFirst({
+      where: { patientId: patient.id, createdAt: new Date(date) },
+    });
+    console.log(ameReports);
+
+    // If no reports found, return an empty array
+    if (!ameReports) {
+      return res.json(new ApiResponse(404, [], 'No test reports found'));
+    }
+    const parseddescription = JSON.parse(ameReports.description);
+    const info = {
+      bloodHb: parseddescription.bloodHb,
+      TLC: parseddescription.TLC,
+      DLC: parseddescription.DLC,
+      urineRE: parseddescription.urineRE,
+      urineSpGravity: parseddescription.urineSpGravity,
+    };
+    // Return all the test reports
+    res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
+  } catch (error) {
+    throw new apiError(500, 'error getting ame data', error);
   }
-  const patient = await prisma.Patient.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-  // Find all AME, AME2, and PME test reports associated with the user
-  const ameReports = await prisma.AME.findMany({
-    where: { patientId: patient.id, createdAt: new Date(date) },
-  });
-  console.log(ameReports);
-
-  // If no reports found, return an empty array
-  if (!ameReports) {
-    return res.json(new ApiResponse(404, [], 'No test reports found'));
-  }
-  const parseddescription = JSON.parse(ameReports.description);
-  const info = {
-    bloodHb: parseddescription.bloodHb,
-    TLC: parseddescription.TLC,
-    DLC: parseddescription.DLC,
-    urineRE: parseddescription.urineRE,
-    urineSpGravity: parseddescription.urineSpGravity,
-  };
-  // Return all the test reports
-  res.json(new ApiResponse(200, info, 'Ame test reports retrieved successfully'));
 });
 
 export const getAme1Reports = asyncHandler(async (req, res) => {
-  const { armyNo, date } = req.body;
+  console.log('ametest1', req.body);
+  try {
+    const { armyNo, date } = req.body;
 
-  // Find the user by army number
-  const user = await prisma.User.findFirst({
-    where: { armyNo, role: 'PATIENT' },
-    select: { id: true },
-  });
+    // Find the user by army number
+    const user = await prisma.User.findFirst({
+      where: { armyNo, role: 'PATIENT' },
+      select: { id: true },
+    });
 
-  // If user not found, throw an error
-  if (!user) {
-    throw new apiError(404, 'User not found');
+    // If user not found, throw an error
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+    const patient = await prisma.Patient.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+    // Find all AME, AME2, and PME test reports associated with the user
+    const ameReports = await prisma.AME2.findFirst({
+      where: { patientId: patient.id, createdAt: new Date(date) },
+    });
+    console.log('amereports', ameReports);
+
+    // If no reports found, return an empty array
+    if (!ameReports) {
+      return res.json(new ApiResponse(404, [], 'No test reports found'));
+    }
+    const parseddescription = JSON.parse(ameReports.description);
+    const info = {
+      bloodHb: parseddescription.bloodHb,
+      TLC: parseddescription.TLC,
+      DLC: parseddescription.DLC,
+      urineRE: parseddescription.urineRE,
+      urineSpGravity: parseddescription.urineSpGravity,
+      bloodSugarFasting: parseddescription.bloodSugarFasting,
+      bloodSugarPP: parseddescription.bloodSugarPP,
+      restingECG: parseddescription.restingECG,
+    };
+    // Return all the test reports
+    res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
+  } catch (error) {
+    throw new apiError(500, 'error getting ame1 data', error);
   }
-  const patient = await prisma.Patient.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-  // Find all AME, AME2, and PME test reports associated with the user
-  const ameReports = await prisma.AME1.findMany({
-    where: { patientId: patient.id, createdAt: new Date(date) },
-  });
-  console.log(ameReports);
-
-  // If no reports found, return an empty array
-  if (!ameReports) {
-    return res.json(new ApiResponse(404, [], 'No test reports found'));
-  }
-  const parseddescription = JSON.parse(ameReports.description);
-  const info = {
-    bloodHb: parseddescription.bloodHb,
-    TLC: parseddescription.TLC,
-    DLC: parseddescription.DLC,
-    urineRE: parseddescription.urineRE,
-    urineSpGravity: parseddescription.urineSpGravity,
-    bloodSugarFasting: parseddescription.bloodSugarFasting,
-    bloodSugarPP: parseddescription.bloodSugarPP,
-    restingECG: parseddescription.restingECG,
-  };
-  // Return all the test reports
-  res.json(new ApiResponse(200, info, 'Ame1 test reports retrieved successfully'));
 });
 export const getPmeReports = asyncHandler(async (req, res) => {
+	console.log('pme req', req.body)
+	try {
+
   const { armyNo, date } = req.body;
 
   // Find the user by army number
@@ -968,7 +979,7 @@ export const getPmeReports = asyncHandler(async (req, res) => {
     },
   });
   // Find all AME, AME2, and PME test reports associated with the user
-  const ameReports = await prisma.PME.findMany({
+  const ameReports = await prisma.PME.findFirst({
     where: { patientId: patient.id, createdAt: new Date(date) },
   });
   console.log(ameReports);
@@ -996,6 +1007,9 @@ export const getPmeReports = asyncHandler(async (req, res) => {
   };
   // Return all the test reports
   res.json(new ApiResponse(200, info, 'Pme test reports retrieved successfully'));
+	} catch (error) {
+		throw new apiError(500, 'get pme error', error)
+	}
 });
 
 // Function to calculate age based on date of birth
@@ -1054,68 +1068,65 @@ export const getTestType = (age) => {
 
 //Function to update AME1
 export const updateAME1 = asyncHandler(async (req, res) => {
-  // Extract required parameters from request body
-
-  const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity } = req.body;
-  const doctr_ArmyNo = req.user.armyNo;
-
-  const user = await prisma.User.findFirst({
-    where: {
-      armyNo: armyNo,
-    },
-  });
-
-  const patient = await prisma.Patient.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-
-  if (!patient) {
-    throw new apiError(404, 'Patient not found');
-  }
-  const doctor = await prisma.Doctor.findFirst({
-    where: {
-      status: 'APPROVED',
-      user: {
-        armyNo: doctr_ArmyNo,
-        role: 'DOCTOR',
+  try {
+    const { armyNo, date, bloodHb, TLC, DLC, urineRE, urineSpGravity } = req.body;
+    const doctr_ArmyNo = req.user.armyNo;
+    const user = await prisma.user.findFirst({
+      where: {
+        armyNo: armyNo,
       },
-    },
-    select: {
-      id: true, // Select only the id field
-    },
-  });
+    });
+    const patient = await prisma.patient.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+    if (!patient) {
+      throw new apiError(404, 'Patient not found');
+    }
+    const doctor = await prisma.doctor.findFirst({
+      where: {
+        status: 'APPROVED',
+        user: {
+          armyNo: doctr_ArmyNo,
+          role: 'DOCTOR',
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    // const ame1 = await prisma.AME.findFirst({
+    //   where: { patientId: patient.id },
+    // });
+    //
+    // // If AME1 record not found, throw an error
+    // if (!ame1) {
+    //   throw new apiError(404, 'AME1 record not found');
+    // }
+    const description = JSON.stringify({
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+    });
+    // Update the AME1 record with new data
+    const updatedAME1 = await prisma.AME.create({
+      data: {
+        date: new Date(date),
+        createdAt: new Date(date),
+        patientId: patient.id,
+        description,
+        doctorId: doctor.id,
+      },
+    });
 
-  // Find the existing AME1 record by ID
-  const ame1 = await prisma.AME.findFirst({
-    where: { patientId: patient.id },
-  });
-
-  // If AME1 record not found, throw an error
-  if (!ame1) {
-    throw new apiError(404, 'AME1 record not found');
+    // Send response with updated AME1 record
+    res.json(new ApiResponse(200, updatedAME1, 'AME1 test report updated successfully'));
+  } catch (error) {
+    throw new apiError(500, 'update ame1 error', error.message);
   }
-  const description = JSON.stringify({
-    bloodHb,
-    TLC,
-    DLC,
-    urineRE,
-    urineSpGravity,
-  });
-  // Update the AME1 record with new data
-  const updatedAME1 = await prisma.AME.create({
-    data: {
-      date: new Date(date),
-      createdAt: new Date(date),
-      patientId: patient.id,
-      description,
-      doctorId: doctor.id,
-    },
-  });
-
-  // Send response with updated AME1 record
-  res.json(new ApiResponse(200, updatedAME1, 'AME1 test report updated successfully'));
 });
 
 //Function to update AME2
@@ -1161,14 +1172,14 @@ export const updateAME2 = asyncHandler(async (req, res) => {
     },
   });
   // Find the existing AME2 record by ID
-  const ame2 = await prisma.AME2.findFirst({
-    where: { patientId: patient.id, doctorId: doctor.id },
-  });
-
-  // If AME2 record not found, throw an error
-  if (!ame2) {
-    throw new apiError(404, 'AME2 record not found');
-  }
+  // const ame2 = await prisma.AME2.findFirst({
+  //   where: { patientId: patient.id, doctorId: doctor.id },
+  // });
+  //
+  // // If AME2 record not found, throw an error
+  // if (!ame2) {
+  //   throw new apiError(404, 'AME2 record not found');
+  // }
   const description = JSON.stringify({
     bloodHb,
     TLC,
@@ -1195,89 +1206,94 @@ export const updateAME2 = asyncHandler(async (req, res) => {
 });
 //Function to update PME
 export const updatePME = asyncHandler(async (req, res) => {
-  // Extract required parameters from request body
-  const {
-    armyNo,
-    date,
-    bloodHb,
-    TLC,
-    DLC,
-    urineRE,
-    urineSpGravity,
-    bloodSugarFasting,
-    bloodSugarPP,
-    restingECG,
-    uricAcid,
-    urea,
-    creatinine,
-    cholesterol,
-    lipidProfile,
-    xrayChestPA,
-  } = req.body;
-  const doctr_ArmyNo = req.user.armyNo;
-  const user = await prisma.User.findFirst({
-    where: {
-      armyNo: armyNo,
-    },
-  });
-  const patient = await prisma.Patient.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-  if (!patient) {
-    throw new apiError(404, 'patient not found');
-  }
-  const doctor = await prisma.Doctor.findFirst({
-    where: {
-      status: 'APPROVED',
-      user: {
-        armyNo: doctr_ArmyNo,
-        role: 'DOCTOR',
+  console.log('update pme', req.body);
+
+  try {
+    const {
+      armyNo,
+      date,
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+      bloodSugarFasting,
+      bloodSugarPP,
+      restingECG,
+      uricAcid,
+      urea,
+      creatinine,
+      cholesterol,
+      lipidProfile,
+      xrayChestPA,
+    } = req.body;
+    const doctr_ArmyNo = req.user.armyNo;
+    const user = await prisma.User.findFirst({
+      where: {
+        armyNo: armyNo,
       },
-    },
-    select: {
-      id: true, // Select only the id field
-    },
-  });
-  // Find the existing PME record by ID
-  const pme = await prisma.PME.findUnique({
-    where: { patientId: patient.id },
-  });
+    });
+    const patient = await prisma.Patient.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+    if (!patient) {
+      throw new apiError(404, 'patient not found');
+    }
+    const doctor = await prisma.Doctor.findFirst({
+      where: {
+        status: 'APPROVED',
+        user: {
+          armyNo: doctr_ArmyNo,
+          role: 'DOCTOR',
+        },
+      },
+      select: {
+        id: true, // Select only the id field
+      },
+    });
+    // Find the existing PME record by ID
+    // const pme = await prisma.PME.findUnique({
+    //   where: { patientId: patient.id },
+    // });
+    //
+    // // If PME record not found, throw an error
+    // if (!pme) {
+    //   throw new apiError(404, 'PME record not found');
+    // }
+    const description = JSON.stringify({
+      bloodHb,
+      TLC,
+      DLC,
+      urineRE,
+      urineSpGravity,
+      bloodSugarFasting,
+      bloodSugarPP,
+      restingECG,
+      uricAcid,
+      urea,
+      creatinine,
+      cholesterol,
+      lipidProfile,
+      xrayChestPA,
+    });
+    // Update the PME record with new data
+    const updatedPME = await prisma.pME.create({
+      data: {
+        date: new Date(date),
+        createdAt: new Date(date),
+        patientId: patient.id,
+        doctorId: doctor.id,
+        description,
+      },
+    });
 
-  // If PME record not found, throw an error
-  if (!pme) {
-    throw new apiError(404, 'PME record not found');
+    // Send response with updated PME record
+    res.json(new ApiResponse(200, updatedPME, 'PME test report updated successfully'));
+  } catch (error) {
+    throw new apiError(500, 'update pme error', error);
   }
-  const description = JSON.stringify({
-    bloodHb,
-    TLC,
-    DLC,
-    urineRE,
-    urineSpGravity,
-    bloodSugarFasting,
-    bloodSugarPP,
-    restingECG,
-    uricAcid,
-    urea,
-    creatinine,
-    cholesterol,
-    lipidProfile,
-    xrayChestPA,
-  });
-  // Update the PME record with new data
-  const updatedPME = await prisma.pME.create({
-    data: {
-      date: new Date(date),
-      createdAt: new Date(date),
-      patientId: patient.id,
-      doctorId: doctor.id,
-      description,
-    },
-  });
-
-  // Send response with updated PME record
-  res.json(new ApiResponse(200, updatedPME, 'PME test report updated successfully'));
 });
 
 // Route to add a test report

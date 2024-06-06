@@ -26,9 +26,58 @@ const updateFamilyHistoryApi = async (makeAuthRequest, familyHistoryData) => {
   return makeAuthRequest('POST', `${API_URL}/update-family-history`, familyHistoryData);
 };
 
+const addTestReportApi = async (makeAuthRequest, data, endpoint) => {
+  return makeAuthRequest('POST', `${API_URL}/${endpoint}`, data);
+};
+
+export const useAddTestReport = () => {
+  const { makeAuthRequest } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ data, endpoint }) => addTestReportApi(makeAuthRequest, data, endpoint),
+    onSuccess: () => {
+      queryClient.invalidateQueries('doctorRequests');
+      queryClient.invalidateQueries('patients');
+      toast.success('Test report submitted successfully');
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error(error.response ? error.response.data.message : 'Error submitting test report');
+    },
+  });
+};
+
 export const getPersonalInfoApi = async (makeAuthRequest, armyNo) => {
   const response = await makeAuthRequest('GET', `${API_URL}/personal-info?armyNo=${armyNo}`, {
     armyNo,
+  });
+  console.log(response.data);
+  return response.data;
+};
+export const getUpdateAMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
+  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-ame`, {
+    armyNo,
+    startDate,
+    endDate,
+  });
+  console.log(response.data);
+  return response.data;
+};
+export const getUpdateAME1DatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
+  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-ame1`, {
+    armyNo,
+    startDate,
+    endDate,
+  });
+  console.log(response.data);
+  return response.data;
+};
+export const getUpdatePMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
+  const response = await makeAuthRequest('POST', `${API_URL}/get-dates-pme`, {
+    armyNo,
+    startDate,
+    endDate,
   });
   console.log(response.data);
   return response.data;

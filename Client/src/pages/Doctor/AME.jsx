@@ -1,12 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CustomTable from '../../components/CustomTable'; // Adjust the import path as necessary
 import '../../styles/StylesP/HistoryData.css';
 import { Button } from '@mui/material';
 
-import '../../styles/StylesP/Ame.css'
+import '../../styles/StylesP/Ame.css';
+import { usePatientStore } from '../../stores/patientStore';
+import useAuth from '../../stores/authStore';
 
-function AME () {
+function AME() {
+  const { patient, testDate } = usePatientStore();
+  // console.log('armyno', patient.armyNo, 'testDate', testDate);
   const ameHeading = ['AME', 'Data'];
+
+  const [ameData, setAMEData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const API = 'http://localhost:3000/api/doctor';
+  const { makeAuthRequest } = useAuth();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const armyNo = patient?.armyNo; // Replace with the actual army number
+        const ameResponse = await makeAuthRequest('POST', `${API}/ametestreports`, {
+          armyNo,
+          date: testDate, // Utilize medicalDate
+        });
+        console.log('ame data', ameResponse.data);
+        setAMEData(ameResponse?.data);
+
+        console.log('ame response', ameResponse);
+      } catch (error) {
+        setIsLoading(false);
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const ameRows = [
     { ameInfo: 'BLOOD HB', data: 'MPQ134' },
@@ -24,14 +55,13 @@ function AME () {
   };
 
   return (
-    <div className='ameInfo'>
-    
+    <div className="ameInfo">
       <h1 className="md:text-3xl text-2xl">AME</h1>
-      <div className='ameTable'>
-        <CustomTable headings={ameHeading} rows={ameRows} />
+      <div className="ameTable">
+        <CustomTable headings={ameHeading} rows={Object.entries(ameData)} />
       </div>
       <center>
-      <button
+        <button
           className="h-9 w-1/4 md:w-1/12 text-lg font-medium text-amber-400 border-2 border-[#efb034] mx-auto mb-5 rounded hover:bg-amber-400 hover:text-white hover:border-[#efb034]"
           onClick={handlePrint}
           style={{ fontFamily: 'Manrope', fontOpticalSizing: 'auto' }}

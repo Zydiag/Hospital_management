@@ -12,12 +12,12 @@ import PME from '../pages/Doctor/PME';
 import AddMedicalData from '../pages/Doctor/AddMedicalData';
 import AddTestData from '../pages/Doctor/AddTestData';
 import PatientMainPage from '../pages/Patient/PatientMainPage';
-import PatientTestRecodsPage from '../pages/Patient/PatientTestRecodsPage';
 import MedicalRecord from '../pages/Patient/MedicalRecord';
 import AMERecord from '../pages/Patient/AMERecord';
 import AME1Record from '../pages/Patient/AME1Record';
 import PMERecord from '../pages/Patient/PMERecord';
 import Profile from '../pages/Profile';
+import PatientTestRecordsPage from '../pages/Patient/PatientTestRecordsPage';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,7 +43,8 @@ export const router = createBrowserRouter(
       <Route path="/doctor/create-medical-data" element={<AddMedicalData />}></Route>
       <Route path="/doctor/create-test-data" element={<AddTestData />}></Route>
       <Route path="/patient/profile" element={<PatientMainPage />}></Route>
-      <Route path="/patient/test" element={<PatientTestRecodsPage />}></Route>
+
+      <Route path="/patient/test" element={<PatientTestRecordsPage />}></Route>
       <Route path="/patient/medical-record" element={<MedicalRecord />}></Route>
       <Route path="/patient/ame" element={<AMERecord />}></Route>
       <Route path="/patient/pme" element={<PMERecord />}></Route>

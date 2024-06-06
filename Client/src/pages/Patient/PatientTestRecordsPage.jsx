@@ -15,7 +15,6 @@ import {
 import useAuth from '../../stores/authStore';
 import { usePatientStore } from '../../stores/patientStore';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
 
 export const calculateAge = (dob) => {
   const birthDate = new Date(dob);
@@ -45,7 +44,7 @@ export const getTestType = (age) => {
     (age > 54 && age <= 57) ||
     (age > 58 && age <= 59)
   ) {
-    return 'AME1';
+    return 'AME2';
   } else if (
     (age >= 35 && age <= 36) ||
     (age >= 40 && age <= 41) ||
@@ -56,7 +55,7 @@ export const getTestType = (age) => {
   ) {
     return 'PME';
   } else {
-    return 'AME';
+    return 'AME1';
   }
 };
 
@@ -68,8 +67,7 @@ function PatientTestRecordsPage() {
   const patientSearchRef = useRef(null);
 
   const { makeAuthRequest } = useAuth();
-  const { patient, setTestDate } = usePatientStore();
-  const navigate = useNavigate();
+  const { patient } = usePatientStore();
 
   console.log('patient', patient);
 
@@ -82,24 +80,21 @@ function PatientTestRecordsPage() {
 
         let res;
         switch (testType) {
-          case 'AME1':
-            res = await getUpdateAME1DatesApi(makeAuthRequest, patient.armyNo, start, end);
+          case 'AME2':
+            res = await getUpdateAME1DatesApi(makeAuthRequest, 'POST', start, end);
             break;
           case 'PME':
-            res = await getUpdatePMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
-            break;
-          case 'AME':
-            res = await getUpdateAMEDatesApi(makeAuthRequest, patient.armyNo, start, end);
+            res = await getUpdatePMEDatesApi(makeAuthRequest, 'POST', start, end);
             break;
           default:
-            throw new Error('test type not defined', testType);
+            res = await getUpdateAMEDatesApi(makeAuthRequest, 'POST', start, end);
             break;
         }
 
-        const updatedPatientData = res?.map((date) => ({
+        const updatedPatientData = res.data.map((date) => ({
           armyNumber: patient.armyNo,
           patientName: patient.fullname,
-          date: new Date(date),
+          date: date,
           test: testType,
         }));
 
@@ -152,29 +147,19 @@ function PatientTestRecordsPage() {
         className="historyIntro h-full flex md:flex-row w-full justify-center bg-neutral-200 flex-col md:pt-0 pt-20"
         style={{ marginBottom: '10vh', height: '65vh' }}
       >
-        <div className="flex flex-col md:gap-0 m-0 md:p-0 md:ml-12 pt-12">
+        <div className="flex flex-col md:gap-0 m-0 md:p-0 md:ml-12 pt-12 my-auto">
           <h1
-            className="text-3xl font-semibold md:ml-12 md:text-left w-full text-center m-0 p-0"
+            className="text-3xl font-semibold md:text-left w-full text-center m-0 p-0"
             style={{ paddingTop: '13vh', fontFamily: 'Manrope' }}
           >
             Patients Test Record
           </h1>
           <p
-            className="text-lg font-medium md:ml-12 md:text-left text-center w-3/4 mx-auto"
+            className="text-lg font-medium md:text-left text-center w-3/4 md:w-full mx-auto md:mx-0"
             style={{ paddingTop: '3vh', paddingBottom: '10vh', fontFamily: 'Manrope' }}
           >
-            Create new test records based on the test required.
+            Select the range of dates to view the specific test record.
           </p>
-          <div className="dataButton md:w-full md:ml-12 h-12 w-3/4 mx-auto md:text-left text-center">
-            <Button
-              className="add lg:h-11 lg:w-1/2 lg:text-lg text-6xl w-fit h-3/4"
-              onClick={() => navigate('/doctor/create-test-data')}
-              variant="contained"
-              // href="/doctor/create-test-data"
-            >
-              Add test record
-            </Button>
-          </div>
         </div>
         <img src={man} alt="man" className="w-2/5 mx-auto md:ml-0 md:mr-0 md:mb-0 mb-12" />
       </div>
@@ -235,15 +220,11 @@ function PatientTestRecordsPage() {
               <RowPatient
                 key={data.armyNumber + data.date}
                 armyNumber={data.armyNumber}
-                date={new Date(data.date).toISOString().split('T')[0]}
+                date={data.date}
                 patientName={data.patientName}
                 test={data.test}
                 button1="View Patient History"
-                handleClick={() => {
-                  console.log(data.date);
-                  setTestDate(data.date);
-                  navigate(getHref(data.test));
-                }}
+                // href={getHref(data.test)}
               />
             ))}
           </div>

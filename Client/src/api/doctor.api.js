@@ -10,6 +10,7 @@ const createPatientProfileApi = async (makeAuthRequest, patientData) => {
 
 const updatePatientProfileApi = async (makeAuthRequest, patientData) => {
   console.log(`${API_URL}/update-patient-profile`, patientData);
+
   return makeAuthRequest('POST', `${API_URL}/update-personal-info`, patientData);
 };
 

@@ -174,7 +174,7 @@ export const getpersonalinfo = asyncHandler(async (req, res) => {
 //for fetching all dates between range
 export const getUpdatedDates = asyncHandler(async (req, res, next) => {
   try {
-    const { armyNo, startDate,endDate } = req.body;
+    const { armyNo, startDate, endDate } = req.body;
 
     // Find the user based on the army number
     const user = await prisma.User.findFirst({
@@ -210,7 +210,9 @@ export const getUpdatedDates = asyncHandler(async (req, res, next) => {
     });
 
     // Extract unique dates from the medical records
-    const dates = [...new Set(medicalRecords.map(record => record.createdAt.toISOString().split('T')[0]))];
+    const dates = [
+      ...new Set(medicalRecords.map((record) => record.createdAt.toISOString().split('T')[0])),
+    ];
 
     res.json(new ApiResponse(200, dates, 'Updated dates retrieved successfully'));
   } catch (error) {
@@ -312,6 +314,56 @@ export const getUpdatedDatesAME1 = asyncHandler(async (req, res, next) => {
     // ];
 
     res.json(new ApiResponse(200, dates, 'AME 1 Updated dates retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+});
+
+export const getUpdatedDatesAME = asyncHandler(async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const { armyNo, startDate, endDate } = req.body;
+    const user = await prisma.User.findFirst({
+      where: {
+        armyNo: armyNo,
+        role: 'PATIENT',
+      },
+    });
+
+    if (!user) {
+      throw new apiError(404, 'User not found');
+    }
+    const patient = await prisma.Patient.findFirst({
+      where: { userId: user.id },
+    });
+    if (!patient) {
+      throw new apiError(404, 'Patient not found');
+    }
+    const start = new Date(new Date(startDate).setUTCHours(0, 0, 0, 0));
+    const end = new Date(new Date(endDate).setUTCHours(23, 59, 59, 999));
+    const ameRecords = await prisma.AME.findMany({
+      where: {
+        patientId: patient.id,
+        createdAt: {
+          // gte: new Date(startDate),
+          // lte: new Date(endDate),
+          gte: start,
+          lte: end,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Extract unique dates from the medical records
+    const dates = ameRecords.map((record) => record.createdAt.toISOString());
+
+    // const dates = [
+    //   ...new Set(medicalRecords.map((record) => record.createdAt.toISOString().split('T')[0])),
+    // ];
+
+    res.json(new ApiResponse(200, dates, 'ame Updated dates retrieved successfully'));
   } catch (error) {
     next(error);
   }

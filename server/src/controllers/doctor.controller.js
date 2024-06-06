@@ -398,7 +398,7 @@ export const getPersonalInfo = asyncHandler(async (req, res) => {
     armyNo: user.armyNo,
     fullname: user.fullname,
     dob: user.dob,
-    age: calculateAge(user.dob),
+    age: calculateAgeWithoutFraction(user.dob),
     unit: user.unit,
   };
   res.json(new ApiResponse(200, info, 'Personal Record:-'));
@@ -999,6 +999,15 @@ export const getPmeReports = asyncHandler(async (req, res) => {
 });
 
 // Function to calculate age based on date of birth
+export const calculateAgeWithoutFraction = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  return age;
+};
 export const calculateAge = (dob) => {
   const birthDate = new Date(dob);
   const today = new Date();
@@ -1010,7 +1019,7 @@ export const calculateAge = (dob) => {
   const fractionOfYear = (monthDiff * 30 + dayDiff) / 365;
 
   // Calculate age as a float value
-  // age += fractionOfYear;
+  age += fractionOfYear;
 
   return age;
 };
@@ -1285,14 +1294,10 @@ export const addTestReport = asyncHandler(async (req, res) => {
   if (!user || !user.dob) {
     throw new apiError(404, 'User not found or date of birth not available');
   }
-
-  // Calculate age based on date of birth
   const age = calculateAge(user.dob);
   console.log(age);
-  // Determine the test to be performed based on age
   const testType = getTestType(age);
   console.log(testType);
-  // Call the respective update test function based on test type
   let updatedTest;
   switch (testType) {
     case 'AME1':

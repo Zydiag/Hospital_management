@@ -24,6 +24,9 @@ import {
   logoutDoctor,
   createPatientProfile,
   getUpdatedDates,
+  getUpdatedDatesAME,
+  getUpdatedDatesAME1,
+  getUpdatedDatesPME
   //deletePresentReferralDetails,
 } from '../controllers/doctor.controller.js'; // Updated import path
 
@@ -45,6 +48,9 @@ router.post(
 );
 router.post('/logout', verifyJwt, authorizeDoctor, asyncHandler(logoutDoctor));
 router.post('/get-dates', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDates));
+router.post('/get-dates-ame', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesAME));
+router.post('/get-dates-ame1', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesAME1));
+router.post('/get-dates-pme', verifyJwt, authorizeDoctor, asyncHandler(getUpdatedDatesPME));
 router.get('/personal-info', verifyJwt, authorizeDoctor, asyncHandler(getPersonalInfo));
 
 router.post('/health-record', verifyJwt, authorizeDoctor, asyncHandler(getHealthRecord));

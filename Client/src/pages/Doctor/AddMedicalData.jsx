@@ -119,11 +119,15 @@ function AddMedicalData() {
       },
     },
   });
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  if (!isAuthenticated) {
-    navigate('/login');
-  }
+  useEffect(() => {
+    if (!isAuthenticated || (user && user.role !== 'DOCTOR') || !user) {
+      // console.log('go back you need to login');
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   // const { patient, setPatient } = usePatientStore();
 
   console.log('patient', dayjs(patient?.dob).format('DD-MM-YYYY'));

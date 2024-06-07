@@ -40,17 +40,15 @@ const patientProfileSchema = z.object({
 });
 
 function PatientSearchPage() {
-  const { isAuthenticated, accessToken } = useAuth();
-  // console.log('isAuthenticated', isAuthenticated);
-  // console.log('accessToken', accessToken);
-  // console.log('patient', patient);
+  const { isAuthenticated, user, accessToken } = useAuth();
 
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || (user && user.role !== 'DOCTOR') || !user) {
+      // console.log('go back you need to login');
       navigate('/login');
     } else {
       setLoading(false);
@@ -91,7 +89,7 @@ function PatientSearchPage() {
       setPatient(formData);
       reset();
       setOpen(false);
-      navigate('/doctor/create-medical-data');
+      navigate('/doctor/patient-record');
     } catch (error) {
       console.error('Error creating patient profile:', error);
     }

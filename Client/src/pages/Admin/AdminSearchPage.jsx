@@ -25,9 +25,15 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 function AdminSearchPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
+  console.log('user value bool', !user);
+  console.log('user value ', user);
+  if (!isAuthenticated || (user && user.role !== 'ADMIN') || !user) {
+    // console.log('go back you need to login');
+    navigate('/login');
+  }
   const [open, setOpen] = useState(false);
   const [doctorName, setDoctorName] = useState('');
   const [armyNumber, setArmyNumber] = useState(0);
@@ -50,7 +56,7 @@ function AdminSearchPage() {
   const totalPages = Math.ceil(totalRows / rowPerPage);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || (user && user.role !== 'ADMIN')) {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);

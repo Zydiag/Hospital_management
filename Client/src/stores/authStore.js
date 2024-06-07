@@ -15,7 +15,7 @@ const useAuth = create((set, get) => ({
   loginAdmin: async (armyNo, password) => {
     try {
       const response = await axios.post(`${API}/admin/login`, { armyNo, password });
-      const { accessToken, refreshToken } = response.data.data;
+      const { accessToken, refreshToken, user } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       set({
         user,
@@ -36,7 +36,7 @@ const useAuth = create((set, get) => ({
   loginDoctor: async (armyNo, password) => {
     try {
       const response = await axios.post(`${API}/doctor/login`, { armyNo, password });
-      const { accessToken, refreshToken } = response.data.data;
+      const { accessToken, refreshToken, user } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       set({
         user,
@@ -206,7 +206,7 @@ const useAuth = create((set, get) => ({
 
         // Set the patient in the patient store if the profession is Patient
         if (profession === 'Patient') {
-          console.log('patient was here');
+          // console.log('patient was here');
           usePatientStore.getState().setPatient(response.data.data.user);
         }
 

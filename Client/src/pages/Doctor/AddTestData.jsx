@@ -72,6 +72,11 @@ function AddTestData() {
   });
 
   const { patient } = usePatientStore();
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated || (user && user.role !== 'DOCTOR')) {
+    navigate('/login');
+  }
   const { mutate } = useAddTestReport();
 
   useEffect(() => {

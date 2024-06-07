@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import '../../styles/StylesP/AddTestData.css';
 import { usePatientStore } from '../../stores/patientStore';
 import { useAddTestReport } from '../../api/doctor.api';
+import useAuth from '../../stores/authStore';
 
 export const calculateAge = (dob) => {
   const birthDate = new Date(dob);

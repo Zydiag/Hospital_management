@@ -1,0 +1,55 @@
+.historyIntro .add {
+  /* width: 14vw;
+  font-size: 1vw; */
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #e99a01;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.historyIntro .add:hover {
+  background-color: #dee1e6;
+  border: solid 2px #e99a01;
+  color: #e99a01;
+}
+
+.historyIntro .test {
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  color: #e99a01;
+  border: solid 2px #e99a01;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+.historyIntro .test:hover {
+  background-color: #e99a01;
+  color: white;
+  border: none;
+}
+
+.patientCalendar {
+  padding: 0 8vw 12vh;
+}
+
+
+
+
+
+.errorDate {
+  text-align: left;
+  
+  width: 70vw;
+  margin: 2vh 0 10vh;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  color: #392c13;
+}

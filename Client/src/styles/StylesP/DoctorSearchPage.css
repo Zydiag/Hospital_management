@@ -1,0 +1,91 @@
+.doctorSearchBar {
+  /* margin-top: 5vh; */
+  margin-bottom: 5vh;
+  background-color: rgb(247, 186, 63);
+  padding: 15vh 0;
+}
+
+.doctorSearchBar h1 {
+  text-align: left;
+  font-size: 35px;
+  width: 70%;
+  margin: 1vh auto 3vh;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  color: black;
+}
+
+.doctorSearchBar .newProfileButton {
+  font-size: 1.1vw;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  color: white;
+  /* border: solid 2px #9095A1; */
+  border-radius: 6px;
+  background-color: #8b6119;
+  text-align: center;
+  width: 18vw;
+  height: 8vh;
+  margin: 8vh auto 0;
+}
+
+.doctorSearchBar .newProfileButton:hover {
+  background-color: rgb(139, 97, 25, 0.7);
+  color: white;
+  border: solid 2px #8b6119;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchRow {
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.searchRow.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.patientProfileForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the form elements */
+  width: 80%; /* Set a fixed width for the form */
+  margin: 4vh auto 0; /* Center the form horizontally */
+}
+
+.patientProfileForm h1 {
+  font-family: 'Lexend', sans-serif;
+  margin-bottom: 5vh;
+}
+
+.formGroup {
+  width: 100%; /* Ensure form groups take the full width of the form */
+  margin-bottom: 1vh; /* Add some space between each form group */
+}
+
+
+
+.patientProfileInput {
+  height: 5vh;
+  border: solid 2px #a8adb7;
+  border-radius: 6px;
+  background-color: #f3f4f6;
+  padding: 0 18px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}

@@ -1,7 +1,6 @@
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -11,21 +10,22 @@ generator client {
 // User model with enhanced data types and relationships
 model User {
   id               String    @id @default(uuid())
-  armyNo           String
+  armyNo           String    @unique
   unit             String?
   rank             String?
   dateOfCommission DateTime?
-  firstName        String
-  middleName       String?
-  lastName         String
+  fullname        String
   email            String?   @unique
   mobileNo         String?   @unique
-  dob              DateTime?
-  refreshToken     String
-
-  role    Role     @default(PATIENT)
-  Patient Patient?
-  Doctor  Doctor?
+  dob              DateTime
+  role             Role      @default(PATIENT)
+  patient          Patient?
+  admin            Admin?
+  doctor           Doctor?
+  refreshToken     String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  password         String?   @unique
 }
 
 model Admin {
@@ -33,6 +33,8 @@ model Admin {
   adminId      String
   password     String
   refreshToken String?
+  userId       String? @unique
+  user         User?   @relation(fields: [userId], references: [id])
 }
 
 // Role model for user access control
@@ -45,17 +47,20 @@ enum Role {
 
 // Patient model with improved relationships and data types
 model Patient {
-  id         String      @id @default(uuid())
-  userId     String?     @unique
-  user       User?       @relation(fields: [userId], references: [id])
-  medical    Medical[]
-  test       Test[]
-  treatments Treatment[]
+  id            String         @id @default(uuid())
+  userId        String?        @unique
+  user          User?          @relation(fields: [userId], references: [id])
+  medical       Medical[]
+  treatments    treatment[]
+  AMEs          AME[]
+  AME2s         AME2[]
+  PMEs          PME[]
+  familyHistory familyHistory?
 }
 
 // Medical record model with relationships and enhanced data types
 model Medical {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   heightCm      Int?
   weightKg      Float?
   BMI           Float?
@@ -63,69 +68,105 @@ model Medical {
   waist         Int?
   bloodPressure String?
   disabilities  String?
+  allergies     String?
   bloodGroup    String?
-  onDrug        Boolean
-  date          DateTime?
-
-  patient   Patient @relation(fields: [patientId], references: [id])
-  patientId String  @unique
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  doctor        Doctor   @relation(fields: [doctorId], references: [id])
+  doctorId      String
 }
 
-// Doctor model with relationships
+model AME {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime @default(now())
+  date        DateTime
+  description String
+}
+
+model AME2 {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime @default(now())
+  date        DateTime
+  description String
+}
+
+model PME {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  createdAt   DateTime @default(now())
+  date        DateTime
+  description String
+}
+
+//Doctor model with relationships
 model Doctor {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
+  id             String          @id @default(uuid())
+  userId         String          @unique
   specialization String
-  Treatment      Treatment[]
-  Department     Department? @relation(fields: [departmentId], references: [id])
-  departmentId   String?
+  status         Status          @default(PENDING)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id])
+  request        Request?
+  AMEs           AME[]
+  AME2s          AME2[]
+  PMEs           PME[]
+  Mediacls       Medical[]
+  Treatments     treatment[]
+  familyHistory  familyHistory[]
 }
 
-// Department model
-model Department {
-  id       String  @id @default(uuid())
-  name     String
-  location String?
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
 
-  // One-to-many relationship with Doctors
-  doctors  Doctor[]
-  doctorId String
+model Request {
+  id        String   @id @default(uuid())
+  status    Status   @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  doctorId  String   @unique
 }
 
 // Treatment model with relationships
-model Treatment {
-  id          String @id @default(uuid())
+model treatment {
+  id          String   @id @default(uuid())
+  diagnosis   String
   description String
-  doctor      Doctor @relation(fields: [doctorId], references: [id])
-  doctorId    String
-
-  medications Medication[]
-  test        Test[]
-  Patient     Patient?     @relation(fields: [patientId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  patient     Patient? @relation(fields: [patientId], references: [id])
   patientId   String?
-}
-
-model Medication {
-  id          String     @id @default(uuid())
-  name        String
-  description String
-  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
-  treatmentId String?
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  doctorId    String
 }
 
 // Test model with relationships
-model Test {
-  id       String   @id @default(uuid())
-  date     DateTime
-  testFor  String
-  imageUrl String
-  result   String
-
-  // Many-to-many relationships with Medical records and Treatments (through ame & pme models)
-  Patient     Patient?   @relation(fields: [patientId], references: [id])
-  patientId   String?
-  Treatment   Treatment? @relation(fields: [treatmentId], references: [id])
-  treatmentId String?
+model familyHistory {
+  id                      String   @id @default(uuid())
+  hypertension            String
+  diabetesMellitus        String
+  anyUnnaturalDeath       String
+  otherSignificantHistory String
+  patient                 Patient  @relation(fields: [patientId], references: [id])
+  patientId               String   @unique
+  doctor                  Doctor   @relation(fields: [doctorId], references: [id])
+  doctorId                String
+  createdAt               DateTime @default(now())
 }

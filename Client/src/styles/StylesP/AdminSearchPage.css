@@ -1,0 +1,43 @@
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchRow {
+  animation: slideDown 1s ease-in-out;
+}
+
+.searchPara {
+  animation: slideDown 0.5s ease-in-out;
+  animation-delay: 0.1s;
+}
+
+/* .adminDropdown {
+  margin-left: -10vw;
+} */
+
+.modalButton {
+  height: 5vh;
+  width: 6vw;
+
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #e99a01;
+  color: white;
+  border: none;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+.doctorStatus {
+  background-color: #f7f7f7;
+  padding: 6vh 0 3vh 0;
+}

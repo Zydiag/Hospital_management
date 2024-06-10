@@ -1,0 +1,71 @@
+.rowPatient {
+  border: solid 4px #9095a1;
+  width: 85vw;
+  margin: 1vh auto;
+  border-radius: 8px;
+  display: flex;
+  flex: row;
+  justify-content: space-between;
+  height: 10vh;
+  align-items: center;
+  background-color: white;
+}
+
+.rowPatient .armyNumber {
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
+}
+
+.rowPatient .Patient {
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
+  margin-left: 3vw;
+}
+
+.rowPatient .entryDate {
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
+}
+
+.rowPatient .testEntry {
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-align: center;
+}
+
+.rowPatient .rowPatientButton {
+  text-align: center;
+  align-self: center;
+  margin-right: 3vw;
+}
+
+.rowPatientButton .buttonRowPatient {
+  height: 6vh;
+
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #e99a01;
+  color: white;
+  border: none;
+  margin-left: 1vw;
+  border-radius: 4px;
+}
+
+.rowPatientButton .buttonRowPatient:hover {
+  background-color: white;
+  border: solid 2px #e99a01;
+  color: #e99a01;
+}

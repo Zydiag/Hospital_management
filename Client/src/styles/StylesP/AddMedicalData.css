@@ -1,0 +1,135 @@
+.personelInfo {
+  width: 100%;
+  height: 120vh;
+}
+
+.listText{
+    font-size: 1.5rem;
+}
+
+.pi {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the form elements */
+  width: 100%; /* Set a fixed width for the form */
+  margin: 8vh auto; /* Center the form horizontally */
+  height: 150vh;
+}
+
+.pi h1 {
+  font-family: 'Lexend', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 2rem;
+  margin: 4vh auto;
+  text-align: center;
+}
+
+.piFormGroup {
+  width: 80%; /* Ensure form groups take the full width of the form */
+  margin: 2vh auto; /* Add some space between each form group */
+  
+}
+
+.piLabel {
+  text-align: left;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 1.1rem;
+  /* margin-left: 8vw; */
+  width: 100%; /* Ensure label takes the full width of the form group */
+  margin-bottom: 0.5vh; /* Add some space below the label */
+}
+
+.piInput {
+  width: 100%; /* Ensure input takes the full width of the form group */
+  height: 6vh;
+  border: solid 2px #a8adb7;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  background-color: #f3f4f6;
+  padding: 10px 18px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  margin-bottom: 0.8vh;
+  /* margin-left: 8vw; */
+}
+
+.piTextarea {
+  width: 100%; /* Ensure input takes the full width of the form group */
+  height: 15vh;
+  border: solid 2px #a8adb7;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  background-color: #f3f4f6;
+  padding: 10px 18px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  margin-bottom: 0.8vh;
+  /* margin-left: 8vw; */
+}
+
+.pi .editForm {
+  height: 7vh;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #e99a01;
+  color: white;
+  border: none;
+  margin-bottom: 5vh;
+  border-radius: 4px;
+}
+
+.pi .editForm:hover {
+  background-color: #e99a01;
+  border: solid 2px #e99a01;
+  color: white;
+}
+
+
+.piInputContainer .bmiInput {
+  width: 49vw; 
+  height: 6vh;
+  border: solid 2px #a8adb7;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  background-color: #f3f4f6;
+  padding: 10px 18px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  margin-bottom: 0.8vh;
+}
+
+.piInputContainer {
+  position: relative;
+}
+
+.piUnit {
+  position: absolute;
+  top: 50%;
+  right: 12px; /* Adjust this value to position the unit as needed */
+  transform: translateY(-50%);
+  color: black; /* Adjust the color as needed */
+  font-size: 1.1rem;
+}
+
+
+.piInputContainer .calc {
+  height: 6vh;
+  
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: #e99a01;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-left: 1vw;
+}
+
+.piInputContainer .calc:hover {
+  background-color: #e99a01;
+}

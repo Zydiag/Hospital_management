@@ -1,0 +1,106 @@
+.doctorProfile {
+  box-shadow: 3px 5px 10px -5px grey;
+  width: 60%; /* Set a specific width */
+  height: 100vh;
+  margin: 10vh auto;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.doctorProfile img {
+  height: 40%;
+}
+
+.doctorProfile h1 {
+  font-family: 'Lexend', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 50px;
+  position: relative;
+  top: -30%;
+}
+
+.doctorProfile .doctorProfileForm{
+  position: relative;
+  top: -22%;
+}
+
+.doctorProfile .doctorProfileLabel {
+  display: block;
+  text-align: left;
+  font-family: 'Manrope', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 25px;
+  width: 60%;
+  margin: 1vh auto;
+
+}
+
+.doctorProfile .doctorProfileInput{
+   margin: 0 auto 2vh;
+    width: 60%;
+    height: 5vh;
+    border: solid 2px #A8ADB7;
+    border-radius: 6px;
+    font-size: 20px;
+    background-color: #F3F4F6;
+}
+
+
+
+.adminButton {
+    display: flex;
+    justify-content: center; /* Horizontally center the items */
+    margin: 0 auto;
+    width: 60%;
+}
+
+.adminButton .MuiButton-root {
+    width: 6vw;
+    height: 5vh;
+    margin: 5vh 0.5vw;
+}
+
+.adminButton .editButton{
+    background-color: #EFB034;
+    font-size: 20px;
+    color: #5D4108;
+}
+
+.adminButton .editButton:hover{
+    background-color: white;
+    color: #EFB034;
+    border: solid 2px #EFB034;
+}
+
+.adminButton .saveButton{
+    background-color: white;
+    color: #EFB034;
+    border: solid 2px #EFB034;
+    font-size: 20px;
+}
+
+.adminButton .saveButton:hover{
+    background-color: #EFB034;
+    color: #5D4108;
+    border: none;
+}
+
+.adminButton .exitButton{
+    font-size: 20px;
+    color: #404246; 
+    border: solid 2px #404246;
+    background-color: white;
+}
+
+.adminButton .exitButton:hover{
+    color: white;
+    background-color: #404246;
+}
+
+
+

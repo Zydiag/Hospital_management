@@ -15,7 +15,7 @@ function AME() {
   const [ameData, setAMEData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'process.env.SERVER/api/user';
+  const API = `${import.meta.env.VITE_SERVER}/api/user`;
   const { makeAuthRequest } = useAuth();
   useEffect(() => {
     const fetchData = async () => {

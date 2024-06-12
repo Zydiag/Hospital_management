@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../stores/authStore';
 
-const API_URL = 'http://localhost:3000/api/admin';
+const API_URL = 'process.env.SERVER/api/admin';
 
 export const useDoctorRequestsByStatus = (status) => {
   const { makeAuthRequest } = useAuth();

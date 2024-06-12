@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const signup = async (data, navigate) => {
-  const api = 'http://localhost:3000/api';
+  const api = `${import.meta.env.VITE_SERVER}/api/user`;
   const rolePaths = {
     Admin: { url: '/admin/create-admin-profile', navigate: '/admin/admin-panel' },
     Doctor: { url: '/doctor/create-doctor-profile', navigate: '/login' },

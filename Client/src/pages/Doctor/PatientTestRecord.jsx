@@ -72,8 +72,6 @@ function PatientTestRecordsPage() {
   const { patient, setTestDate } = usePatientStore();
   const navigate = useNavigate();
 
-  console.log('patient', patient);
-
   const fetchData = useCallback(
     async (start, end) => {
       setLoading(true);
@@ -82,7 +80,6 @@ function PatientTestRecordsPage() {
         const testType = getTestType(age);
 
         const someData = await getCombinedDates(makeAuthRequest, patient.armyNo, start, end);
-        console.log('combined dates', someData);
 
         const updatedPatientData = someData?.map((obj) => ({
           armyNumber: patient.armyNo,
@@ -250,7 +247,6 @@ function PatientTestRecordsPage() {
                 test={data.test}
                 button1="View Patient History"
                 handleClick={() => {
-                  console.log(data.date);
                   setTestDate(data.date);
                   navigate(getHref(data.test));
                 }}

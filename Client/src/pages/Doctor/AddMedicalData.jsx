@@ -102,7 +102,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 function AddMedicalData() {
   const { patient, setPatient } = usePatientStore();
-  console.log(patient);
   const CustomTextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
       '& fieldset': {
@@ -130,7 +129,6 @@ function AddMedicalData() {
 
   // const { patient, setPatient } = usePatientStore();
 
-  console.log('patient', dayjs(patient?.dob).format('DD-MM-YYYY'));
   const [formData, setFormData] = useState({
     BMI: '',
     height: '',
@@ -191,7 +189,6 @@ function AddMedicalData() {
   const { mutate: updateTreatmentRecord } = useUpdateTreatmentRecord();
   const { mutate: updateFamilyHistory } = useUpdateFamilyHistory();
   const validatePersonalInfo = (data) => {
-    console.log('validate this data', data);
     const requiredFields = ['patientName', 'armyNumber', 'ageService', 'unitServiceArms'];
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -255,7 +252,6 @@ function AddMedicalData() {
           toast('Please fill all fields in Personal Info', { type: 'error' });
           return;
         }
-        console.log('formData update personal', formData);
         updatePatientProfile({
           armyNo: patient?.armyNo || formData.armyNumber,
           fullname: patient.fullname,
@@ -312,7 +308,7 @@ function AddMedicalData() {
         });
         break;
       default:
-        console.log('Unknown section');
+        throw new Error('Invalid section');
     }
   };
 
@@ -586,7 +582,7 @@ function AddMedicalData() {
             <form onSubmit={handleSubmit} className="pi">
               <h1>PERSONAL MEDICAL HISTORY</h1>
               <div className="piFormGroup">
-                <label className="piLabel">Present medications</label>
+                <label className="piLabel">Present Complaints</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Present medications.."
@@ -606,7 +602,7 @@ function AddMedicalData() {
                 />
               </div>
               <div className="piFormGroup">
-                <label className="piLabel">Description</label>
+                <label className="piLabel">Experiments and Tests</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Description.."
@@ -626,7 +622,7 @@ function AddMedicalData() {
                 />
               </div>
               <div className="piFormGroup">
-                <label className="piLabel">Miscellaneous</label>
+                <label className="piLabel">Treatment Advice</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Miscellaneous.."

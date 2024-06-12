@@ -62,20 +62,14 @@ export default function Login() {
   });
 
   const onSubmit = async (data) => {
-    console.log('Login data:', data);
     if (data.profession === 'Admin') {
-      console.log(' login data:', data);
       try {
         await loginAdmin(data.armyNo, data.password);
-        console.log('noError');
         navigate('/admin/admin-panel');
       } catch (error) {
-        console.log('error from admin login', error);
-        // console.log('error from admin login', authError);
         setError(error);
       }
     } else if (data.profession === 'Doctor') {
-      console.log(' login data:', data);
       try {
         await loginDoctor(data.armyNo, data.password);
         navigate('/doctor/doctor-panel');
@@ -84,7 +78,6 @@ export default function Login() {
         setError(error);
       }
     } else if (data.profession === 'Patient') {
-      console.log('patient login data:', data);
       try {
         await loginPatient(data.armyNo, data.password);
         navigate('/patient/profile');

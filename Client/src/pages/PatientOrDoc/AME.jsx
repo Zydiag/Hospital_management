@@ -9,13 +9,12 @@ import useAuth from '../../stores/authStore';
 
 function AME() {
   const { patient, testDate } = usePatientStore();
-  // console.log('armyno', patient.armyNo, 'testDate', testDate);
   const ameHeading = ['AME', 'Data'];
 
   const [ameData, setAMEData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/user';
+  const API = `${import.meta.env.VITE_SERVER}/api/user`;
   const { makeAuthRequest } = useAuth();
   useEffect(() => {
     const fetchData = async () => {
@@ -26,10 +25,7 @@ function AME() {
           armyNo,
           date: testDate, // Utilize medicalDate
         });
-        console.log('ame data', ameResponse.data);
         setAMEData(ameResponse?.data);
-
-        console.log('ame response', ameResponse);
       } catch (error) {
         setIsLoading(false);
         console.error('Error fetching data:', error);

@@ -22,7 +22,6 @@ function PatientMainPage() {
   const patientSearchRef = useRef(null);
 
   const { makeAuthRequest, user } = useAuth();
-  console.log('user', user);
   const { patient, setMedicalDate, setPatient } = usePatientStore();
 
   // if (user?.role === 'PATIENT') {
@@ -34,7 +33,6 @@ function PatientMainPage() {
       setLoading(true);
       try {
         const res = await getUpdateDatesApi(makeAuthRequest, patient.armyNo, start, end);
-        console.log(res);
 
         const updatedPatientData = res.map((date) => ({
           armyNumber: patient.armyNo,
@@ -51,7 +49,6 @@ function PatientMainPage() {
     },
     [makeAuthRequest, patient.armyNo, patient.fullname]
   );
-  console.log('filteredData', filteredData);
 
   useEffect(() => {
     if (selectedStartDate && selectedEndDate) {
@@ -179,7 +176,6 @@ function PatientMainPage() {
                 key={data.armyNumber + data.date}
                 armyNumber={data.armyNumber}
                 handleClick={() => {
-                  console.log(data.date);
                   setMedicalDate(data.date);
                   navigate('/doctor/medical-record');
                 }}

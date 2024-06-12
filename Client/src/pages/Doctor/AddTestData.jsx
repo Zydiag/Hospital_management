@@ -85,9 +85,7 @@ function AddTestData() {
       return <div>No patient selected</div>;
     }
     const DOB = patient.dob;
-    console.log('dob', DOB);
     const age = calculateAge(DOB);
-    console.log('age', age);
     const testType = getTestType(age);
     let section;
     switch (testType) {

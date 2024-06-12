@@ -18,7 +18,7 @@ function MedicalRecord() {
   const { patient, medicalDate } = usePatientStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/user';
+  const API = `${import.meta.env.VITE_SERVER}/api/user`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,6 +57,14 @@ function MedicalRecord() {
           doctorName: healthRecordResponse?.data?.doctor?.user?.fullname, // Extract the doctor's full name
         };
 
+        const formattedTreatmentRecordResponse = {
+          'Present Complaints': treatmentRecordResponse?.data?.info?.medicationName,
+          'Experiments and Tests': treatmentRecordResponse?.data?.info?.note,
+          Diagnosis: treatmentRecordResponse?.data?.info?.diagnosis,
+          'Known Allergies': treatmentRecordResponse?.data?.info?.knownAllergies,
+          'Treatment Advice': treatmentRecordResponse?.data?.info?.miscellaneous,
+          // createdAt: new Date(treatmentRecordResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
+        };
         const formattedFamilyHistory = {
           ...familyHistoryResponse.data,
           createdAt: new Date(familyHistoryResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
@@ -65,7 +73,7 @@ function MedicalRecord() {
 
         setPersonnelInfo(updatedPersonalInfoResponse);
         setHealthRecord(healthRecordWithoutDoctor);
-        setTreatmentRecord(treatmentRecordResponse?.data?.info);
+        setTreatmentRecord(formattedTreatmentRecordResponse);
         setFamilyHistory(formattedFamilyHistory);
         setIsLoading(false);
       } catch (error) {

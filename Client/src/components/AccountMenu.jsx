@@ -25,19 +25,37 @@ function stringToColor(string) {
 }
 
 function stringAvatar(name) {
+  if (!name) {
+    return {
+      sx: {
+        bgcolor: stringToColor('Unknown'), // Default color for unknown names
+      },
+      children: '?', // Default children for unknown names
+    };
+  }
+
+  const nameParts = name.split(' ');
+
+  if (nameParts.length === 1) {
+    return {
+      sx: {
+        bgcolor: stringToColor(name),
+      },
+      children: `${nameParts[0][0]}`, // Use only the first letter if there's only one part
+    };
+  }
+
   return {
     sx: {
       bgcolor: stringToColor(name),
     },
-    children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+    children: `${nameParts[0][0]}${nameParts[1][0]}`, // Use the first letters of the first two parts
   };
 }
-
 const AccountMenu = () => {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
   const handleLogout = () => {
-    console.log('handleLogout', user);
     logout(user?.role?.toLowerCase());
     navigate('/login');
   };
@@ -54,7 +72,6 @@ const AccountMenu = () => {
   };
 
   const handleProfile = () => {
-    console.log('handleProfile');
     navigate('/my-account'); // Redirect to /my-account
     setAnchorEl(null);
   };

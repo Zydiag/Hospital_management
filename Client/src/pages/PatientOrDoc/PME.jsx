@@ -14,7 +14,7 @@ function PME() {
   const [pmeData, setPMEData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/user';
+  const API = `${import.meta.env.VITE_SERVER}/api/user`;
   const { makeAuthRequest } = useAuth();
   useEffect(() => {
     const fetchData = async () => {
@@ -25,10 +25,7 @@ function PME() {
           armyNo,
           date: testDate, // Utilize medicalDate
         });
-        console.log('ame data', pmeResponse.data);
         setPMEData(pmeResponse?.data);
-
-        console.log('ame response', pmeResponse);
       } catch (error) {
         setIsLoading(false);
         console.error('Error fetching data:', error);

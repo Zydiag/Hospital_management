@@ -38,7 +38,6 @@ function Profile() {
   if (!isAuthenticated || !user) {
     navigate('/login');
   }
-  console.log(user);
   const { role, fullname, armyNo, email, mobileNo, rank, unit, dateOfCommission, dob } = user;
   const navigate = useNavigate();
   // const user = { name: 'some name' };

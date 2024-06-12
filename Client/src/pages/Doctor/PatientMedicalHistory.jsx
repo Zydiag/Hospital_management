@@ -33,7 +33,6 @@ function PatientMedicalHistory() {
       setLoading(true);
       try {
         const res = await getUpdateDatesApi(makeAuthRequest, patient.armyNo, start, end);
-        console.log(res);
 
         const updatedPatientData = res.map((date) => ({
           armyNumber: patient.armyNo,
@@ -50,7 +49,6 @@ function PatientMedicalHistory() {
     },
     [makeAuthRequest, patient.armyNo, patient.fullname]
   );
-  console.log('filteredData', filteredData);
 
   useEffect(() => {
     if (selectedStartDate && selectedEndDate) {
@@ -185,7 +183,6 @@ function PatientMedicalHistory() {
                 key={data.armyNumber + data.date}
                 armyNumber={data.armyNumber}
                 handleClick={() => {
-                  console.log(data.date);
                   setMedicalDate(data.date);
                   navigate('/doctor/medical-record');
                 }}

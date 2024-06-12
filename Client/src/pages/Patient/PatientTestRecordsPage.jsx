@@ -81,7 +81,6 @@ function PatientTestRecordsPage() {
 
         let res;
         const someData = await getCombinedDates(makeAuthRequest, patient.armyNo, start, end);
-        console.log('combined dates', someData);
 
         const updatedPatientData = someData?.map((obj) => ({
           armyNumber: patient.armyNo,

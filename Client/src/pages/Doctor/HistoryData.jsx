@@ -18,7 +18,7 @@ const HistoryData = () => {
   const { patient, medicalDate } = usePatientStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'http://localhost:3000/api/user';
+  const API = 'process.env.SERVER/api/user';
 
   useEffect(() => {
     const fetchData = async () => {

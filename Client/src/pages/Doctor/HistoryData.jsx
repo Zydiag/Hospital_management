@@ -51,6 +51,15 @@ const HistoryData = () => {
           ...personalInfoResponse,
           dob: formattedDOB,
         };
+
+        const formattedTreatmentRecordResponse = {
+          'Present Complaints': treatmentRecordResponse?.data?.info?.medicationName,
+          'Experiments and Tests': treatmentRecordResponse?.data?.info?.note,
+          Diagnosis: treatmentRecordResponse?.data?.info?.diagnosis,
+          'Known Allergies': treatmentRecordResponse?.data?.info?.knownAllergies,
+          'Treatment Advice': treatmentRecordResponse?.data?.info?.miscellaneous,
+          // createdAt: new Date(treatmentRecordResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
+        };
         const formattedHealthRecord = {
           ...healthRecordResponse.data,
           createdAt: new Date(healthRecordResponse?.data?.createdAt).toISOString().split('T')[0], // Format to YYYY-MM-DD
@@ -65,7 +74,7 @@ const HistoryData = () => {
 
         setPersonnelInfo(updatedPersonalInfoResponse);
         setHealthRecord(healthRecordWithoutDoctor);
-        setTreatmentRecord(treatmentRecordResponse?.data?.info);
+        setTreatmentRecord(formattedTreatmentRecordResponse);
         setFamilyHistory(formattedFamilyHistory);
         setIsLoading(false);
       } catch (error) {

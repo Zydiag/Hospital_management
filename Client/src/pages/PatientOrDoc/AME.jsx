@@ -9,7 +9,6 @@ import useAuth from '../../stores/authStore';
 
 function AME() {
   const { patient, testDate } = usePatientStore();
-  // console.log('armyno', patient.armyNo, 'testDate', testDate);
   const ameHeading = ['AME', 'Data'];
 
   const [ameData, setAMEData] = useState({});
@@ -26,10 +25,7 @@ function AME() {
           armyNo,
           date: testDate, // Utilize medicalDate
         });
-        console.log('ame data', ameResponse.data);
         setAMEData(ameResponse?.data);
-
-        console.log('ame response', ameResponse);
       } catch (error) {
         setIsLoading(false);
         console.error('Error fetching data:', error);

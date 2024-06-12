@@ -25,10 +25,7 @@ function PME() {
           armyNo,
           date: testDate, // Utilize medicalDate
         });
-        console.log('ame data', pmeResponse.data);
         setPMEData(pmeResponse?.data);
-
-        console.log('ame response', pmeResponse);
       } catch (error) {
         setIsLoading(false);
         console.error('Error fetching data:', error);

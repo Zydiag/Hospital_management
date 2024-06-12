@@ -10,8 +10,6 @@ const createPatientProfileApi = async (makeAuthRequest, patientData) => {
 };
 
 const updatePatientProfileApi = async (makeAuthRequest, patientData) => {
-  console.log(`${API_URL}/update-patient-profile`, patientData);
-
   return makeAuthRequest('POST', `${API_URL}/update-personal-info`, patientData);
 };
 
@@ -53,7 +51,6 @@ export const getPersonalInfoApi = async (makeAuthRequest, armyNo) => {
   const response = await makeAuthRequest('GET', `${API}/user/personal-info?armyNo=${armyNo}`, {
     armyNo,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getCombinedDates = async (makeAuthRequest, armyNo, startDate, endDate) => {
@@ -62,7 +59,6 @@ export const getCombinedDates = async (makeAuthRequest, armyNo, startDate, endDa
     startDate,
     endDate,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getUpdateAMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
@@ -71,7 +67,6 @@ export const getUpdateAMEDatesApi = async (makeAuthRequest, armyNo, startDate, e
     startDate,
     endDate,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getUpdateAME1DatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
@@ -80,7 +75,6 @@ export const getUpdateAME1DatesApi = async (makeAuthRequest, armyNo, startDate, 
     startDate,
     endDate,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getUpdatePMEDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
@@ -89,7 +83,6 @@ export const getUpdatePMEDatesApi = async (makeAuthRequest, armyNo, startDate, e
     startDate,
     endDate,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getUpdateDatesApi = async (makeAuthRequest, armyNo, startDate, endDate) => {
@@ -98,7 +91,6 @@ export const getUpdateDatesApi = async (makeAuthRequest, armyNo, startDate, endD
     startDate,
     endDate,
   });
-  console.log(response.data);
   return response.data;
 };
 export const getTreatmentRecordApi = async (makeAuthRequest, armyNo) => {
@@ -109,7 +101,6 @@ export const getTreatmentRecordApi = async (makeAuthRequest, armyNo) => {
       armyNo,
     }
   );
-  console.log(response.data);
   return response.data;
 };
 

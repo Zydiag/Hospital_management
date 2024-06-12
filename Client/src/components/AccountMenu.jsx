@@ -56,7 +56,6 @@ const AccountMenu = () => {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
   const handleLogout = () => {
-    console.log('handleLogout', user);
     logout(user?.role?.toLowerCase());
     navigate('/login');
   };
@@ -73,7 +72,6 @@ const AccountMenu = () => {
   };
 
   const handleProfile = () => {
-    console.log('handleProfile');
     navigate('/my-account'); // Redirect to /my-account
     setAnchorEl(null);
   };

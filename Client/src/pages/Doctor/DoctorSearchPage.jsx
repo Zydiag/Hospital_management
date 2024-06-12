@@ -85,7 +85,6 @@ function PatientSearchPage() {
 
     try {
       const patient = await createPatientProfile(formData);
-      console.log('patient', formData);
       setPatient(formData);
       reset();
       setOpen(false);
@@ -126,23 +125,19 @@ function PatientSearchPage() {
   // const {patient, setPatient} = usePatientStore();
 
   const handleSearch = async () => {
-    console.log('Search button clicked', searchValuePatient); // Add this line to debug
     setSearchValuePatient('');
     if (!searchValuePatient) {
       setErrorMessagePatient('Search Input is empty.');
       // console.log('Error: Input is empty'); // Add this line to debug
     } else {
       const data = await getPersonalInfoApi(makeAuthRequest, searchValuePatient);
-      console.log(data);
       setPatient(data);
       if (data) {
         setSelectedRowPatient(data);
         setErrorMessagePatient('');
-        console.log('Found row:', data); // Add this line to debug
       } else {
         setSelectedRowPatient(null);
         setErrorMessagePatient('User not found');
-        console.log('Error: User not found'); // Add this line to debug
       }
     }
   };

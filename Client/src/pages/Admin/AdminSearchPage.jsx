@@ -28,8 +28,6 @@ function AdminSearchPage() {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  console.log('user value bool', !user);
-  console.log('user value ', user);
   if (!isAuthenticated || (user && user.role !== 'ADMIN') || !user) {
     // console.log('go back you need to login');
     navigate('/login');

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../stores/authStore';
 
-const API_URL = `${import.meta.env.VITE_SERVER}/api/admin`
+const API_URL = `${import.meta.env.VITE_SERVER}/api/admin`;
 
 export const useDoctorRequestsByStatus = (status) => {
   const { makeAuthRequest } = useAuth();
@@ -20,7 +20,6 @@ const rejectRequestApi = async (makeAuthRequest, doctorId) => {
 };
 
 const blockRequestApi = async (makeAuthRequest, doctorId) => {
-  console.log('doctorId', doctorId);
   return makeAuthRequest('POST', `${API_URL}/block-request?doctorId=${doctorId}`);
 };
 

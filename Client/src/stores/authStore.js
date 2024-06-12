@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { usePatientStore } from './patientStore';
 
-const API = 'process.env.SERVER/api';
+const API = '${import.meta.env.VITE_SERVER}/api';
 const useAuth = create((set, get) => ({
   user: null,
   accessToken: localStorage.getItem('accessToken'),

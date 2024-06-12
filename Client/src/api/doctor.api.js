@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../stores/authStore';
 import { toast } from 'react-toastify';
 
-const API_URL = 'process.env.SERVER/api/doctor';
+const API_URL = `${import.meta.env.VITE_SERVER}/api/user`;
 const API = 'process.env.SERVER/api';
 
 const createPatientProfileApi = async (makeAuthRequest, patientData) => {

@@ -586,7 +586,7 @@ function AddMedicalData() {
             <form onSubmit={handleSubmit} className="pi">
               <h1>PERSONAL MEDICAL HISTORY</h1>
               <div className="piFormGroup">
-                <label className="piLabel">Present medications</label>
+                <label className="piLabel">Present Complaints</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Present medications.."
@@ -596,7 +596,7 @@ function AddMedicalData() {
                 />
               </div>
               <div className="piFormGroup">
-                <label className="piLabel">Diagnosis</label>
+                <label className="piLabel">Experiments and Tests</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Diagnosis.."
@@ -606,7 +606,7 @@ function AddMedicalData() {
                 />
               </div>
               <div className="piFormGroup">
-                <label className="piLabel">Description</label>
+                <label className="piLabel">Diagnosis</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Description.."
@@ -626,7 +626,7 @@ function AddMedicalData() {
                 />
               </div>
               <div className="piFormGroup">
-                <label className="piLabel">Miscellaneous</label>
+                <label className="piLabel">Treatment Advice</label>
                 <textarea
                   className="piTextarea"
                   placeholder="Miscellaneous.."

@@ -18,7 +18,7 @@ const HistoryData = () => {
   const { patient, medicalDate } = usePatientStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const API = 'process.env.SERVER/api/user';
+  const API = '${import.meta.env.VITE_SERVER}/api/user';
 
   useEffect(() => {
     const fetchData = async () => {

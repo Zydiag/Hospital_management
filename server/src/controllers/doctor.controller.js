@@ -206,8 +206,8 @@ export const getCombinedUpdatedDates = asyncHandler(async (req, res, next) => {
         where: {
           patientId: patient.id,
           createdAt: {
-            gte: start,
-            lte: end,
+            gte: new Date(startDate),
+          lte: new Date(endDate),
           },
         },
         orderBy: {
@@ -218,8 +218,8 @@ export const getCombinedUpdatedDates = asyncHandler(async (req, res, next) => {
         where: {
           patientId: patient.id,
           createdAt: {
-            gte: start,
-            lte: end,
+            gte: new Date(startDate),
+          lte: new Date(endDate),
           },
         },
         orderBy: {
@@ -230,8 +230,8 @@ export const getCombinedUpdatedDates = asyncHandler(async (req, res, next) => {
         where: {
           patientId: patient.id,
           createdAt: {
-            gte: start,
-            lte: end,
+            gte: new Date(startDate),
+          lte: new Date(endDate),
           },
         },
         orderBy: {
